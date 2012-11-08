@@ -3,17 +3,23 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <vector>
+#include <string>
+
 #include "parser.h"
+#include "../modeles/modeles.h"
+
+using namespace std;
 
 // Lit une string **alphanumérique** dans str et l'écrit dans s.
 // Retour : renvoie la longueur de la string lue. Si 0 => erreur, on renvoie -1.
-int parse_nextString(const char* str, char s[])
+int parse_nextString(const char* str, string *s)
 {
+	*s = "";
 	int i;
-	for(i=0 ; isalnum(str[i]) && i<64 ; i++) {
-		s[i] = str[i];
+	for(i=0 ; isalnum(str[i]) ; i++) {
+		s->push_back(str[i]);
 	}
-	s[i] = '\0';
 	if (i==0)
 		return -1;
 	return i;
@@ -68,81 +74,79 @@ int skip(const char* str, char c)
 // "nom,palettes,cartons,pieces,rebut,dim[0],dim[1],dim[2]"
 // ex I_Field : "#A,10,50,1000,20,33,44,55#"
 // nom est une string et les autres champs des ints.
-// Tout ça est ecrit dans *mi qui ne doit pas être NULL !
+// Tout ça est ecrit dans *lot qui ne doit pas être NULL !
 // Retour : -1 si erreur ; le nombre de char lus sinon.
-int parse_I_nextField(const char* str, MsgInit *mi)
+int parse_I_nextField(const char* str, Lot *lot)
 {
 	int err, ofs=0;
 	
-	if (mi == NULL || !isalnum(str[0]))
+	if (lot == NULL || !isalnum(str[0]))
 		return -1;
 	
-	err = parse_nextString(str+ofs, mi->nom); if (err == -1) return -1; else ofs += err;
+	err = parse_nextString(str+ofs, &lot->nom); if (err == -1) return -1; else ofs += err;
 	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
-	err = parse_nextUint(str+ofs, &mi->palettes); if (err == -1) return -1; else ofs += err;
+	err = parse_nextUint(str+ofs, &lot->palettes); if (err == -1) return -1; else ofs += err;
 	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
-	err = parse_nextUint(str+ofs, &mi->cartons); if (err == -1) return -1; else ofs += err;
+	err = parse_nextUint(str+ofs, &lot->cartons); if (err == -1) return -1; else ofs += err;
 	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
-	err = parse_nextUint(str+ofs, &mi->pieces); if (err == -1) return -1; else ofs += err;
+	err = parse_nextUint(str+ofs, &lot->pieces); if (err == -1) return -1; else ofs += err;
 	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
-	err = parse_nextUint(str+ofs, &mi->rebut); if (err == -1) return -1; else ofs += err;
+	err = parse_nextUint(str+ofs, &lot->rebut); if (err == -1) return -1; else ofs += err;
 	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
-	err = parse_nextUint(str+ofs, &mi->dim[0]); if (err == -1) return -1; else ofs += err;
+	err = parse_nextUint(str+ofs, &lot->dim[0]); if (err == -1) return -1; else ofs += err;
 	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
-	err = parse_nextUint(str+ofs, &mi->dim[1]); if (err == -1) return -1; else ofs += err;
+	err = parse_nextUint(str+ofs, &lot->dim[1]); if (err == -1) return -1; else ofs += err;
 	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
-	err = parse_nextUint(str+ofs, &mi->dim[2]); if (err == -1) return -1; else ofs += err;
+	err = parse_nextUint(str+ofs, &lot->dim[2]); if (err == -1) return -1; else ofs += err;
 
 	return ofs;
 }
 
-int parse_I(const char* str, InfoInit *val)
+int parse_I(const char* str, ListeLots *val)
 {
 	if (val == NULL || str[0] != INITIALISATION)
 		return -1;
 
 	int err, i, ofs = 1;
-	for (i=0 ; i < MAX_LOT && ofs < strlen(str) ; i++)
+	for (i=0 ; ofs < strlen(str) ; i++)
 	{
+		Lot lot;
 		err = skip(str+ofs, SEP); if (err == -1) return -1; else ofs += err;
-		err = parse_I_nextField(str+ofs, &val->msgs[i]); if (err == -1) return -1; else ofs += err;
+		err = parse_I_nextField(str+ofs, &lot); if (err == -1) return -1; else ofs += err;
+		val->lots.push_back(lot);
 	}
-	if (i == MAX_LOT)
-		return -1;
 	val->tot = i;
 	val->cur = 0;
 	return ofs;
 }
 
-int parse_C_nextField(const char *str, MsgCommande *mc)
+int parse_C_nextField(const char *str, Commande *mc)
 {
 	int err, ofs = 0;
 	if (mc == NULL || !isalnum(str[0])) {
 		return -1;
 	}
 
-	err = parse_nextString(str+ofs, mc->nom); if (err == -1) return -1; else ofs += err;
+	err = parse_nextString(str+ofs, &mc->nom); if (err == -1) return -1; else ofs += err;
 	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
 	err = parse_nextUint(str+ofs, &mc->palettes); if (err == -1) return -1; else ofs += err;
 
 	return ofs;
 }
 
-int parse_C(const char *str, InfoCommande *val)
+int parse_C(const char *str, ListeCommandes *val)
 {
 	if (val == NULL || str[0] != COMMANDE)
 		return -1;
 
-	int err, i, ofs = 1;
-	for (i=0 ; i < MAX_LOT && ofs < strlen(str) ; i++)
+	int err, ofs = 1;
+	while (ofs < strlen(str))
 	{
+		Commande c;
 		err = skip(str+ofs, SEP); if (err == -1) return -1; else ofs += err;
-		err = parse_C_nextField(str+ofs, &val->msgs[i]); if (err == -1) return -1; else ofs += err;
+		err = parse_C_nextField(str+ofs, &c); if (err == -1) return -1; else ofs += err;
+		val->commandes.push_back(c);
 	}
-	if (i == MAX_LOT)
-		return -1;
-	val->tot = i;
-	val->cur = 0;
 	return ofs;
 }
 

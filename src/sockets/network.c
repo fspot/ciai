@@ -13,7 +13,19 @@
 
 #include "network.h"
 #include "parser.h"
-#include "messages.h"
+#include "../modeles/modeles.h"
+
+#include <vector>
+#include <string>
+
+// DEFINES
+
+#define PORT 4522
+#define MAX_SIZE_MSG 1024
+#define GOOD_MSG 1
+#define BAD_MSG -1
+
+// TYPES
 
 typedef struct sockaddr_in Sockaddr_in;
 typedef struct sockaddr Sockaddr;
@@ -22,11 +34,21 @@ enum e_sockstate {
 	MIDDLE
 };
 
-#define PORT 4522
-#define MAX_SIZE_MSG 1024
-#define GOOD_MSG 1
-#define BAD_MSG -1
+// SIGNATURES
+
+int initListener();
+int waitClient(int listener);
+int handle(char* data, char *buf);
+int handle_BEGIN(char *str);
+int handle_MIDDLE(char *str);
+
+// STATICS
+
 static int sockstate;
+
+// CODE STARTS HERE
+
+using namespace std;
 
 int initListener()
 {
@@ -69,9 +91,6 @@ int waitClient(int listener)
 	return csock;
 }
 
-int handle_BEGIN(char *str);
-int handle_MIDDLE(char *str);
-
 int handle(char* data, char *buf)
 {
 	if (MAX_SIZE_MSG-strlen(data) < strlen(buf))
@@ -111,12 +130,14 @@ int handle(char* data, char *buf)
 
 int handle_BEGIN(char *str)
 {
-	InfoInit ii;
-	int err = parse_I(str, &ii);
+	ListeLots ll;
+	int err = parse_I(str, &ll);
 	if (err == -1) {
 		return BAD_MSG;
 	}
-	printf("(tot %d) [0] => Prod %d palettes de %s\n", ii.tot, ii.msgs[0].palettes, ii.msgs[0].nom);
+	for (int i=0 ; i<ll.lots.size() ; i++) {
+		printf("(%d/%d) => Prod %d palettes de %s\n", i+1, ll.tot, ll.lots[i].palettes, ll.lots[i].nom.c_str());
+	}
 	printf("(BEGIN RCV : %s)\n", str);
 	sockstate = MIDDLE;
 	return GOOD_MSG;
@@ -134,13 +155,15 @@ int handle_MIDDLE(char *str)
 		}
 		return BAD_MSG;
 	} else if (c == COMMANDE) {
-		InfoCommande ic;
-		int err = parse_C(str, &ic);
+		ListeCommandes lc;
+		int err = parse_C(str, &lc);
 		puts("A");
 		if (err == -1) {
 			return BAD_MSG;
 		}
-		printf("(tot %d) [0] => Destock %d palettes de %s\n", ic.tot, ic.msgs[0].palettes, ic.msgs[0].nom);
+		for (int i=0 ; i<lc.commandes.size() ; i++) {
+			printf("(%d/%d) => Commande de %d palettes de %s\n", i+1, lc.commandes.size(), lc.commandes[i].palettes, lc.commandes[i].nom.c_str());
+		}
 		printf("(MIDDLE RCV : %s)\n", str);
 		return GOOD_MSG;
 	} else {
@@ -149,8 +172,10 @@ int handle_MIDDLE(char *str)
 	}
 }
 
-void* thread_network(void* arg)
+// tâche de réception de messages en provenance du client windows
+void* thread_network(void* socket)
 {
+	int *client = (int*) socket;
 	int listener = initListener();
 	
 	int k=3; while(k--) //while(1)
@@ -158,7 +183,7 @@ void* thread_network(void* arg)
 		// On va attendre un client...
 		sockstate = BEGIN;
 		puts("Waiting for *one* client... ... ... ...");
-		int client = waitClient(listener);
+		*client = waitClient(listener);
 		puts(">>>> Client got ! :)");
 	
 		// reception string
@@ -168,14 +193,14 @@ void* thread_network(void* arg)
 		int continuer = 1;
 		while(continuer > 0) 
 		{
-			if((n = recv(client, buffer, sizeof(buffer)-1, 0)) <= 0)
+			if((n = recv(*client, buffer, sizeof(buffer)-1, 0)) <= 0)
 				break;
 			buffer[n] = '\0';
 			continuer = handle(data, buffer);
 			if (continuer <= 0)
 				puts("<<<< Client gone :( ...");
 		}
-		close(client);
+		close(*client);
 	}
 	
 	close(listener);

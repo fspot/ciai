@@ -1,7 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "messages.h"
+#include "../modeles/modeles.h"
 
 #define MAX_INT 9
 #define MAX_STR 64
@@ -18,8 +18,8 @@
 #define FINPAUSE '3'
 #define COMMANDE 'C'
 
-int parse_I(const char* msg, InfoInit *val);
+int parse_I(const char* msg, ListeLots *val);
 int parse_R(const char *str, int *val);
-int parse_C(const char *str, InfoCommande *val);
+int parse_C(const char *str, ListeCommandes *val);
 
 #endif
