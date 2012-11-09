@@ -3,10 +3,11 @@ CIBLE = a.exe
 CFLAGS = -g
 LIBS = -lpthread
 DIR = ../../src/sockets/
+MBDIR = ../../src/mailbox/
 H_MODELES = ../../src/modeles/modeles.h
 CHEMINSHEAD = 
 CHEMINSLIBS = 
-OBJETS = parser.o server.o network.o netsend.o
+OBJETS = parser.o server.o network.o netsend.o mailbox.o
 
 all : $(CIBLE)
 
@@ -28,6 +29,10 @@ network.o : $(DIR)network.c $(DIR)network.h $(H_MODELES)
 	$(CC) -c $(CFLAGS) $(CHEMINSHEAD) $<
 
 netsend.o : $(DIR)netsend.cpp $(DIR)netsend.h
+	@echo "Compiling $@..."
+	$(CC) -c $(CFLAGS) $(CHEMINSHEAD) $<
+
+mailbox.o : $(MBDIR)mailbox.cpp $(MBDIR)mailbox.h
 	@echo "Compiling $@..."
 	$(CC) -c $(CFLAGS) $(CHEMINSHEAD) $<
 
