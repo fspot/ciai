@@ -1,10 +1,12 @@
+#ifndef MAILBOX_H
+#define MAILBOX_H
+
 #define PRIO_MAX 10
 
 #include <queue>
 #include <vector>
 #include <pthread.h>
 #include <semaphore.h>
-
 
 
 template <typename T>
@@ -40,7 +42,7 @@ private:
 
     //attributes
     std::priority_queue<prioWrapper,std::vector<prioWrapper>,comparePrio> content;
-    sem_t* countSemaphore;
+    sem_t countSemaphore;
 };
 
 
@@ -54,13 +56,13 @@ private:
 template <typename T>
 Mailbox<T>::Mailbox()
 {
-    sem_init(countSemaphore, 0, 0);
+    sem_init(&countSemaphore, 0, 0);
 }
 
 template <typename T>
 Mailbox<T>::~Mailbox()
 {
-    sem_destroy(countSemaphore);
+    sem_destroy(&countSemaphore);
 }
 
 template <typename T>
@@ -71,12 +73,14 @@ void Mailbox<T>::Push(const T& element, unsigned int priority)
     pw.object = element;
     content.Push(element);
 
-    sem_post(countSemaphore);
+    sem_post(&countSemaphore);
 }
 
 template <typename T>
 const T& Mailbox<T>::Pull()
 {
-    sem_wait(countSemaphore);
+    sem_wait(&countSemaphore);
     return content.Pop().object;
 }
+
+#endif
