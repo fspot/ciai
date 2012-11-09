@@ -3,34 +3,53 @@
 #include "multithreadObjects/sharedMemory.h"
 #include "mailbox/mailbox.h"
 
+using namespace std;
 
-void * remplir_carton()
+void * remplir_carton_function()
 {
+  cout<<"remplir crarton"<<endl;
+  pthread_exit(0);
 }
 
-void * imprimer()
+void * imprimer_function()
 {
+  cout<<"imprimer "<<endl;
+  pthread_exit(0);
 } 
-void * remplir_palette()
+void * remplir_palette_function()
 {
+  cout<<"remplir palette"<<endl;
+  pthread_exit(0);
 }
-void * stocker_palette()
+void * stocker_palette_function()
 {
+  cout<<"stocker palette"<<endl;
+  pthread_exit(0);
 }
-void * destocker_palette()
+void * destocker_palette_function()
 {
+  cout<<"destocker palette "<<endl;
+  pthread_exit(0);
 }
-void * controleur()
+void * controleur_function()
 {
+  cout<<"controleur "<<endl;
+  pthread_exit(0);
 }
-void * serveur_reception()
+void * serveur_reception_function()
 {
+  cout<<"serveur reception"<<endl;
+  pthread_exit(0);
 }
-void * serveur_envoi()
+void * serveur_envoi_function()
 {
+  cout<<"serveur envoi"<<endl;
+  pthread_exit(0);
 }
-void * gestion_series()
+void * gestion_series_function()
 {
+  cout<<"gestion series"<<endl;
+  pthread_exit(0);
 }
 
 int main()
@@ -38,40 +57,41 @@ int main()
 
 
 // Initialisation des boites aux lettres
-  Mailbox<Error*> balEvenements;
+  Mailbox<Event*> balEvenements;
   Mailbox<Carton*> imprimante;
   Mailbox<Carton*> palette;
   Mailbox<Palette*> stockage;
 
-
+  cout<<"Boites crées"<<endl;
 // Initialisation mémoires partagées
   
-  sharedMemory infos;
+  SharedMemory infos;
   infos.mutex=PTHREAD_MUTEX_INITIALIZER;
   pthread_mutex_init(&infos.mutex,NULL);
-
+  cout<<"SHMEM crées"<<endl;
 // Mutex
 
   pthread_mutex_t mutexLog=PTHREAD_MUTEX_INITIALIZER;
   pthread_mutex_init(&mutexLog,NULL);
-
+  cout<<"mutex crées"<<endl;
 // Creation du gestionnaire de Log
-
+  cout<<"Gestionnaire de Log crée"<<endl;
 
 //Creation des threads
   pthread_t remplir_carton, imprimer, remplir_palette,stocker_palette,destocker_palette,controleur,serveur_reception,serveur_envoi,gestion_series;
   int data1,data2,data3,data4,data5,data6,data7,data8,data9;
 
-  pthread_create (&remplir_carton, NULL, (void *) &remplir_carton_function, (void *) &data1);
-  pthread_create (&imprimer, NULL, (void *) &imprimer_function, (void *) &data2);
-  pthread_create (&remplir_palette, NULL, (void *) &remplir_palette_function, (void *) &data3);
-  pthread_create (&stocker_palette, NULL, (void *) &stocker_palette_function, (void *) &data4);
-  pthread_create (&destocker_palette, NULL, (void *) &destocker_palette_function, (void *) &data5);
-  pthread_create (&controleur, NULL, (void *) &controleur_function, (void *) &data6);
-  pthread_create (&serveur_reception, NULL, (void *) &serveur_reception_function, (void *) &data7);
-  pthread_create (&serveur_envoi, NULL, (void *) &serveur_envoi_function, (void *) &data8);
-  pthread_create (&remplir_carton, NULL, (void *) &remplir_carton_function, (void *) &data9);
+  pthread_create (&remplir_carton, NULL, (void *) &remplir_carton_function, NULL);
+  pthread_create (&imprimer, NULL, (void *) &imprimer_function, NULL);
+  pthread_create (&remplir_palette, NULL, (void *) &remplir_palette_function, NULL);
+  pthread_create (&stocker_palette, NULL, (void *) &stocker_palette_function, NULL);
+  pthread_create (&destocker_palette, NULL, (void *) destocker_palette_function, NULL);
+  pthread_create (&controleur, NULL, (void *) controleur_function, (void *) NULL);
+  pthread_create (&serveur_reception, NULL, (void *) serveur_reception_function, NULL);
+  pthread_create (&serveur_envoi, NULL, (void *) serveur_envoi_function, (void *) NULL);
+  pthread_create (&gestion_series, NULL, (void *) gestion_series_function, (void *) NULL);
 
+  cout<<"Threadcrées"<<endl;
   pthread_join(remplir_carton, NULL);
   pthread_join(imprimer, NULL);
   pthread_join(remplir_palette, NULL);
@@ -81,9 +101,9 @@ int main()
   pthread_join(serveur_reception, NULL);
   pthread_join(serveur_envoi, NULL);
   pthread_join(serveur_reception, NULL);
-  pthread_join(remplir_carton, NULL);
+  pthread_join(gestion_series, NULL);
 
-
+  cout<<"Thread détruits"<<endl;
   return 0;
   
 }

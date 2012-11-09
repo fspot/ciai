@@ -8,4 +8,4 @@ typedef struct TsharedMemory
 	pthread_mutex_t mutex;
 	void * content;	
 
-} SharedMemeory;
+} SharedMemory;

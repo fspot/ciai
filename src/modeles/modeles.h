@@ -22,17 +22,17 @@ struct Lot {
 
 enum EventType            
 {
-    abscenceCarton,      
-    panneImprimante ,     
-    absencePalette,         
-    tauxErreurTE,
-    fileAttentePlein,      
-    arretUrgence,
-    repriseErreur,
-    pause,
-    erreurEmbalage,
-    erreurCommande,
-    reprisePause		
+    ABSCCARTON,      
+    PANNEIMPRIM ,     
+    ABSCPALETTE,         
+    TAUXERR,
+    FILEATTPLEINE,      
+    ARRETGENCES,
+    REPRISEERREUR,
+    PAUSE,
+    ERREMBALAGES,
+    ERRCOMMANDE,
+    REPRISEPAUSE		
 } ;
 
 
