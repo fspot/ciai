@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <utility>
-#include <stdio.h>
+#include <iostream>
 
 
 
