@@ -17,6 +17,27 @@ struct Lot {
 	}
 }; 
 
+
+enum EventType            
+{
+    abscenceCarton,      
+    panneImprimante ,     
+    absencePalette,         
+    tauxErreurTE,
+    fileAttentePlein,      
+    arretUrgence,
+    repriseErreur,
+    pause,
+    erreurEmbalage,
+    erreurCommande,
+    reprisePause		
+} ;
+
+
+struct Event {
+	EventType event	;
+}; 
+
 struct ListeLots {
 	std::vector<Lot> lots;
 	int cur, tot;
