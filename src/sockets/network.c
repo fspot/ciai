@@ -173,12 +173,14 @@ int handle_MIDDLE(char *str)
 }
 
 // tâche de réception de messages en provenance du client windows
-void* thread_network(void* socket)
+void* thread_network(void* arg)
 {
-	int *client = (int*) socket;
+	NetworkInitInfo *infos = (NetworkInitInfo*) arg;
+	Mailbox<string> *netmb = infos->netmb_ptr;
+	int *client = infos->socket_ptr;
 	int listener = initListener();
 	
-	int k=3; while(k--) //while(1)
+	while(1)
 	{
 		// On va attendre un client...
 		sockstate = BEGIN;
