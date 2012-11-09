@@ -4,10 +4,10 @@
 #define PRIO_MAX 10
 
 #include <queue>
-#include <vector>
 #include <pthread.h>
 #include <semaphore.h>
 #include <utility>
+#include <stdio.h>
 
 
 
@@ -15,32 +15,25 @@ template <typename T>
 class Mailbox
 {
 
-typedef std::pair<T, unsigned int> prioWrapper;
-
-// Returns true if elt1 has a higher priority than elt2
-    struct comparePrio {
-	bool operator()(prioWrapper& elt1, prioWrapper& elt2) const
-	{
-	    return (elt1.second < elt2.second);
-	}
-    };
-
-
-
 public:
     Mailbox();
     ~Mailbox();
 
     void Push(const T& element, unsigned int priority);
-    const T& Pull();
+    //	permet d'insérer un element de type T dans la mailbox, avec la priorité priority.
+    //	un message est d'autant plus prioritaire que sa priorité est petite.
+
+    T Pull();
+    //	renvoie un élément (par priorité d'abord, puis FIFO si memes priorités)
+    //	bloquant si la boite aux lettres est vide.
 
 private:
     //methods
 
 
     //attributes
-    std::priority_queue<prioWrapper,std::vector<prioWrapper>,comparePrio> content;
-    sem_t* countSemaphore;
+    std::queue<T> queues[PRIO_MAX];
+    sem_t countSemaphore;
 };
 
 
@@ -53,31 +46,42 @@ private:
 template <typename T>
 Mailbox<T>::Mailbox()
 {
-    sem_init(countSemaphore, 0, 0);
+    sem_init(&countSemaphore, 0, 0);
 }
 
 template <typename T>
 Mailbox<T>::~Mailbox()
 {
-    sem_destroy(countSemaphore);
+    sem_destroy(&countSemaphore);
 }
 
 template <typename T>
 void Mailbox<T>::Push(const T& element, unsigned int priority)
 {
-    prioWrapper pw;
-    pw.second = priority;
-    pw.first = element;
-    content.Push(pw);
+    if (priority >= PRIO_MAX)
+    {
+	std::cout << "[WARNING] Mailbox::Push() - priority higher than PRIO_MAX (set back to " << PRIO_MAX-1 << ")" << std::endl;
+	priority = PRIO_MAX-1;
+    }
 
-    sem_post(countSemaphore);
+    queues[priority].push(element);
+
+    sem_post(&countSemaphore);
 }
 
 template <typename T>
-const T& Mailbox<T>::Pull()
+T Mailbox<T>::Pull()
 {
-    sem_wait(countSemaphore);
-    return content.Pop().object;
+    sem_wait(&countSemaphore);
+    for (unsigned int i=0 ; true ; i++ )
+    {
+	if (queues[i].size())
+	{
+	    T returnedElt = queues[i].front();
+	    queues[i].pop();
+	    return returnedElt;
+	}
+    }
 }
 
 
