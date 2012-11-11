@@ -8,46 +8,62 @@
 // http://lite.framapad.org/p/ideemodeleciai
 
 /* Note de Fred :
-	la méthode netstr() renvoie une chaîne formatée de façon à ce qu'elle puisse être envoyée sur le réseau.
-	Du coup si vous voulez modifier les structures suivantes, pensez simplement à faire en sorte que ces
-		méthodes fonctionnent toujours (en y ajoutant des paramètres si besoin).
+   la méthode netstr() renvoie une chaîne formatée de façon à ce qu'elle puisse être envoyée sur le réseau.
+   Du coup si vous voulez modifier les structures suivantes, pensez simplement à faire en sorte que ces
+   méthodes fonctionnent toujours (en y ajoutant des paramètres si besoin).
 */
 
 struct Lot {
-	std::string nom;
-	int pieces, cartons, palettes, rebut, dim[3];
-	std::string netstr() { return "L\r\n"; } // msg envoyé lors du passage au lot suivant
+  std::string nom;
+  int pieces, cartons, palettes, rebut, dim[3];
+  std::string netstr() { return "L\r\n"; } // msg envoyé lors du passage au lot suivant
 }; 
 
 
+enum Task
+  {
+    REMPLIRCARTON,
+    REMPLIRPALETTE,
+    IMPRIMER,
+    STOCKERPALETTE,
+    DESTOCKERPALETTE
+  };
+
 enum EventType            
-{
-    ABSCCARTON,      
+  {
+    ABSCARTON,      
     PANNEIMPRIM ,     
-    ABSCPALETTE,         
+    ABSPALETTE,         
     TAUXERR,
     FILEATTPLEINE,      
-    ARRETGENCES,
+    ARTURG,
     REPRISEERREUR,
     PAUSE,
     ERREMBALAGES,
     ERRCOMMANDE,
     REPRISEPAUSE		
-} ;
+  } ;
 
 
 struct Event {
-	EventType event	;
+  EventType event	;
+}; 
+
+
+
+
+struct Message {
+  std::string contenu;
 }; 
 
 struct ListeLots {
-	std::vector<Lot> lots;
-	int cur, tot;
+  std::vector<Lot> lots;
+  int cur, tot;
 };
 
 struct Commande {
-	std::string nom; // nom du produit
-	int palettes; // nombre de palettes commandées
+  std::string nom; // nom du produit
+  int palettes; // nombre de palettes commandées
 };
 
 struct ListeCommandes {
