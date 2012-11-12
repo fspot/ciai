@@ -2,14 +2,10 @@
 #include <signal.h>
 #include <unistd.h>
 #include "remplissageCarton.h"
-#include "structs.h"
+#include "../mailbox/mailbox.h"
 #include <iostream>
 using namespace std;
 
-#define TIME_MAX 3 //en secondes
-#define ERREUR_CARTON_ABSENT 1
-#define ERREUR_TROP_PIECES_DEFECTUEUSES 2
-#define ERREUR_PIECE_ABSENTE 3
 #define FIN 4
 
 static time_t timeBegin;
@@ -22,6 +18,13 @@ static unsigned int idCarton;
 static unsigned int serieCourante;
 static pthread_mutex_t mutCV;
 
+void wait();
+{
+	pthread_mutex_lock(init->mutCV);
+	pthread_cond_wait(init->cv,&mutCV);
+	pthread_mutex_unlock(init->mutCV);
+}
+
 static void remplirCartonReel(int noSignal)
 {
 	cout<<"heu1"<<endl;
@@ -31,13 +34,11 @@ static void remplirCartonReel(int noSignal)
 	if(!retour)
 	{
 		cout<<"heu2"<<endl;
-		init->pBalEvenements->write(1,tEvenement(ERREUR_CARTON_ABSENT));
-		pthread_mutex_lock(&mutCV);
-		pthread_cond_wait(init->cv,&mutCV);
-		pthread_mutex_unlock(&mutCV);
+		init->pBalEvenements->push(Event(ABSCARTON),1);
+		wait();
 	}
 
-	tPiece piece=init->pBalPieces->read();
+	Piece piece=init->pBalPieces->pull();
 
 	int i=0;
 	bool valide=true;
@@ -54,19 +55,18 @@ static void remplirCartonReel(int noSignal)
 	if(nbPiecesDsRebut>lotCourant->nbRebut)
 	{
 		cout<<"heu3"<<endl;
-		init->pBalEvenements->write(1,tEvenement(ERREUR_TROP_PIECES_DEFECTUEUSES));
-		pthread_mutex_lock(&mutCV);
-		pthread_cond_wait(init->cv,&mutCV);
-		pthread_mutex_unlock(&mutCV);
+		init->pBalEvenements->push(1,Event(TAUXERR));
+		wait();
 	}
 	else
 	{
 		nbPiecesDsCarton++;
-		if(nbPiecesDsCarton>=lotCourant->nbPieces)
+		if(nbPiecesDsCarton>=lotCourant->pieces)
 		{
 			cout<<"heu4"<<endl;
 			nbPiecesDsCarton=0;
-			init->pBalCartons->write(1,tCarton(idCarton));
+			Carton carton={idCarton,nbPiecesDsRebut};
+			init->pBalCartons->push(1,carton);
 			nbCartonsRestant--;
 			if(nbCartonsRestant<=0)
 			{
@@ -75,16 +75,14 @@ static void remplirCartonReel(int noSignal)
 				if((serieCourante+1)>init->nbLots)
 				{
 					cout<<"heu6"<<endl;
-					init->pBalEvenements->write(1,tEvenement(FIN));
-					pthread_mutex_lock(&mutCV);
-					pthread_cond_wait(init->cv,&mutCV);
-					pthread_mutex_unlock(&mutCV);
+					init->pBalEvenements->push(1,Event(FIN));// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
+					wait();
 				}
 				else
 				{
 					cout<<"heu7"<<endl;
 					lotCourant=&(init->lots[serieCourante]);
-					nbCartonsRestant=lotCourant->nbPalettes*lotCourant->nbCartons;
+					nbCartonsRestant=lotCourant->nbPalettes*lotCourant->cartons;
 					sem_post(init->sem_fin_de_serie);
 				}
 			}
@@ -105,7 +103,7 @@ void* remplirCarton(void * index)
 	init=(tInitRemplissageCarton *)index;
 	serieCourante=0;
 	lotCourant=&(init->lots[serieCourante]);	
-	nbCartonsRestant=lotCourant->nbPalettes*lotCourant->nbCartons;
+	nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 	nbPiecesDsCarton=0;
 	idCarton=0;
 
@@ -121,8 +119,7 @@ void* remplirCarton(void * index)
 			cout<<"heu8"<<endl;
 			init->pBalEvenements->write(1,tEvenement(ERREUR_PIECE_ABSENTE));
 			pthread_mutex_lock(&mutCV);
-			pthread_cond_wait(init->cv,&mutCV);
-			pthread_mutex_unlock(&mutCV);
+			wait();
 		}
 	}
 }

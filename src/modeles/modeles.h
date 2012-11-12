@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include "../mailbox/mailbox.h"
 
 // http://lite.framapad.org/p/ideemodeleciai
 
@@ -41,12 +42,13 @@ enum EventType
     PAUSE,
     ERREMBALAGES,
     ERRCOMMANDE,
-    REPRISEPAUSE		
+    REPRISEPAUSE
   } ;
 
 
 struct Event {
   EventType event	;
+  Event(EventType e):event(e){}
 }; 
 
 
@@ -76,15 +78,6 @@ struct ListeCommandes {
 	}
 };
 
-struct Erreur {
-	int code;
-	std::string netstr() {
-		std::stringstream ss;
-		ss << "E#" << code << "\r\n"; // msg envoyé lors d'une erreur.
-		return ss.str();
-	}
-};
-
 struct Palette {
 	int id;
 	Lot *lot;
@@ -98,7 +91,6 @@ struct Palette {
 struct Carton {
 	int id;
 	int nbrebut;
-	Lot *lot;
 	std::string netstr() {
 		std::stringstream ss;
 		ss << "B#" << lot->nom << "," << lot->pieces << "," << nbrebut << "\r\n"; // msg envoyé qd carton fini.
@@ -111,5 +103,18 @@ struct Piece {
 	// Carton *carton; // ?
 	int x,y,z; // en mm
 };
+
+typedef struct tInitRemplissageCarton{
+  Mailbox<Piece>* pBalPieces;
+  Mailbox<Carton>* pBalCartons;
+  Mailbox<Event>* pBalEvenements;
+  pthread_mutex_t* mutCartonPresent;
+  sem_t* sem_fin_de_serie;
+  bool* pCartonPresent;
+  tLot* lots;
+  unsigned int nbLots;
+  pthread_cond_t* cv;
+  pthread_mutex_t mutCv;
+}tInitRemplissageCarton;
 
 #endif
