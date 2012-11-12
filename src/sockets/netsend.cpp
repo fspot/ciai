@@ -41,7 +41,7 @@ void* thread_netsend(void* arg)
 	/*
 
 
-	while ((msg = netmb->Pull()) != "EXIT_TASK")
+	while ((msg = netmb->Pull().contenu) != "EXIT_TASK")
 	{
 		if(send(*client, msg.c_str(), strlen(msg.c_str()), 0) < 0)
 		{
