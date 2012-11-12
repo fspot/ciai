@@ -60,9 +60,9 @@ int main()
   pthread_mutex_init(&series.mutex,NULL);
 
 
-  SharedMemory infos;
+  SharedMemory infosThreads;
   infos.mutex=PTHREAD_MUTEX_INITIALIZER;
-  pthread_mutex_init(&infos.mutex,NULL);
+  pthread_mutex_init(&infosThreads.mutex,NULL);
 
 
   cout<<"\tMémoires partagées créeés"<<endl;
