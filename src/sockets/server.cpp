@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 	void *ret;
 
 	int socket; // cette variable contiendra le socket utile aux 2 threads.
-	Mailbox<string> netmb; // celle ci est la Mailbox pour l'envoi réseau.
+	Mailbox<Message> netmb; // celle ci est la Mailbox pour l'envoi réseau.
 
 	// argument pour le thread_network
 	NetworkInitInfo network_arg;

@@ -177,7 +177,7 @@ void* thread_network(void* arg)
 {
 	puts("Thread network launched");
 	NetworkInitInfo *infos = (NetworkInitInfo*) arg;
-	//Mailbox<string> *netmb = infos->netmb_ptr;
+//	Mailbox<string> *netmb = infos->netmb_ptr;
 	int *client = infos->socket_ptr;
 	int listener = initListener();
 	

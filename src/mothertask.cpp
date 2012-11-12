@@ -3,6 +3,7 @@
 #include "multithreadObjects/sharedMemory.h"
 #include "mailbox/mailbox.h"
 #include "controleur/controleur.h"
+#include "sockets/network.h"
 
 using namespace std;
 
@@ -32,39 +33,39 @@ void * destocker_palette_function()
   cout<<"\t\tTâche destocker palette lancée"<<endl;
   pthread_exit(0);
 }
-void * controleur_function()
-{
-  cout<<"\t\tTâche controleur lancée"<<endl;
-  pthread_exit(0);
-}
+
+
 void * serveur_reception_function()
 {
   cout<<"\t\tTâche serveur reception lancée"<<endl;
   pthread_exit(0);
 }
+
 void * serveur_envoi_function()
 {
   cout<<"\t\tTâche serveur envoi lancée"<<endl;
   pthread_exit(0);
 }
+
 void * gestion_series_function()
 {
   cout<<"\t\tTâche gestion series lancée"<<endl;
   pthread_exit(0);
 }
 
+
 int main()
 {
   cout<<"Phase d'initialisation"<<endl;
-
-// Initialisation des boites aux lettres
-  Mailbox<Event> balEvenements;
-  Mailbox<Carton> imprimante;
-  Mailbox<Carton> palette;
-  Mailbox<Palette> stockage;
+  // Initialisation des boites aux lettres
+  Mailbox<Event>  balEvenements;
+  Mailbox<Carton> balImprimante;
+  Mailbox<Carton> balPalette;
+  Mailbox<Palette> balStockage;
+  Mailbox<Message> balMessages;
 
   cout<<"\tBoites  aux lettre créées"<<endl;
-// Initialisation mémoires partagées
+  // Initialisation mémoires partagées
   
   SharedMemory series;
   series.mutex=PTHREAD_MUTEX_INITIALIZER;
@@ -77,30 +78,38 @@ int main()
 
 
   cout<<"\tMémoires partagées créeés"<<endl;
-// Mutex
+  // Mutex
 
   pthread_mutex_t mutexLog=PTHREAD_MUTEX_INITIALIZER;
   pthread_mutex_init(&mutexLog,NULL);
   cout<<"\tMutex crées"<<endl;
 
 
-// Creation du gestionnaire de Log
+  // Creation du gestionnaire de Log
   cout<<"\tGestionnaire de Log créé"<<endl;
 
-//Creation des threads
+  //Creation des threads
   pthread_t remplir_carton, imprimer, remplir_palette,stocker_palette,destocker_palette,controleur,serveur_reception,serveur_envoi,gestion_series;
 
 
-  pthread_create (&remplir_carton, NULL, (void *) &remplir_carton_function, NULL);
+  pthread_create (&remplir_carton, NULL, (void *)&remplir_carton_function, NULL);
   pthread_create (&imprimer, NULL, (void *) &imprimer_function, NULL);
   pthread_create (&remplir_palette, NULL, (void *) &remplir_palette_function, NULL);
   pthread_create (&stocker_palette, NULL, (void *) &stocker_palette_function, NULL);
   pthread_create (&destocker_palette, NULL, (void *) destocker_palette_function, NULL);
 
+  //Création du thread controleur
   ArgControleur * argControleur = new ArgControleur();
   argControleur->eventBox= &balEvenements;
   pthread_create (&controleur, NULL, (void *) controleur_thread, (void *) argControleur);
-  pthread_create (&serveur_reception, NULL, (void *) serveur_reception_function, NULL);
+
+
+  NetworkInitInfo * info = new NetworkInitInfo();
+  info->netmb_ptr = &balMessages;
+  info->socket_ptr = new int(0);
+  pthread_create (&serveur_reception, NULL, (void *) thread_network, (void *)info);
+
+
   pthread_create (&serveur_envoi, NULL, (void *) serveur_envoi_function, (void *) NULL);
   pthread_create (&gestion_series, NULL, (void *) gestion_series_function, (void *) NULL);
 
@@ -110,11 +119,11 @@ int main()
   cout<<"Phase moteur"<<endl;
 
   for(int i =0;i<10;i++)
-  {
-    Event anEvent;
-    anEvent.event=i%10;
-    cout <<"empilement"<<endl;
-  }
+    {
+      Event anEvent;
+      anEvent.event=i%10;
+      cout <<"empilement"<<endl;
+    }
   int a;
   cin>>a;
 
