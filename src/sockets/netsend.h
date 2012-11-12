@@ -1,11 +1,11 @@
 #ifndef NETSEND_H
 #define NETSEND_H
 
-#include <string>
+#include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
 
 struct NetSendInitInfo {
-	Mailbox<std::string> *netmb_ptr;
+	Mailbox<Message> *netmb_ptr;
 	int *socket_ptr;
 };
 

@@ -4,6 +4,7 @@
 #include "mailbox/mailbox.h"
 #include "controleur/controleur.h"
 #include "sockets/network.h"
+#include "sockets/netsend.h"
 
 using namespace std;
 
@@ -31,19 +32,6 @@ void * stocker_palette_function()
 void * destocker_palette_function()
 {
   cout<<"\t\tTâche destocker palette lancée"<<endl;
-  pthread_exit(0);
-}
-
-
-void * serveur_reception_function()
-{
-  cout<<"\t\tTâche serveur reception lancée"<<endl;
-  pthread_exit(0);
-}
-
-void * serveur_envoi_function()
-{
-  cout<<"\t\tTâche serveur envoi lancée"<<endl;
   pthread_exit(0);
 }
 
@@ -110,23 +98,18 @@ int main()
   pthread_create (&serveur_reception, NULL, (void *) thread_network, (void *)info);
 
 
-  pthread_create (&serveur_envoi, NULL, (void *) serveur_envoi_function, (void *) NULL);
+  NetSendInitInfo * infoSend = new NetSendInitInfo();
+  infoSend->netmb_ptr = &balMessages;
+  infoSend->socket_ptr = new int(0);
+  pthread_create (&serveur_envoi, NULL, (void *) thread_netsend, (void *) infoSend);
   pthread_create (&gestion_series, NULL, (void *) gestion_series_function, (void *) NULL);
 
   cout<<"\t\t\tTout les thread ont été créés"<<endl;
 
 
   cout<<"Phase moteur"<<endl;
-
-  for(int i =0;i<10;i++)
-    {
-      Event anEvent;
-      anEvent.event=i%10;
-      cout <<"empilement"<<endl;
-    }
   int a;
   cin>>a;
-
   cout<<endl<<endl<<endl;
   cout<<"Phase de destruction"<<endl;
 

@@ -5,7 +5,10 @@ project(mothertask)
 set (CMAKE_CXX_FLAGS "-fpermissive") 
  
 find_package (Threads)
+set(SOURCES sockets/network.cpp
+	    sockets/parser.cpp
+ 	    sockets/netsend.cpp)
 
-add_executable(mothertask mothertask.cpp sockets/network.cpp  sockets/parser.cpp sockets/netsend.cpp)
+add_executable(mothertask mothertask.cpp ${SOURCES})
 target_link_libraries (mothertask ${CMAKE_THREAD_LIBS_INIT})
 
