@@ -33,3 +33,8 @@ void Mutex::unlock()
 {
 	pthread_mutex_unlock(&mut);
 }
+
+pthread_mutex_t* Mutex::getMutex()
+{
+	return &mut;
+}
