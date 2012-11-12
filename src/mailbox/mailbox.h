@@ -8,32 +8,40 @@
 #include <semaphore.h>
 #include <utility>
 #include <iostream>
+#include "../multithreadObjects/mutex.h"
 
 
 
 template <typename T>
 class Mailbox
 {
-	
+
 public:
 	Mailbox();
 	~Mailbox();
-	
+
 	void Push(const T& element, unsigned int priority);
 	//	permet d'insérer un element de type T dans la mailbox, avec la priorité priority.
 	//	un message est d'autant plus prioritaire que sa priorité est petite.
-	
+
 	T Pull();
 	//	renvoie un élément (par priorité d'abord, puis FIFO si memes priorités)
 	//	bloquant si la boite aux lettres est vide.
-	
-private:
+
+	int Size();
+	//	renvoie le nombre d'éléments dans la boite aux lettres
+	//	attention quant à l'utilisation de cette valeur, du fait de la concurence elle peut ne plus être valide au moment où vous la recevez.
+	//	à utiliser précautionneusement.
+
+
+protected:
 	//methods
-	
-	
+
+
 	//attributes
 	std::queue<T> queues[PRIO_MAX];
 	sem_t countSemaphore;
+	Mutex writeMutex[PRIO_MAX];
 };
 
 
@@ -63,9 +71,10 @@ void Mailbox<T>::Push(const T& element, unsigned int priority)
 		std::cout << "[WARNING] Mailbox::Push() - priority higher than PRIO_MAX (set back to " << PRIO_MAX-1 << ")" << std::endl;
 		priority = PRIO_MAX-1;
 	}
-	
+
+	writeMutex[priority].lock();
 	queues[priority].push(element);
-	
+	writeMutex[priority].unlock();
 	sem_post(&countSemaphore);
 }
 
@@ -77,11 +86,22 @@ T Mailbox<T>::Pull()
 	{
 		if (queues[i].size())
 		{
+			writeMutex[i].lock();
 			T returnedElt = queues[i].front();
 			queues[i].pop();
+			writeMutex[i].unlock();
 			return returnedElt;
 		}
+		std::cout<<"boucle"<<std::endl;
 	}
+}
+
+template <typename T>
+int Mailbox<T>::Size()
+{
+	int returnValue;
+	sem_getvalue(&countSemaphore, &returnValue);
+	return returnValue;
 }
 
 

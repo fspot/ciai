@@ -5,6 +5,7 @@
 #include "controleur/controleur.h"
 #include "sockets/network.h"
 #include "sockets/netsend.h"
+#include "tacheImprimer/imprimer.h"
 
 using namespace std;
 
@@ -83,15 +84,34 @@ int main()
     condRP=PTHREAD_COND_INITIALIZER,
     condSP=PTHREAD_COND_INITIALIZER,
     condDP=PTHREAD_COND_INITIALIZER;
+  //pthread_cond_init(&condRC); 
+  //pthread_cond_init(&condIMP);
+  //pthread_cond_init(&condRP);
+  //pthread_cond_init(&condSP);
+  //pthread_cond_init(&condDP);
 
- pthread_mutex_t condRCM=PTHREAD_MUTEX_INITIALIZER,
+
+
+
+
+  pthread_mutex_t condRCM=PTHREAD_MUTEX_INITIALIZER,
     condIMPM=PTHREAD_MUTEX_INITIALIZER,
     condRPM=PTHREAD_MUTEX_INITIALIZER,
     condSPM=PTHREAD_MUTEX_INITIALIZER,
     condDPM=PTHREAD_MUTEX_INITIALIZER;
   
   pthread_create (&remplir_carton, NULL, (void *)&remplir_carton_function, NULL);
-  pthread_create (&imprimer, NULL, (void *) &imprimer_function, NULL);
+
+  // Création du thread imprimer
+  ArgImprimer * argImprimer = new ArgImprimer();
+  argImprimer->eventBox= &balEvenements;
+  argImprimer->balImprimante=&balImprimante;
+  argImprimer->balPalette=&balPalette;
+  argImprimer->varCond=&condIMP;
+  argImprimer->mutex=&condIMPM;
+  pthread_create (&imprimer, NULL, (void *) &imprimer_thread, (void *)argImprimer);
+
+
   pthread_create (&remplir_palette, NULL, (void *) &remplir_palette_function, NULL);
   pthread_create (&stocker_palette, NULL, (void *) &stocker_palette_function, NULL);
   pthread_create (&destocker_palette, NULL, (void *) destocker_palette_function, NULL);
