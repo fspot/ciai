@@ -92,12 +92,12 @@ struct Carton {
 	int id;
 	Lot *lot;
 	int nbrebut;
-	std::string netstr() {
+	std::string netstr_rempli() {
 		std::stringstream ss;
 		ss << "B#" << lot->nom << "," << nbrebut << "\r\n"; // msg envoyé qd carton rempli.
 		return ss.str();
 	}
-        std::string netstr() {
+        std::string netstr_palette() {
           std::stringstream ss;
           ss << "D#" << lot->nom << "\r\n"; // msg envoyé qd carton paletté.
           return ss.str();
