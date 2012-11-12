@@ -92,7 +92,6 @@ T Mailbox<T>::Pull()
 			writeMutex[i].unlock();
 			return returnedElt;
 		}
-		std::cout<<"boucle"<<std::endl;
 	}
 }
 
