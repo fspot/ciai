@@ -78,8 +78,18 @@ int main()
 
   //Creation des threads
   pthread_t remplir_carton, imprimer, remplir_palette,stocker_palette,destocker_palette,controleur,serveur_reception,serveur_envoi,gestion_series;
+  pthread_cond_t condRC=PTHREAD_COND_INITIALIZER,
+    condIMP=PTHREAD_COND_INITIALIZER,
+    condRP=PTHREAD_COND_INITIALIZER,
+    condSP=PTHREAD_COND_INITIALIZER,
+    condDP=PTHREAD_COND_INITIALIZER;
 
-
+ pthread_mutex_t condRCM=PTHREAD_MUTEX_INITIALIZER,
+    condIMPM=PTHREAD_MUTEX_INITIALIZER,
+    condRPM=PTHREAD_MUTEX_INITIALIZER,
+    condSPM=PTHREAD_MUTEX_INITIALIZER,
+    condDPM=PTHREAD_MUTEX_INITIALIZER;
+  
   pthread_create (&remplir_carton, NULL, (void *)&remplir_carton_function, NULL);
   pthread_create (&imprimer, NULL, (void *) &imprimer_function, NULL);
   pthread_create (&remplir_palette, NULL, (void *) &remplir_palette_function, NULL);
@@ -90,12 +100,39 @@ int main()
    
   ArgControleur * argControleur = new ArgControleur();
   argControleur->eventBox= &balEvenements;
+  
+  InfoThread remplirCarton;
+  remplirCarton.id =remplir_carton;
+  remplirCarton.cw=&condRC;
+  remplirCarton.mx=&condRCM;
+  argControleur->threads[REMPLIRCARTON]=remplirCarton;
 
-  argControleur->threads[REMPLIRCARTON]=remplir_carton;
-  argControleur->threads[REMPLIRPALETTE]=remplir_palette;
-  argControleur->threads[IMPRIMER]=imprimer;
-  argControleur->threads[STOCKERPALETTE]=stocker_palette;
-  argControleur->threads[DESTOCKERPALETTE]=destocker_palette;
+  InfoThread remplirPalette;
+  remplirPalette.id =remplir_palette;
+  remplirPalette.cw=&condRP;
+  remplirPalette.mx=&condRPM;
+  argControleur->threads[REMPLIRPALETTE]=remplirPalette;
+
+  InfoThread imprimerTI;
+  imprimerTI.id =imprimer;
+  imprimerTI.cw=&condIMP;
+  imprimerTI.mx=&condIMPM;
+  argControleur->threads[IMPRIMER]=imprimerTI;
+
+
+  InfoThread stockerPalette;
+  stockerPalette.id =stocker_palette;
+  stockerPalette.cw=&condSP;
+  stockerPalette.mx=&condSPM;
+  argControleur->threads[STOCKERPALETTE]=stockerPalette;
+
+  InfoThread destockerPalette;
+  destockerPalette.id =destocker_palette;
+  destockerPalette.cw=&condDP;
+  destockerPalette.mx=&condDPM;
+  argControleur->threads[DESTOCKERPALETTE]=destockerPalette;
+
+
   pthread_create (&controleur, NULL, (void *) controleur_thread, (void *) argControleur);
 
 
