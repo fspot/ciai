@@ -42,7 +42,8 @@ enum EventType
     PAUSE,
     ERREMBALAGES,
     ERRCOMMANDE,
-    REPRISEPAUSE
+    REPRISEPAUSE,
+    FIN
   } ;
 
 
@@ -101,7 +102,7 @@ struct Carton {
 
 struct Piece {
 	// Carton *carton; // ?
-	int x,y,z; // en mm
+	int dim[3]; // en mm
 };
 
 typedef struct tInitRemplissageCarton{
@@ -111,7 +112,7 @@ typedef struct tInitRemplissageCarton{
   pthread_mutex_t* mutCartonPresent;
   sem_t* sem_fin_de_serie;
   bool* pCartonPresent;
-  tLot* lots;
+  Lot* lots;
   unsigned int nbLots;
   pthread_cond_t* cv;
   pthread_mutex_t mutCv;

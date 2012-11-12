@@ -16,7 +16,7 @@ static unsigned int nbPiecesDsRebut;
 static unsigned int nbPiecesDsCarton;
 static unsigned int idCarton;
 static unsigned int serieCourante;
-static pthread_mutex_t mutCV;
+static pthread_mutex_t mutCV;i
 
 void wait();
 {
