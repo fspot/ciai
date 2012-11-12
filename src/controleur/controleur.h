@@ -6,11 +6,17 @@ using namespace std;
 
 #include <map>
 
+struct InfoThread
+{
+  pthread_t id;
+  pthread_cond_t * cw;
+  pthread_mutex_t * mx;
+};
 struct ArgControleur
 {
   Mailbox<Event> * eventBox;
   Mailbox<Message> * msgBox;
-  map<Task,pthread_t> threads;
+  map<Task,InfoThread> threads;
 };
 
 void fermeture_clapet()
@@ -23,15 +29,15 @@ void ecriture_log_controleur()
   // a ecrire
 }
 
-void suspendre_tache(pthread_t aThread)
+void suspendre_tache(InfoThread aThread)
 {
-  pthread_kill(aThread,SIGUSR2);
+  pthread_kill(aThread.id,SIGUSR2);
 }
 
 
-void reprendre_tache(pthread_t aThread)
+void reprendre_tache(InfoThread aThread)
 {
-  pthread_kill(aThread,SIGUSR1);
+  pthread_cond_signal(aThread.cw);
 }
 
 int controleur_thread(void * argsUnconverted)
