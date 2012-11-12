@@ -17,7 +17,7 @@
 struct Lot {
   std::string nom;
   int pieces, cartons, palettes, rebut, dim[3];
-  std::string netstr() { return "L\r\n"; } // msg envoyé lors du passage au lot suivant
+  std::string netstr() { return "L\r\n"; } // msg envoyé lors du passage au lot suivant (== nouveau lot)
 }; 
 
 
@@ -84,20 +84,25 @@ struct Palette {
 	Lot *lot;
 	std::string netstr() {
 		std::stringstream ss;
-		ss << "P#" << lot->nom << "," << lot->cartons << "\r\n"; // msg envoyé qd palette finie.
+		ss << "P#" << lot->nom << "\r\n"; // msg envoyé qd palette finie.
 		return ss.str();
 	}
 };
 
 struct Carton {
 	int id;
+	Lot *lot;
 	int nbrebut;
-	std::string netstr() {
+	std::string netstr_rempli() {
 		std::stringstream ss;
-		ss << "B#" << lot->nom << "," << lot->pieces << "," << nbrebut << "\r\n"; // msg envoyé qd carton fini.
+		ss << "B#" << lot->nom << "," << nbrebut << "\r\n"; // msg envoyé qd carton rempli.
 		return ss.str();
 	}
-	// Palette *palette; // ?
+        std::string netstr_palette() {
+          std::stringstream ss;
+          ss << "D#" << lot->nom << "\r\n"; // msg envoyé qd carton paletté.
+          return ss.str();
+        }
 };
 
 struct Piece {
