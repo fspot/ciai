@@ -81,6 +81,7 @@ T Mailbox<T>::Pull()
 			queues[i].pop();
 			return returnedElt;
 		}
+		std::cout<<"boucle"<<std::endl;
 	}
 }
 
