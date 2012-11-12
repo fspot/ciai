@@ -23,6 +23,8 @@ void* thread_netsend(void* arg)
 	Mailbox<Message> *netmb = infos->netmb_ptr;
 	int *client = infos->socket_ptr;
 	string msg;
+
+	/*
 	int i=0;
 	// dummy example :
 	 for(;;)
@@ -31,6 +33,7 @@ void* thread_netsend(void* arg)
 	 	cout<<"<thread 2 says socket "<<i<<endl;
 		i++;
 	 }
+	 /**/
 
 	/*
 	en vérité le thread n'a pas pour seul argument le socket :
@@ -38,9 +41,8 @@ void* thread_netsend(void* arg)
 	Et en vérité on ne boucle pas à l'infini, on boucle sur les messages de la BaL,
 	Puis on envoie ce message (primitive send() TCP)
 	*/
-	/*
 
-
+	//*
 	while ((msg = netmb->Pull().contenu) != "EXIT_TASK")
 	{
 		if(send(*client, msg.c_str(), strlen(msg.c_str()), 0) < 0)
@@ -50,6 +52,7 @@ void* thread_netsend(void* arg)
 		}
 		cout << "<thread 2 sent \"" << msg << "\">" << endl;
 	}
-	*/
+	/**/
+
 	pthread_exit(0);
 }

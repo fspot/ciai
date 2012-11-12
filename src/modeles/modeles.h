@@ -44,6 +44,7 @@ enum EventType
     ERREMBALAGES,
     ERRCOMMANDE,
     REPRISEPAUSE,
+    ABSPIECE,
     FIN
   } ;
 
@@ -121,7 +122,7 @@ typedef struct tInitRemplissageCarton{
   Lot* lots;
   unsigned int nbLots;
   pthread_cond_t* cv;
-  pthread_mutex_t mutCv;
+  pthread_mutex_t* mutCv;
 }tInitRemplissageCarton;
 
 #endif
