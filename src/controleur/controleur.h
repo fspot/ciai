@@ -158,7 +158,7 @@ int controleur_thread(void * argsUnconverted)
 	  args->msgBox->Push(aMsg,0);
 	  break;
 	default:
-	    std::cout<<"wtf?"<<std::endl;
+	    std::cout<<"Message d'erreur non supporté"<<std::endl;
 	break;
 	}
     }
