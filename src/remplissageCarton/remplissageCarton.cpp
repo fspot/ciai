@@ -27,77 +27,79 @@ void wait()
 
 static void remplirCartonReel(int noSignal)
 {
-	cout<<"heu1"<<endl;
-	pthread_mutex_lock(init->mutCartonPresent);
-	bool retour=(*(init->pCartonPresent));
-	pthread_mutex_unlock(init->mutCartonPresent);
-	if(!retour)
+	if(noSignal==SIGUSR1)
 	{
-		cout<<"heu2"<<endl;
-		init->pBalEvenements->Push(Event(ABSCARTON),1);
-		wait();
-	}
-
-	Piece piece=init->pBalPieces->Pull();
-
-	int i=0;
-	bool valide=true;
-	while(i<3 && valide)
-	{
-		if(piece.dim[i]!=lotCourant->dim[i])
-			valide=false;
-		i++;
-	}
-
-	if(!valide)
-		nbPiecesDsRebut++;
-
-	if(nbPiecesDsRebut>lotCourant->rebut)
-	{
-		cout<<"heu3"<<endl;
-		init->pBalEvenements->Push(Event(TAUXERR),1);
-		wait();
-	}
-	else
-	{
-		nbPiecesDsCarton++;
-		if(nbPiecesDsCarton>=lotCourant->pieces)
+		cout<<"heu1"<<endl;
+		pthread_mutex_lock(init->mutCartonPresent);
+		bool retour=(*(init->pCartonPresent));
+		pthread_mutex_unlock(init->mutCartonPresent);
+		if(!retour)
 		{
-			cout<<"heu4"<<endl;
-			nbPiecesDsCarton=0;
-			Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
-			init->pBalCartons->Push(carton,1);
-			nbCartonsRestant--;
-			if(nbCartonsRestant<=0)
+			cout<<"heu2"<<endl;
+			init->pBalEvenements->Push(Event(ABSCARTON),1);
+			wait();
+		}
+
+		Piece piece=init->pBalPieces->Pull();
+
+		int i=0;
+		bool valide=true;
+		while(i<3 && valide)
+		{
+			if(piece.dim[i]!=lotCourant->dim[i])
+				valide=false;
+			i++;
+		}
+
+		if(!valide)
+			nbPiecesDsRebut++;
+
+		if(nbPiecesDsRebut>lotCourant->rebut)
+		{
+			cout<<"heu3"<<endl;
+			init->pBalEvenements->Push(Event(TAUXERR),1);
+			wait();
+		}
+		else
+		{
+			nbPiecesDsCarton++;
+			if(nbPiecesDsCarton>=lotCourant->pieces)
 			{
-				cout<<"heu5"<<endl;
-				serieCourante++;
-				if((serieCourante+1)>init->nbLots)
+				cout<<"heu4"<<endl;
+				nbPiecesDsCarton=0;
+				Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
+				init->pBalCartons->Push(carton,1);
+				nbCartonsRestant--;
+				if(nbCartonsRestant<=0)
 				{
-					cout<<"heu6"<<endl;
-					init->pBalEvenements->Push(Event(FIN),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
-					wait();
-				}
-				else
-				{
-					cout<<"heu7"<<endl;
-					lotCourant=&(init->lots[serieCourante]);
-					nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
-					sem_post(init->sem_fin_de_serie);
+					cout<<"heu5"<<endl;
+					serieCourante++;
+					if((serieCourante+1)>init->nbLots)
+					{
+						cout<<"heu6"<<endl;
+						init->pBalEvenements->Push(Event(FIN),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
+						wait();
+					}
+					else
+					{
+						cout<<"heu7"<<endl;
+						lotCourant=&(init->lots[serieCourante]);
+						nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
+						sem_post(init->sem_fin_de_serie);
+					}
 				}
 			}
 		}
+	}
+	else
+	{
+		wait();
 	}
 	time(&timeBegin);
 }
 
 void* remplirCarton(void * index)
 {
-	struct sigaction action;
-	action.sa_handler=remplirCartonReel;
-	sigemptyset(&action.sa_mask);
-	action.sa_flags=0;
-
 	init=(tInitRemplissageCarton *)index;
 	serieCourante=0;
 	lotCourant=&(init->lots[serieCourante]);	
@@ -105,7 +107,8 @@ void* remplirCarton(void * index)
 	nbPiecesDsCarton=0;
 	idCarton=0;
 
-	sigaction(SIGUSR1,&action,NULL);
+	signal(SIGUSR1,remplirCartonReel);
+	signal(SIGUSR2,remplirCartonReel);
 
 	time(&timeBegin);
 
