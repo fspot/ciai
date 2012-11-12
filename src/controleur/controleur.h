@@ -1,13 +1,16 @@
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
+#include <pthread.h>
+#include <signal.h>
 using namespace std;
 
+#include <map>
 
 struct ArgControleur
 {
   Mailbox<Event> * eventBox;
   Mailbox<Message> * msgBox;
-  
+  map<Task,pthread_t> threads;
 };
 
 void fermeture_clapet()
@@ -20,15 +23,15 @@ void ecriture_log_controleur()
   // a ecrire
 }
 
-void suspendre_tache(Task aTask)
+void suspendre_tache(pthread_t aThread)
 {
-  // a ecrire
+  pthread_kill(aThread,SIGUSR2);
 }
 
 
-void reprendre_tache(Task aTask)
+void reprendre_tache(pthread_t aThread)
 {
-  // a ecrire
+  pthread_kill(aThread,SIGUSR1);
 }
 
 int controleur_thread(void * argsUnconverted)
@@ -54,7 +57,7 @@ int controleur_thread(void * argsUnconverted)
 
 	case PANNEIMPRIM:
 	  fermeture_clapet();
-	  suspendre_tache(REMPLIRCARTON);
+	  suspendre_tache(args->threads[REMPLIRCARTON]);
 	  ecriture_log_controleur();
 	  aMsg.contenu ="Panne imprimante";
 	  args->msgBox->Push(aMsg,0);
@@ -62,8 +65,8 @@ int controleur_thread(void * argsUnconverted)
 
 	case ABSPALETTE:
 	  fermeture_clapet();
-	  suspendre_tache(REMPLIRCARTON);
-	  suspendre_tache(IMPRIMER);
+	  suspendre_tache(args->threads[REMPLIRCARTON]);
+	  suspendre_tache(args->threads[IMPRIMER]);
 	  ecriture_log_controleur();
 	  aMsg.contenu ="Abscence palette";
 	  args->msgBox->Push(aMsg,0);
@@ -78,8 +81,8 @@ int controleur_thread(void * argsUnconverted)
 
 	case FILEATTPLEINE:
 	  fermeture_clapet();
-	  suspendre_tache(REMPLIRCARTON);
-	  suspendre_tache(IMPRIMER);
+	  suspendre_tache(args->threads[REMPLIRCARTON]);
+	  suspendre_tache(args->threads[IMPRIMER]);
 	  ecriture_log_controleur();
 	  aMsg.contenu ="File d'attente pleine";
 	  args->msgBox->Push(aMsg,0);
@@ -87,11 +90,11 @@ int controleur_thread(void * argsUnconverted)
 
 
 	case ARTURG:
-	  suspendre_tache(REMPLIRCARTON);
-	  suspendre_tache(IMPRIMER);
-	  suspendre_tache(REMPLIRPALETTE);
-	  suspendre_tache(STOCKERPALETTE);
-	  suspendre_tache(DESTOCKERPALETTE);
+	  suspendre_tache(args->threads[REMPLIRCARTON]);
+	  suspendre_tache(args->threads[IMPRIMER]);
+	  suspendre_tache(args->threads[REMPLIRPALETTE]);
+	  suspendre_tache(args->threads[STOCKERPALETTE]);
+	  suspendre_tache(args->threads[DESTOCKERPALETTE]);
 	  ecriture_log_controleur();
 	  aMsg.contenu ="Arret d'urgence";
 	  args->msgBox->Push(aMsg,0);
@@ -99,11 +102,11 @@ int controleur_thread(void * argsUnconverted)
 
 
 	case REPRISEERREUR:
-	  reprendre_tache(DESTOCKERPALETTE);
-	  reprendre_tache(STOCKERPALETTE);
-	  reprendre_tache(REMPLIRPALETTE);
-	  reprendre_tache(IMPRIMER);
-	  reprendre_tache(REMPLIRCARTON);
+	  reprendre_tache(args->threads[DESTOCKERPALETTE]);
+	  reprendre_tache(args->threads[STOCKERPALETTE]);
+	  reprendre_tache(args->threads[REMPLIRPALETTE]);
+	  reprendre_tache(args->threads[IMPRIMER]);
+	  reprendre_tache(args->threads[REMPLIRCARTON]);
 	  ecriture_log_controleur();
 	  aMsg.contenu ="Reprise pause";
 	  args->msgBox->Push(aMsg,0);
@@ -111,11 +114,11 @@ int controleur_thread(void * argsUnconverted)
 
 	case PAUSE:
 	  fermeture_clapet();
-	  suspendre_tache(REMPLIRCARTON);
-	  suspendre_tache(IMPRIMER);
-	  suspendre_tache(REMPLIRPALETTE);
-	  suspendre_tache(STOCKERPALETTE);
-	  suspendre_tache(DESTOCKERPALETTE);
+	  suspendre_tache(args->threads[REMPLIRCARTON]);
+	  suspendre_tache(args->threads[IMPRIMER]);
+	  suspendre_tache(args->threads[REMPLIRPALETTE]);
+	  suspendre_tache(args->threads[STOCKERPALETTE]);
+	  suspendre_tache(args->threads[DESTOCKERPALETTE]);
 	  ecriture_log_controleur();
 	  aMsg.contenu ="Pause";
 	  args->msgBox->Push(aMsg,0);
@@ -123,8 +126,8 @@ int controleur_thread(void * argsUnconverted)
 
 	case ERREMBALAGES:
 	  fermeture_clapet();
-	  suspendre_tache(REMPLIRCARTON);
-	  suspendre_tache(IMPRIMER);
+	  suspendre_tache(args->threads[REMPLIRCARTON]);
+	  suspendre_tache(args->threads[IMPRIMER]);
 	  ecriture_log_controleur();
 
 	  aMsg.contenu ="Erreur embalage";
@@ -138,10 +141,11 @@ int controleur_thread(void * argsUnconverted)
 	  break;
 
 	case REPRISEPAUSE:
-	  reprendre_tache(STOCKERPALETTE);
-	  reprendre_tache(REMPLIRPALETTE);
-	  reprendre_tache(IMPRIMER);
-	  reprendre_tache(REMPLIRCARTON);
+	  reprendre_tache(args->threads[DESTOCKERPALETTE]);
+	  reprendre_tache(args->threads[STOCKERPALETTE]);
+	  reprendre_tache(args->threads[REMPLIRPALETTE]);
+	  reprendre_tache(args->threads[IMPRIMER]);
+	  reprendre_tache(args->threads[REMPLIRCARTON]);
 
 	  ecriture_log_controleur();
 	  aMsg.contenu ="Reprise pause";

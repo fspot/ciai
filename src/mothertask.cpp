@@ -60,9 +60,9 @@ int main()
   pthread_mutex_init(&series.mutex,NULL);
 
 
-  SharedMemory infosThreads;
+  SharedMemory infos;
   infos.mutex=PTHREAD_MUTEX_INITIALIZER;
-  pthread_mutex_init(&infosThreads.mutex,NULL);
+  pthread_mutex_init(&infos.mutex,NULL);
 
 
   cout<<"\tMémoires partagées créeés"<<endl;
@@ -85,10 +85,17 @@ int main()
   pthread_create (&remplir_palette, NULL, (void *) &remplir_palette_function, NULL);
   pthread_create (&stocker_palette, NULL, (void *) &stocker_palette_function, NULL);
   pthread_create (&destocker_palette, NULL, (void *) destocker_palette_function, NULL);
-
+  
   //Création du thread controleur
+   
   ArgControleur * argControleur = new ArgControleur();
   argControleur->eventBox= &balEvenements;
+
+  argControleur->threads[REMPLIRCARTON]=remplir_carton;
+  argControleur->threads[REMPLIRPALETTE]=remplir_palette;
+  argControleur->threads[IMPRIMER]=imprimer;
+  argControleur->threads[STOCKERPALETTE]=stocker_palette;
+  argControleur->threads[DESTOCKERPALETTE]=destocker_palette;
   pthread_create (&controleur, NULL, (void *) controleur_thread, (void *) argControleur);
 
 
