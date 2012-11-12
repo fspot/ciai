@@ -6,6 +6,7 @@
 #include "sockets/network.h"
 #include "sockets/netsend.h"
 #include "tacheImprimer/imprimer.h"
+#include "log/log.h"
 
 using namespace std;
 
@@ -68,14 +69,12 @@ int main()
 
   cout<<"\tMémoires partagées créeés"<<endl;
   // Mutex
-
-  pthread_mutex_t mutexLog=PTHREAD_MUTEX_INITIALIZER;
-  pthread_mutex_init(&mutexLog,NULL);
-  cout<<"\tMutex crées"<<endl;
-
+  Mutex  sortieStdMutex;
+  
 
   // Creation du gestionnaire de Log
   cout<<"\tGestionnaire de Log créé"<<endl;
+  Log gestionnaireLog(sortieStdMutex);
 
   //Creation des threads
   pthread_t remplir_carton, imprimer, remplir_palette,stocker_palette,destocker_palette,controleur,serveur_reception,serveur_envoi,gestion_series;
@@ -120,6 +119,7 @@ int main()
    
   ArgControleur * argControleur = new ArgControleur();
   argControleur->eventBox= &balEvenements;
+  argControleur->gestionnaireLog=&gestionnaireLog;
   
   InfoThread remplirCarton;
   remplirCarton.id =remplir_carton;
@@ -166,6 +166,10 @@ int main()
   infoSend->netmb_ptr = &balMessages;
   infoSend->socket_ptr = new int(0);
   pthread_create (&serveur_envoi, NULL, (void *) thread_netsend, (void *) infoSend);
+
+
+
+
   pthread_create (&gestion_series, NULL, (void *) gestion_series_function, (void *) NULL);
 
   cout<<"\t\t\tTout les thread ont été créés"<<endl;

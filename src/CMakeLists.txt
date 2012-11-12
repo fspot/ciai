@@ -9,7 +9,8 @@ find_package (Threads)
 set(SOURCES sockets/network.cpp
 	    sockets/parser.cpp
  	    sockets/netsend.cpp
-	    multithreadObjects/mutex.cpp)
+	    multithreadObjects/mutex.cpp
+	    log/log.cpp)
 
 add_executable(mothertask mothertask.cpp ${SOURCES})
 target_link_libraries (mothertask ${CMAKE_THREAD_LIBS_INIT})
