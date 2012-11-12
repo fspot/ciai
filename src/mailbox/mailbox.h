@@ -34,7 +34,7 @@ public:
 	//	à utiliser précautionneusement.
 
 
-private:
+protected:
 	//methods
 
 
