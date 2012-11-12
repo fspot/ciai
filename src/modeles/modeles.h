@@ -90,6 +90,7 @@ struct Palette {
 
 struct Carton {
 	int id;
+	Lot *lot;
 	int nbrebut;
 	std::string netstr() {
 		std::stringstream ss;
@@ -111,7 +112,7 @@ typedef struct tInitRemplissageCarton{
   pthread_mutex_t* mutCartonPresent;
   sem_t* sem_fin_de_serie;
   bool* pCartonPresent;
-  tLot* lots;
+  Lot* lots;
   unsigned int nbLots;
   pthread_cond_t* cv;
   pthread_mutex_t mutCv;
