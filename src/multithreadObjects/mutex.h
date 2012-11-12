@@ -1,3 +1,6 @@
+#ifndef MUTEX_H
+#define MUTEX_H
+
 #include "pthread.h"
 
 class Mutex
@@ -40,3 +43,5 @@ pthread_mutex_t* Mutex::getMutex()
 {
 	return &mut;
 }
+
+#endif

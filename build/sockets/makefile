@@ -16,7 +16,7 @@ $(CIBLE) : $(OBJETS)
 	$(CC) -o $(CIBLE) $(CFLAGS) $(CHEMINSLIBS) $(OBJETS) $(LIBS)
 	@echo "DONE !"
 
-parser.o : $(DIR)parser.c $(DIR)parser.h $(H_MODELES)
+parser.o : $(DIR)parser.cpp $(DIR)parser.h $(H_MODELES)
 	@echo "Compiling $@..."
 	$(CC) -c $(CFLAGS) $(CHEMINSHEAD) $<
 
@@ -24,7 +24,7 @@ server.o : $(DIR)server.cpp $(MBDIR)mailbox.h
 	@echo "Compiling $@..."
 	$(CC) -c $(CFLAGS) $(CHEMINSHEAD) $<
 
-network.o : $(DIR)network.c $(DIR)network.h $(H_MODELES) $(MBDIR)mailbox.h
+network.o : $(DIR)network.cpp $(DIR)network.h $(H_MODELES) $(MBDIR)mailbox.h
 	@echo "Compiling $@..."
 	$(CC) -c $(CFLAGS) $(CHEMINSHEAD) $<
 
