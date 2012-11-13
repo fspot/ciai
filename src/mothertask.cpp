@@ -24,10 +24,6 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-type Nom ( liste de paramètres )
-
-{
-} //----- fin de Nom
 
 // Fonctions temporaires
 void * remplir_palette_function()
