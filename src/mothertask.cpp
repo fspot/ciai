@@ -77,9 +77,12 @@ int main()
 
 
   // Mutex
-  Mutex  sortieStdMutex; 
-  Mutex  finSerieMutex;
-  Mutex  pauseSerieMutex;
+  Mutex  sortieStdMutex;
+ 
+  sem_t  finSerieMutex;
+  sem_init(&finSerieMutex, 0, 0);
+  sem_t  pauseSerieMutex;
+  sem_init(&pauseSerieMutex, 0, 0);
   
 
   // Creation du gestionnaire de Log
@@ -197,7 +200,7 @@ int main()
   //Création du thread de gestion des séries
   ArgGestionSerie * gestionSerie = new ArgGestionSerie();
   gestionSerie->mtxPauseRequest=&pauseSerieMutex;
-  gestionSerie->mtxSerieEnCours=&finSerieMutex;
+  gestionSerie->finDeSerie=&finSerieMutex;
   gestionSerie->eventBox=&balEvenements;
   pthread_create (&gestion_series, NULL, (void *(*)(void *)) gestionserie_thread, (void *) gestionSerie);
 

@@ -2,16 +2,15 @@
 #include "../modeles/modeles.h"
 #include <iostream>
 
+#include <errno.h>
 
-
-void gestionserie_thread(void* params)
+void gestionserie_thread(void * params)
 {
-	ArgGestionSerie args = (ArgGestionSerie) *params;
+	ArgGestionSerie * args = (ArgGestionSerie*) params;
 	while(1)
 	{
-		std::cout<<"I love cats"<<std::endl;
 		sem_wait(args->finDeSerie);
-		if (sem_trywait(args->mtxPauseRequest) != EAGAIN)
+		if (sem_trywait(args->mtxPauseRequest) != -1 && errno == EAGAIN )
 			args->eventBox->Push(Event(PAUSE),0);
 
 		args->eventBox->Push(Event(REPRISEPAUSE),0);

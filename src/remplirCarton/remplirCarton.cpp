@@ -102,9 +102,7 @@ void* remplirCarton(void * index)
 {
 	init=(ArgRemplirCarton *)index;
 	serieCourante=0;
-        
-        init->finDeSerieMutex->lock();
-        cout<<"locked"<<endl;
+      
 	//lotCourant=&(init->lots[serieCourante]);	
 	//nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 	nbPiecesDsCarton=0;

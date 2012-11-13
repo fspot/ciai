@@ -24,7 +24,7 @@ struct ArgRemplirCarton{
   bool* pCartonPresent;
   Lot* lots;
   unsigned int nbLots;
-  Mutex * finDeSerieMutex;
+  sem_t * finDeSerieMutex;
   pthread_cond_t* cv;
   pthread_mutex_t* mutCv;
 };
