@@ -8,8 +8,8 @@
 
 
 struct ArgGestionSerie {
-	Mutex* mtxPauseRequest;
-	Mutex* mtxSerieEnCours;
+	sem_t* mtxPauseRequest;
+	sem_t* finDeSerie;
 	Mailbox<Event>* eventBox;
 };
 
