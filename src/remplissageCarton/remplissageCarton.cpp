@@ -10,7 +10,7 @@ using namespace std;
 #define TIME_MAX 10
 
 static time_t timeBegin;
-static tInitRemplissageCarton* init;
+static ArgRemplissageCarton* init;
 static Lot *lotCourant;
 static unsigned int nbCartonsRestant;
 static unsigned int nbPiecesDsRebut;
@@ -100,7 +100,7 @@ static void remplirCartonReel(int noSignal)
 
 void* remplirCarton(void * index)
 {
-	init=(tInitRemplissageCarton *)index;
+	init=(ArgRemplissageCarton *)index;
 	serieCourante=0;
 	lotCourant=&(init->lots[serieCourante]);	
 	nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;

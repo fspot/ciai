@@ -112,17 +112,5 @@ struct Piece {
 	int dim[3]; // en mm
 };
 
-typedef struct tInitRemplissageCarton{
-  Mailbox<Piece>* pBalPieces;
-  Mailbox<Carton>* pBalCartons;
-  Mailbox<Event>* pBalEvenements;
-  pthread_mutex_t* mutCartonPresent;
-  sem_t* sem_fin_de_serie;
-  bool* pCartonPresent;
-  Lot* lots;
-  unsigned int nbLots;
-  pthread_cond_t* cv;
-  pthread_mutex_t* mutCv;
-}tInitRemplissageCarton;
 
 #endif

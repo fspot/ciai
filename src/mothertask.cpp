@@ -7,20 +7,12 @@
 #include "sockets/netsend.h"
 #include "tacheImprimer/imprimer.h"
 #include "log/log.h"
+#include "remplissageCarton/remplissageCarton.h"
+
 
 using namespace std;
 
-void * remplir_carton_function()
-{
-  cout<<"\t\tTâche remplir carton lancée"<<endl;
-  pthread_exit(0);
-}
 
-void * imprimer_function()
-{
-  cout<<"\t\tTâche imprimer lancée"<<endl;
-  pthread_exit(0);
-} 
 void * remplir_palette_function()
 {
   cout<<"\t\tTâche remplir palette lancée"<<endl;
@@ -53,6 +45,7 @@ int main()
   Mailbox<Carton> balPalette;
   Mailbox<Palette> balStockage;
   Mailbox<Message> balMessages;
+  Mailbox<Piece> balPiece;
 
   cout<<"\tBoites  aux lettre créées"<<endl;
   // Initialisation mémoires partagées
@@ -90,16 +83,24 @@ int main()
   //pthread_cond_init(&condDP);
 
 
-
-
-
   pthread_mutex_t condRCM=PTHREAD_MUTEX_INITIALIZER,
     condIMPM=PTHREAD_MUTEX_INITIALIZER,
     condRPM=PTHREAD_MUTEX_INITIALIZER,
     condSPM=PTHREAD_MUTEX_INITIALIZER,
     condDPM=PTHREAD_MUTEX_INITIALIZER;
-  
-  pthread_create (&remplir_carton, NULL, (void *)&remplir_carton_function, NULL);
+
+
+
+  ArgRemplissageCarton * argRC = new ArgRemplissageCarton();
+  argRC->pBalPieces=&balPiece;
+  argRC->pBalCartons = &balImprimante;
+  argRC->pBalEvenements = &balEvenements;
+  argRC->mutCartonPresent=NULL;
+  argRC->pCartonPresent = new bool(true);
+  argRC->mutCv=&condRCM;
+  argRC->cv=&condRC;
+  argRC->nbLots=0;
+  pthread_create (&remplir_carton, NULL, (void *)&remplirCarton, argRC);
 
   // Création du thread imprimer
   ArgImprimer * argImprimer = new ArgImprimer();
