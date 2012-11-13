@@ -7,7 +7,7 @@
 #include <iostream>
 using namespace std;
 
-#define TIME_MAX 10
+#define TIME_MAX 5
 
 static time_t timeBegin;
 static tInitRemplissageCarton* init;
@@ -27,6 +27,7 @@ void wait()
 
 static void remplirCartonReel(int noSignal)
 {
+	alarm(0);
 	if(noSignal==SIGUSR1)
 	{
 		cout<<"heu1"<<endl;
@@ -91,11 +92,17 @@ static void remplirCartonReel(int noSignal)
 			}
 		}
 	}
-	else
+	else if(noSignal==SIGUSR2)
 	{
 		wait();
 	}
-	time(&timeBegin);
+	else
+	{
+		cout<<"heu8"<<endl;
+		init->pBalEvenements->Push(Event(ABSPIECE),1);
+		wait();
+	}
+	alarm(TIME_MAX);
 }
 
 void* remplirCarton(void * index)
@@ -109,17 +116,9 @@ void* remplirCarton(void * index)
 
 	signal(SIGUSR1,remplirCartonReel);
 	signal(SIGUSR2,remplirCartonReel);
+	signal(SIGALRM,remplirCartonReel);
 
-	time(&timeBegin);
+	alarm(TIME_MAX);
 
-	for(;;)
-	{
-		sleep(1);
-		if(difftime(time(NULL),timeBegin)>TIME_MAX)
-		{
-			cout<<"heu8"<<endl;
-			init->pBalEvenements->Push(Event(ABSPIECE),1);
-			wait();
-		}
-	}
+	for(;;){}
 }
