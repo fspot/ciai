@@ -10,11 +10,9 @@ void gestionSerie(void* params)
 	while(1)
 	{
 		args->mtxSerieEnCours->lock();
-		if (args->mtxPauseRequest->getMutex())
+		if (args->mtxPauseRequest->trylock())
 			args->eventBox->Push(Event(PAUSE));
 
-		args->mtxPauseRequest->lock();
-		args->mtxPauseRequest->unlock();
 		args->eventBox->Push(Event(REPRISEPAUSE));
 	}
 }
