@@ -1,25 +1,21 @@
+/*************************************************************************
+                           Log  -  description
+                             -------------------
+*************************************************************************/
+
+//---------- Réalisation de la classe Log -------
+
+//---------------------------------------------------------------- INCLUDE
+
+//-------------------------------------------------------- Include système
+using namespace std;
+//------------------------------------------------------ Include personnel
 #include "log.h"
 
+//------------------------------------------------------------- Constantes
 
+//----------------------------------------------------------------- PUBLIC
 
-Log::Log(Mutex &mtxStandardOutput):
-file(FILENAME, ios::app),
-mutexStd(mtxStandardOutput)
-{
-	if (!file)
-	{
-		cout << "[WARNING] Log - Could not open file " << FILENAME << "." << endl;
-	}
-	else
-	{
-		file << "* * * Ouverture de session - "<< dateStr() << " * * *" << endl;
-	}
-}
-
-
-Log::~Log()
-{
-}
 
 void Log::Write(string text, logType type, bool stdOutput)
 {
@@ -50,3 +46,29 @@ string Log::dateStr()
 	str.erase(str.end()-1,str.end()); //remove \n inserted by ctime
 	return str;
 }
+//----------------------------------------------------- Méthodes publiques
+
+//------------------------------------------------- Surcharge d'opérateurs
+
+//-------------------------------------------- Constructeurs - destructeur
+
+Log::Log(Mutex &mtxStandardOutput):
+file(FILENAME, ios::app),
+mutexStd(mtxStandardOutput)
+{
+	if (!file)
+	{
+		cout << "[WARNING] Log - Could not open file " << FILENAME << "." << endl;
+	}
+	else
+	{
+		file << "* * * Ouverture de session - "<< dateStr() << " * * *" << endl;
+	}
+}
+
+
+Log::~Log()
+{
+}
+
+
