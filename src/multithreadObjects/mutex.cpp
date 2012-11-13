@@ -18,7 +18,7 @@ void Mutex::lock()
 	pthread_mutex_lock(&mut);
 }
 
-int Mutex::trylock()
+bool Mutex::trylock()
 {
 	return (pthread_mutex_trylock(&mut) != EBUSY);
 }

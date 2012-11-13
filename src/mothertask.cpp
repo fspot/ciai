@@ -18,6 +18,7 @@
 #include "imprimer/imprimer.h"
 #include "log/log.h"
 #include "remplirCarton/remplirCarton.h"
+#include "gestionserie/gestionserie.h"
 //------------------------------------------------------ Name spaces
 using namespace std;
 
@@ -76,7 +77,9 @@ int main()
 
 
   // Mutex
-  Mutex  sortieStdMutex;
+  Mutex  sortieStdMutex; 
+  Mutex  finSerieMutex;
+  Mutex  pauseSerieMutex;
   
 
   // Creation du gestionnaire de Log
@@ -111,6 +114,7 @@ int main()
   argRC->mutCv=&condRCM;
   argRC->cv=&condRC;
   argRC->nbLots=0;
+  argRC->finDeSerieMutex=&finSerieMutex;
   pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, argRC);
 
 
@@ -191,9 +195,12 @@ int main()
 
 
   //Création du thread de gestion des séries
-  pthread_create (&gestion_series, NULL, (void *(*)(void *)) gestion_series_function, (void *) NULL);
+  ArgGestionSerie * gestionSerie = new ArgGestionSerie();
+  gestionSerie->mtxPauseRequest=&pauseSerieMutex;
+  gestionSerie->mtxSerieEnCours=&finSerieMutex;
+  gestionSerie->eventBox=&balEvenements;
+  pthread_create (&gestion_series, NULL, (void *(*)(void *)) gestionserie_thread, (void *) gestionSerie);
 
-  cout<<"A"<<endl;
 
   cout<<"Phase moteur"<<endl;
   int a;
