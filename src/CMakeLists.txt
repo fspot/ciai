@@ -11,7 +11,7 @@ set(SOURCES sockets/network.cpp
  	    sockets/netsend.cpp
 	    multithreadObjects/mutex.cpp
 	    log/log.cpp
-	    remplissageCarton/remplissageCarton.cpp)
+	    remplirCarton/remplirCarton.cpp)
 
 add_executable(mothertask mothertask.cpp ${SOURCES})
 target_link_libraries (mothertask ${CMAKE_THREAD_LIBS_INIT})

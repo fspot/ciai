@@ -17,7 +17,7 @@
 #include "sockets/netsend.h"
 #include "tacheImprimer/imprimer.h"
 #include "log/log.h"
-#include "remplissageCarton/remplissageCarton.h"
+#include "remplirCarton/remplirCarton.h"
 //------------------------------------------------------ Name spaces
 using namespace std;
 
@@ -101,8 +101,8 @@ int main()
 
   //Creation des threads
 
-  // Création du thread remplissage carton
-  ArgRemplissageCarton * argRC = new ArgRemplissageCarton();
+  // Création du thread remplir carton
+  ArgRemplirCarton * argRC = new ArgRemplirCarton();
   argRC->pBalPieces=&balPiece;
   argRC->pBalCartons = &balImprimante;
   argRC->pBalEvenements = &balEvenements;
@@ -111,7 +111,7 @@ int main()
   argRC->mutCv=&condRCM;
   argRC->cv=&condRC;
   argRC->nbLots=0;
-  pthread_create (&remplir_carton, NULL, (void *)&remplirCarton, argRC);
+  pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, argRC);
 
 
 
@@ -122,17 +122,18 @@ int main()
   argImprimer->balPalette=&balPalette;
   argImprimer->varCond=&condIMP;
   argImprimer->mutex=&condIMPM;
-  pthread_create (&imprimer, NULL, (void *) &imprimer_thread, (void *)argImprimer);
+  pthread_create (&imprimer, NULL, (void *(*)(void *)) &imprimer_thread, (void *)argImprimer);
+
 
 
   // Création du thread remplir palette
-  pthread_create (&remplir_palette, NULL, (void *) &remplir_palette_function, NULL);
+  pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplir_palette_function, NULL);
 
   //Creation du thread stocker palette
-  pthread_create (&stocker_palette, NULL, (void *) &stocker_palette_function, NULL);
+  pthread_create (&stocker_palette, NULL, (void *(*)(void *)) &stocker_palette_function, NULL);
 
   //Création du thread destocker palette
-  pthread_create (&destocker_palette, NULL, (void *) destocker_palette_function, NULL);
+  pthread_create (&destocker_palette, NULL, (void *(*)(void *)) destocker_palette_function, NULL);
   
   //Création du thread controleur
    
@@ -171,28 +172,28 @@ int main()
   destockerPalette.mx=&condDPM;
   argControleur->threads[DESTOCKERPALETTE]=destockerPalette;
 
-  pthread_create (&controleur, NULL, (void *) controleur_thread, (void *) argControleur);
+  pthread_create (&controleur, NULL, (void *(*)(void *)) controleur_thread, (void *) argControleur);
 
 
   // Création du thread de reception(serveur)
   NetworkInitInfo * info = new NetworkInitInfo();
   info->netmb_ptr = &balMessages;
   info->socket_ptr = new int(0);
-  pthread_create (&serveur_reception, NULL, (void *) thread_network, (void *)info);
+  pthread_create (&serveur_reception, NULL, (void *(*)(void *)) thread_network, (void *)info);
 
 
   // Création du thread d'envoi(server)
   NetSendInitInfo * infoSend = new NetSendInitInfo();
   infoSend->netmb_ptr = &balMessages;
   infoSend->socket_ptr = new int(0);
-  pthread_create (&serveur_envoi, NULL, (void *) thread_netsend, (void *) infoSend);
+  pthread_create (&serveur_envoi, NULL, (void *(*)(void *)) thread_netsend, (void *) infoSend);
 
 
 
   //Création du thread de gestion des séries
-  pthread_create (&gestion_series, NULL, (void *) gestion_series_function, (void *) NULL);
+  pthread_create (&gestion_series, NULL, (void *(*)(void *)) gestion_series_function, (void *) NULL);
 
-
+  cout<<"A"<<endl;
 
   cout<<"Phase moteur"<<endl;
   int a;
@@ -211,7 +212,21 @@ int main()
   pthread_join(remplir_palette, NULL);
   pthread_join(imprimer, NULL);
   pthread_join(remplir_carton, NULL);
-  cout<<"\tThread détruits"<<endl;
+
+
+  delete infoSend->socket_ptr;
+
+  delete infoSend;
+
+  delete info;
+
+  delete argControleur;
+
+  delete argImprimer;
+
+  delete argRC->pCartonPresent;
+  
+  delete argRC;
 
   return 0;
   
