@@ -22,6 +22,9 @@ struct ArgStock {
 	Mailbox<Palette>* balStockage;
 	Mailbox<Event>* balEvenements;
 	sem_t* reprise; // reprise après erreur
+	SharedMemoryLots *shMemLots;
+	SharedMemoryStock *stock;
+	sem_t *debutSyncro;
 	// sem_t* sem_fin_de_serie;
 	// bool* pCartonPresent;
 	// Lot* lots;
