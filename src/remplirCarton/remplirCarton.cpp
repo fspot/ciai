@@ -4,10 +4,9 @@
 #include "remplirCarton.h"
 #include "../mailbox/mailbox.h"
 #include "../modeles/modeles.h"
+#include "utilTest.h"
 #include <iostream>
 using namespace std;
-
-#define TIME_MAX 10
 
 static time_t timeBegin;
 static ArgRemplirCarton* init;
@@ -18,7 +17,7 @@ static unsigned int nbPiecesDsCarton;
 static unsigned int idCarton;
 static unsigned int serieCourante;
 
-void wait()
+static void wait()
 {
 	pthread_mutex_lock(init->mutCv);
 	pthread_cond_wait(init->cv,init->mutCv);
@@ -27,15 +26,14 @@ void wait()
 
 static void remplirCartonReel(int noSignal)
 {
+	alarm(0);
 	if(noSignal==SIGUSR1)
 	{
-		cout<<"heu1"<<endl;
 		pthread_mutex_lock(init->mutCartonPresent);
 		bool retour=(*(init->pCartonPresent));
 		pthread_mutex_unlock(init->mutCartonPresent);
 		if(!retour)
 		{
-			cout<<"heu2"<<endl;
 			init->pBalEvenements->Push(Event(ABSCARTON),1);
 			wait();
 		}
@@ -56,7 +54,6 @@ static void remplirCartonReel(int noSignal)
 
 		if(nbPiecesDsRebut>lotCourant->rebut)
 		{
-			cout<<"heu3"<<endl;
 			init->pBalEvenements->Push(Event(TAUXERR),1);
 			wait();
 		}
@@ -65,24 +62,20 @@ static void remplirCartonReel(int noSignal)
 			nbPiecesDsCarton++;
 			if(nbPiecesDsCarton>=lotCourant->pieces)
 			{
-				cout<<"heu4"<<endl;
 				nbPiecesDsCarton=0;
 				Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
 				init->pBalCartons->Push(carton,1);
 				nbCartonsRestant--;
 				if(nbCartonsRestant<=0)
 				{
-					cout<<"heu5"<<endl;
 					serieCourante++;
 					if((serieCourante+1)>init->nbLots)
 					{
-						cout<<"heu6"<<endl;
 						init->pBalEvenements->Push(Event(FIN),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
 						wait();
 					}
 					else
 					{
-						cout<<"heu7"<<endl;
 						lotCourant=&(init->lots[serieCourante]);
 						nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 						sem_post(init->sem_fin_de_serie);
@@ -91,11 +84,23 @@ static void remplirCartonReel(int noSignal)
 			}
 		}
 	}
+<<<<<<< HEAD:src/remplissageCarton/remplissageCarton.cpp
+	alarm(TIME_MAX);
+}
+
+static void alarm(int noSignal)
+{
+	alarm(0);
+	init->pBalEvenements->Push(Event(ABSPIECE),1);
+	wait();
+	alarm(TIME_MAX);
+=======
 	else
 	{
 		cout<<"Merde"<<endl;
 	}
 	time(&timeBegin);
+>>>>>>> a8d7c07b181fd06d3bb9b7399adcdeb59b950fe2:src/remplirCarton/remplirCarton.cpp
 }
 
 void* remplirCarton(void * index)
@@ -109,10 +114,14 @@ void* remplirCarton(void * index)
 	idCarton=0;
 
 	signal(SIGUSR1,remplirCartonReel);
-	signal(SIGUSR2,remplirCartonReel);
+	signal(SIGALRM,alarm);
 
-	time(&timeBegin);
+	alarm(TIME_MAX);
 
+<<<<<<< HEAD:src/remplissageCarton/remplissageCarton.cpp
+	for(;;){}
+}
+=======
 
 	for(;;)
 	{
@@ -125,3 +134,4 @@ void* remplirCarton(void * index)
 		}
 	}
 }
+>>>>>>> a8d7c07b181fd06d3bb9b7399adcdeb59b950fe2:src/remplirCarton/remplirCarton.cpp

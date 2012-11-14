@@ -45,8 +45,12 @@ enum EventType
     ERRCOMMANDE,
     REPRISEPAUSE,
     ABSPIECE,
+<<<<<<< HEAD
     FIN,
     FINERREUR
+=======
+    FIN//temporaire
+>>>>>>> f506a5e992e1cfc979a6d52a831e10f806585b78
   } ;
 
 
@@ -65,7 +69,6 @@ struct Message {
 
 struct ListeLots {
   std::vector<Lot> lots;
-  int cur, tot;
 };
 
 struct Commande {
@@ -117,7 +120,6 @@ struct Piece {
 	int dim[3]; // en mm
   bool fin; // vaut true si fin de la tâche, false sinon.
 };
-
 
 
 
