@@ -1,7 +1,7 @@
 #include <time.h>
 #include <signal.h>
 #include <unistd.h>
-#include "remplissageCarton.h"
+#include "remplirCarton.h"
 #include "../mailbox/mailbox.h"
 #include "../modeles/modeles.h"
 #include <iostream>
@@ -10,7 +10,7 @@ using namespace std;
 #define TIME_MAX 10
 
 static time_t timeBegin;
-static ArgRemplissageCarton* init;
+static ArgRemplirCarton* init;
 static Lot *lotCourant;
 static unsigned int nbCartonsRestant;
 static unsigned int nbPiecesDsRebut;
@@ -93,17 +93,18 @@ static void remplirCartonReel(int noSignal)
 	}
 	else
 	{
-		wait();
+		cout<<"Merde"<<endl;
 	}
 	time(&timeBegin);
 }
 
 void* remplirCarton(void * index)
 {
-	init=(ArgRemplissageCarton *)index;
+	init=(ArgRemplirCarton *)index;
 	serieCourante=0;
-	lotCourant=&(init->lots[serieCourante]);	
-	nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
+      
+	//lotCourant=&(init->lots[serieCourante]);	
+	//nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 	nbPiecesDsCarton=0;
 	idCarton=0;
 
@@ -111,6 +112,7 @@ void* remplirCarton(void * index)
 	signal(SIGUSR2,remplirCartonReel);
 
 	time(&timeBegin);
+
 
 	for(;;)
 	{

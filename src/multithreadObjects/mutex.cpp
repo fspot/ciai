@@ -1,5 +1,6 @@
 
 #include "mutex.h"
+#include <errno.h>	//def EBUSY
 
 Mutex::Mutex()
 {
@@ -15,6 +16,11 @@ Mutex::~Mutex()
 void Mutex::lock()
 {
 	pthread_mutex_lock(&mut);
+}
+
+bool Mutex::trylock()
+{
+	return (pthread_mutex_trylock(&mut) != EBUSY);
 }
 
 void Mutex::unlock()

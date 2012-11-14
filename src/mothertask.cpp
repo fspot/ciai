@@ -1,18 +1,33 @@
-#include<iostream>
+/*************************************************************************
+                           mothertask.cpp  -  Tâche mère
+                             -------------------
+*************************************************************************/
+
+//---------- Réalisation de la tâche mère ---
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//-------------------------------------------------------- Include système
+#include <iostream>
+//------------------------------------------------------ Include personnel
 #include "modeles/modeles.h"
 #include "multithreadObjects/sharedMemory.h"
 #include "mailbox/mailbox.h"
 #include "controleur/controleur.h"
 #include "sockets/network.h"
 #include "sockets/netsend.h"
-#include "tacheImprimer/imprimer.h"
+#include "imprimer/imprimer.h"
 #include "log/log.h"
-#include "remplissageCarton/remplissageCarton.h"
-
-
+#include "remplirCarton/remplirCarton.h"
+#include "gestionserie/gestionserie.h"
+#include <signal.h>
+//------------------------------------------------------ Name spaces
 using namespace std;
 
 
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
+
+// Fonctions temporaires
 void * remplir_palette_function()
 {
   cout<<"\t\tTâche remplir palette lancée"<<endl;
@@ -35,10 +50,19 @@ void * gestion_series_function()
   pthread_exit(0);
 }
 
+// Tâche mère
 
 int main()
+// Algorithme :
+// Allocation des ressources, initialisation et lancement des autres threads 
+
 {
-  cout<<"Phase d'initialisation"<<endl;
+
+  struct sigaction actions;
+  actions.sa_flags = 0;
+  sigaction(SIGUSR1,&actions,NULL);
+  sigaction(SIGUSR2,&actions,NULL);
+ 
   // Initialisation des boites aux lettres
   Mailbox<Event>  balEvenements;
   Mailbox<Carton> balImprimante;
@@ -47,9 +71,7 @@ int main()
   Mailbox<Message> balMessages;
   Mailbox<Piece> balPiece;
 
-  cout<<"\tBoites  aux lettre créées"<<endl;
   // Initialisation mémoires partagées
-  
   SharedMemory series;
   series.mutex=PTHREAD_MUTEX_INITIALIZER;
   pthread_mutex_init(&series.mutex,NULL);
@@ -60,28 +82,27 @@ int main()
   pthread_mutex_init(&infos.mutex,NULL);
 
 
-  cout<<"\tMémoires partagées créeés"<<endl;
   // Mutex
   Mutex  sortieStdMutex;
+ 
+  sem_t  finSerieMutex;
+  sem_init(&finSerieMutex, 0, 0);
+  sem_t  pauseSerieMutex;
+  sem_init(&pauseSerieMutex, 0, 0);
   
 
   // Creation du gestionnaire de Log
-  cout<<"\tGestionnaire de Log créé"<<endl;
   Log gestionnaireLog(sortieStdMutex);
 
-  //Creation des threads
+
+  // Allocation des mutex et variables conditionnelles
   pthread_t remplir_carton, imprimer, remplir_palette,stocker_palette,destocker_palette,controleur,serveur_reception,serveur_envoi,gestion_series;
   pthread_cond_t condRC=PTHREAD_COND_INITIALIZER,
     condIMP=PTHREAD_COND_INITIALIZER,
     condRP=PTHREAD_COND_INITIALIZER,
     condSP=PTHREAD_COND_INITIALIZER,
     condDP=PTHREAD_COND_INITIALIZER;
-  //pthread_cond_init(&condRC); 
-  //pthread_cond_init(&condIMP);
-  //pthread_cond_init(&condRP);
-  //pthread_cond_init(&condSP);
-  //pthread_cond_init(&condDP);
-
+ 
 
   pthread_mutex_t condRCM=PTHREAD_MUTEX_INITIALIZER,
     condIMPM=PTHREAD_MUTEX_INITIALIZER,
@@ -90,8 +111,10 @@ int main()
     condDPM=PTHREAD_MUTEX_INITIALIZER;
 
 
+  //Creation des threads
 
-  ArgRemplissageCarton * argRC = new ArgRemplissageCarton();
+  // Création du thread remplir carton
+  ArgRemplirCarton * argRC = new ArgRemplirCarton();
   argRC->pBalPieces=&balPiece;
   argRC->pBalCartons = &balImprimante;
   argRC->pBalEvenements = &balEvenements;
@@ -100,7 +123,10 @@ int main()
   argRC->mutCv=&condRCM;
   argRC->cv=&condRC;
   argRC->nbLots=0;
-  pthread_create (&remplir_carton, NULL, (void *)&remplirCarton, argRC);
+  argRC->finDeSerieMutex=&finSerieMutex;
+  pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, argRC);
+
+
 
   // Création du thread imprimer
   ArgImprimer * argImprimer = new ArgImprimer();
@@ -109,12 +135,18 @@ int main()
   argImprimer->balPalette=&balPalette;
   argImprimer->varCond=&condIMP;
   argImprimer->mutex=&condIMPM;
-  pthread_create (&imprimer, NULL, (void *) &imprimer_thread, (void *)argImprimer);
+  pthread_create (&imprimer, NULL, (void *(*)(void *)) &imprimer_thread, (void *)argImprimer);
 
 
-  pthread_create (&remplir_palette, NULL, (void *) &remplir_palette_function, NULL);
-  pthread_create (&stocker_palette, NULL, (void *) &stocker_palette_function, NULL);
-  pthread_create (&destocker_palette, NULL, (void *) destocker_palette_function, NULL);
+
+  // Création du thread remplir palette
+  pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplir_palette_function, NULL);
+
+  //Creation du thread stocker palette
+  pthread_create (&stocker_palette, NULL, (void *(*)(void *)) &stocker_palette_function, NULL);
+
+  //Création du thread destocker palette
+  pthread_create (&destocker_palette, NULL, (void *(*)(void *)) destocker_palette_function, NULL);
   
   //Création du thread controleur
    
@@ -153,27 +185,30 @@ int main()
   destockerPalette.mx=&condDPM;
   argControleur->threads[DESTOCKERPALETTE]=destockerPalette;
 
+  pthread_create (&controleur, NULL, (void *(*)(void *)) controleur_thread, (void *) argControleur);
 
-  pthread_create (&controleur, NULL, (void *) controleur_thread, (void *) argControleur);
 
-
+  // Création du thread de reception(serveur)
   NetworkInitInfo * info = new NetworkInitInfo();
   info->netmb_ptr = &balMessages;
   info->socket_ptr = new int(0);
-  pthread_create (&serveur_reception, NULL, (void *) thread_network, (void *)info);
+  pthread_create (&serveur_reception, NULL, (void *(*)(void *)) thread_network, (void *)info);
 
 
+  // Création du thread d'envoi(server)
   NetSendInitInfo * infoSend = new NetSendInitInfo();
   infoSend->netmb_ptr = &balMessages;
   infoSend->socket_ptr = new int(0);
-  pthread_create (&serveur_envoi, NULL, (void *) thread_netsend, (void *) infoSend);
+  pthread_create (&serveur_envoi, NULL, (void *(*)(void *)) thread_netsend, (void *) infoSend);
 
 
 
-
-  pthread_create (&gestion_series, NULL, (void *) gestion_series_function, (void *) NULL);
-
-  cout<<"\t\t\tTout les thread ont été créés"<<endl;
+  //Création du thread de gestion des séries
+  ArgGestionSerie * gestionSerie = new ArgGestionSerie();
+  gestionSerie->mtxPauseRequest=&pauseSerieMutex;
+  gestionSerie->finDeSerie=&finSerieMutex;
+  gestionSerie->eventBox=&balEvenements;
+  pthread_create (&gestion_series, NULL, (void *(*)(void *)) gestionserie_thread, (void *) gestionSerie);
 
 
   cout<<"Phase moteur"<<endl;
@@ -181,6 +216,9 @@ int main()
   cin>>a;
   cout<<endl<<endl<<endl;
   cout<<"Phase de destruction"<<endl;
+
+
+  cout<<"Envoyé :"<<pthread_kill(controleur,SIGUSR2)<<endl;
 
 
   pthread_join(gestion_series, NULL);
@@ -193,16 +231,21 @@ int main()
   pthread_join(remplir_palette, NULL);
   pthread_join(imprimer, NULL);
   pthread_join(remplir_carton, NULL);
-  cout<<"\tThread détruits"<<endl;
 
 
-  cout<<"\tGestionnaire de Log detruit"<<endl;
+  delete infoSend->socket_ptr;
 
-  cout<<"\tMémoires partagées detruites"<<endl;
+  delete infoSend;
 
-  cout<<"\tBoites  aux lettre détruites"<<endl;
+  delete info;
 
-  cout<<"\tFin de l'application"<<endl;
+  delete argControleur;
+
+  delete argImprimer;
+
+  delete argRC->pCartonPresent;
+  
+  delete argRC;
 
   return 0;
   
