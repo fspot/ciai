@@ -84,6 +84,7 @@ int main()
 
   // Mutex
   Mutex  sortieStdMutex;
+  Mutex  cartonPresent;
 
   sem_t  debutSyncro;
   sem_init(&debutSyncro, 0, 0);
@@ -134,7 +135,7 @@ int main()
   argRC->pBalPieces=&balPiece;
   argRC->pBalCartons = &balImprimante;
   argRC->pBalEvenements = &balEvenements;
-  argRC->mutCartonPresent=NULL;
+  argRC->mutCartonPresent=&cartonPresent;
   argRC->pCartonPresent = new bool(true);
   argRC->mutCv=&condRCM;
   argRC->cv=&condRC;
@@ -168,7 +169,7 @@ int main()
   argStock.balEvenements = &balEvenements;
   // argStock.reprise = ?; // reprise après erreur
   argStock.debutSyncro = &debutSyncro;
-  argStock.shMemLots = &shMemLots;
+  argStock.shMemLots = &lots;
   argStock.cv = &condSP;
   argStock.mutCv = &condSPM;
   argStock.stock = &stock;

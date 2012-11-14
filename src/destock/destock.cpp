@@ -4,7 +4,7 @@
 
 #include "pthread.h"
 
-#include "stock.h"
+#include "destock.h"
 #include "../mailbox/mailbox.h"
 #include "../modeles/modeles.h"
 
