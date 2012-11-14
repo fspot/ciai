@@ -143,16 +143,17 @@ int controleur_thread(void * argsUnconverted)
 	  pthread_exit(0);
           break;
 	case FINERREUR:
+	   cout<<"J'aime manger"<<endl;
            Carton c;
 	   c.fin=true;
-	   balImprimante->Push(c,0);
-  	   balPalette->Push(c,0);
+	   args->balImprimante->Push(c,0);
+  	   args->balPalette->Push(c,0);
  	   Palette p;
 	   p.fin=true;
-           balStockage>Push(p,0);
+           args->balStockage->Push(p,0);
 	   Piece pe;
 	   pe.fin=true;
-           balPiece>Push(pe,0);
+           args->balPiece->Push(pe,0);
 	  break;
 	default:
 	    ecriture_log_controleur(args->gestionnaireLog,"Erreur non gérée",ERROR);

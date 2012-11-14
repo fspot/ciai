@@ -56,11 +56,6 @@ int main()
 // Allocation des ressources, initialisation et lancement des autres threads 
 
 {
-
-  struct sigaction actions;
-  actions.sa_flags = 0;
-  sigaction(SIGUSR1,&actions,NULL);
-  sigaction(SIGUSR2,&actions,NULL);
  
   // Initialisation des boites aux lettres
   Mailbox<Event>  balEvenements;
@@ -81,7 +76,10 @@ int main()
 
   // Mutex
   Mutex  sortieStdMutex;
- 
+
+  sem_t  debutSyncro;
+  sem_init(&debutSyncro, 0, 0);
+
   sem_t  finSerieMutex;
   sem_init(&finSerieMutex, 0, 0);
   sem_t  pauseSerieMutex;
@@ -219,6 +217,8 @@ int main()
   cin>>a;
   cout<<endl<<endl<<endl;
   cout<<"Phase de destruction"<<endl;
+  Event e(FINERREUR);
+  balEvenements.Push(e,0);
 
 
   pthread_join(gestion_series, NULL);
