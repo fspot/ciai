@@ -151,6 +151,10 @@ int main()
   ArgControleur * argControleur = new ArgControleur();
   argControleur->eventBox= &balEvenements;
   argControleur->gestionnaireLog=&gestionnaireLog;
+  argControleur->balImprimante=&balImprimante;
+  argControleur->balPalette=&balPalette;
+  argControleur->balStockage=&balStockage;
+  argControleur->balPiece=&balPiece;
   
   InfoThread remplirCarton;
   remplirCarton.id =remplir_carton;

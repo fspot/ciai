@@ -27,6 +27,10 @@ struct InfoThread
 
 struct ArgControleur
 {
+  Mailbox<Carton> * balImprimante;
+  Mailbox<Carton>  * balPalette;
+  Mailbox<Palette> *balStockage;
+  Mailbox<Piece> * balPiece;
   Mailbox<Event> * eventBox;
   Mailbox<Message> * msgBox;
   Log * gestionnaireLog;

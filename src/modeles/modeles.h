@@ -45,7 +45,8 @@ enum EventType
     ERRCOMMANDE,
     REPRISEPAUSE,
     ABSPIECE,
-    FIN
+    FIN,
+    FINERREUR
   } ;
 
 

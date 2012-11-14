@@ -30,7 +30,7 @@ void fermeture_clapet()
 void ecriture_log_controleur(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
-  unGestionnaire->Write(msg,unType,true);
+    unGestionnaire->Write(msg,unType,true);
   #else
     unGestionnaire->Write(msg,unType,false);
   #endif 
@@ -142,6 +142,18 @@ int controleur_thread(void * argsUnconverted)
 	case FIN:
 	  pthread_exit(0);
           break;
+	case FINERREUR:
+           Carton c;
+	   c.fin=true;
+	   balImprimante->Push(c,0);
+  	   balPalette->Push(c,0);
+ 	   Palette p;
+	   p.fin=true;
+           balStockage>Push(p,0);
+	   Piece pe;
+	   pe.fin=true;
+           balPiece>Push(pe,0);
+	  break;
 	default:
 	    ecriture_log_controleur(args->gestionnaireLog,"Erreur non gérée",ERROR);
 	break;
