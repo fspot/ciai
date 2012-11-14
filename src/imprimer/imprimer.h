@@ -3,16 +3,17 @@
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
 
-
 using namespace std;
 
 struct ArgImprimer
 {
-	Mailbox<Event> * eventBox;
-	Mailbox<Carton> * balImprimante;
-	Mailbox<Carton> * balPalette;
-	pthread_cond_t * varCond;
-	pthread_mutex_t * mutex;
+  Mailbox<Event> * eventBox;
+  Mailbox<Carton> * balImprimante;
+  Mailbox<Carton> * balPalette;
+  pthread_cond_t * varCond;
+  pthread_mutex_t * mutex;
+  SharedMemoryLots * Lots;
+
 };
 
 int imprimer_thread(void * argsUnconverted)
