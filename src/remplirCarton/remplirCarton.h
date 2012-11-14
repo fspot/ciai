@@ -29,6 +29,7 @@ struct ArgRemplirCarton{
   sem_t * finDeSerieMutex;
   pthread_cond_t* cv;
   pthread_mutex_t* mutCv;
+  sem_t * debutSyncro;
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques

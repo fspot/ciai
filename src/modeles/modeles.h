@@ -1,9 +1,16 @@
 #ifndef MODELES_H
 #define MODELES_H
 
+// includes C++
+#include <map>
 #include <vector>
 #include <string>
 #include <sstream>
+
+// includes C
+#include <pthread.h>
+
+// includes perso
 #include "../mailbox/mailbox.h"
 
 
@@ -23,31 +30,32 @@ struct Lot {
 
 
 enum Task
-  {
-    REMPLIRCARTON,
-    REMPLIRPALETTE,
-    IMPRIMER,
-    STOCKERPALETTE,
-    DESTOCKERPALETTE
-  };
+{
+  REMPLIRCARTON,
+  REMPLIRPALETTE,
+  IMPRIMER,
+  STOCKERPALETTE,
+  DESTOCKERPALETTE
+};
 
 enum EventType            
-  {
-    ABSCARTON,      
-    PANNEIMPRIM ,     
-    ABSPALETTE,         
-    TAUXERR,
-    FILEATTPLEINE,      
-    ARTURG,
-    REPRISEERREUR,
-    PAUSE,
-    ERREMBALAGES,
-    ERRCOMMANDE,
-    REPRISEPAUSE,
-    ABSPIECE,
-    FIN,
-    FINERREUR
-  } ;
+
+{
+  ABSCARTON,      
+  PANNEIMPRIM ,     
+  ABSPALETTE,         
+  TAUXERR,
+  FILEATTPLEINE,      
+  ARTURG,
+  REPRISEERREUR,
+  PAUSE,
+  ERREMBALAGES,
+  ERRCOMMANDE,
+  REPRISEPAUSE,
+  ABSPIECE,
+  FIN,
+  FINERREUR
+} ;
 
 
 struct Event {
@@ -65,6 +73,8 @@ struct Message {
 
 struct ListeLots {
   std::vector<Lot> lots;
+  int tot;
+  int cur;
 };
 
 struct Commande {
@@ -118,14 +128,19 @@ struct Piece {
 };
 
 
-
-#include <pthread.h>
+// SHARED MEMORY :
 
 struct SharedMemoryLots
 {
 	Mutex mutex;
 	ListeLots * content;	
+};
 
-} ;
+struct SharedMemoryStock // utilisé par stock et destock :
+{
+  Mutex mutex;
+  std::map<std::string, int> stock; // associe un nom de lot à un compteur (nb de palettes)
+};
+
 
 #endif
