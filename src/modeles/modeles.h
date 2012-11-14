@@ -111,4 +111,19 @@ struct Piece {
 	int dim[3]; // en mm
 };
 
+<<<<<<< HEAD
+=======
+
+
+
+#include <pthread.h>
+
+struct SharedMemoryLots
+{
+	Mutex mutex;
+	ListeLots * content;	
+
+} ;
+
+>>>>>>> 5240bafcf610c6b26347d45d0d2d9da285b6bdf7
 #endif

@@ -10,7 +10,6 @@
 #include <iostream>
 //------------------------------------------------------ Include personnel
 #include "modeles/modeles.h"
-#include "multithreadObjects/sharedMemory.h"
 #include "mailbox/mailbox.h"
 #include "controleur/controleur.h"
 #include "sockets/network.h"
@@ -72,14 +71,10 @@ int main()
   Mailbox<Piece> balPiece;
 
   // Initialisation mémoires partagées
-  SharedMemory series;
-  series.mutex=PTHREAD_MUTEX_INITIALIZER;
-  pthread_mutex_init(&series.mutex,NULL);
+  SharedMemoryLots lots;
+  ListeLots listeLots;
+  lots.content=&listeLots;
 
-
-  SharedMemory infos;
-  infos.mutex=PTHREAD_MUTEX_INITIALIZER;
-  pthread_mutex_init(&infos.mutex,NULL);
 
 
   // Mutex
