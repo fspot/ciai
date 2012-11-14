@@ -6,13 +6,13 @@ typedef struct tInitRemplissageCarton{
   Mailbox<Piece>* pBalPieces;
   Mailbox<Carton>* pBalCartons;
   Mailbox<Event>* pBalEvenements;
-  pthread_mutex_t* mutCartonPresent;
   sem_t* sem_fin_de_serie;
+  pthread_mutex_t* mutCartonPresent;
   bool* pCartonPresent;
   pthread_cond_t* cv;
   pthread_mutex_t* mutCv;
   pthread_mutex_t mutBegin;
-  TsharedMemory* lots;
+  SharedMemoryLots* lots;
 }tInitRemplissageCarton;
 
 #ifndef REMPLISSAGE_CARTON_H
