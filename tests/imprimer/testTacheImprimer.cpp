@@ -7,6 +7,33 @@
 
 using namespace std;
 
+void depotCartonBalImprimante(ArgImprimer * args, int numCarton) {
+	Carton carton;
+	carton.id = numCarton;
+	carton.lot = NULL;
+	carton.nbrebut = 0;
+	
+	args->balImprimante->Push(carton, 1);	
+}
+
+void retraitCartonBalPalette(ArgImprimer * args) {
+	Carton carton;
+	carton = args->balPalette->Pull();
+} 
+
+void simuFonctionnementNormal(ArgImprimer * args) {
+	for (int i=1; i<15; i++) {
+		depotCartonBalImprimante( args, i );
+		retraitCartonBalPalette(args);
+	}
+}
+
+void simuFilePleine (ArgImprimer * args) {
+	for (int i=1; i<15; i++) {
+		depotCartonBalImprimante( args, i );
+	}
+}
+
 int main() {
 
 	cout<<"Phase d'initialisation"<<endl;
@@ -36,11 +63,9 @@ int main() {
 
 	cout<<"Phase moteur"<<endl;
 	
+	simuFonctionnementNormal(argImprimer);	
 
-
-
-
-
+	simuFilePleine(argImprimer);
 
 	cout<<"Fin Phase moteur"<<endl;
 
