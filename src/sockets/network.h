@@ -7,6 +7,7 @@
 struct NetworkInitInfo {
 	Mailbox<Message> *netmb_ptr;
 	int *socket_ptr;
+	SharedMemoryLots *shMemLots;
 };
 
 void* thread_network(void* arg);
