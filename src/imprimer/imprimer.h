@@ -13,7 +13,8 @@ struct ArgImprimer
   pthread_cond_t * varCond;
   pthread_mutex_t * mutex;
   SharedMemoryLots * Lots;
-
+  bool * panneImprim;
+  Mutex * mutexPanne;
 };
 
 int imprimer_thread(void * argsUnconverted)
@@ -30,9 +31,14 @@ int imprimer_thread(void * argsUnconverted)
 	for (;;) {
 
 		cartonImpression = args->balImprimante->Pull();
+		if(cartonImpression.fin)
+			pthread_exit(0);
+		cout<<"\nCarton récupéré "<< cartonImpression.id<<endl;
 
 		// Verification panne imprimante
-		// panneImprimante = 
+		// mutexPanne->lock();
+		// panneImprimante = &panneImprim;
+		// mutexPanne->unlock();
 
 		if (!panneImprimante) {
 
@@ -44,6 +50,7 @@ int imprimer_thread(void * argsUnconverted)
 			else {
 
 				// Depot message erreur dans la bal enventbox
+				cout<<"File Pleine après impression"<<endl;
 				Event msgErreurFileAttente(FILEATTPLEINE);
 				args->eventBox->Push( msgErreurFileAttente,0 );
 				
