@@ -1,7 +1,10 @@
-
+#include "../modeles/modeles.h"
+#include "../mailbox/mailbox.h"
 
 #define TIME_MAX 5
 
+#ifndef REMPLISSAGE_CARTON_H
+#define REMPLISSAGE_CARTON_H
 typedef struct tInitRemplissageCarton{
   Mailbox<Piece>* pBalPieces;
   Mailbox<Carton>* pBalCartons;
@@ -11,11 +14,8 @@ typedef struct tInitRemplissageCarton{
   bool* pCartonPresent;
   pthread_cond_t* cv;
   pthread_mutex_t* mutCv;
-  pthread_mutex_t mutBegin;
   SharedMemoryLots* lots;
 }tInitRemplissageCarton;
 
-#ifndef REMPLISSAGE_CARTON_H
-#define REMPLISSAGE_CARTON_H
 void * remplirCarton(void * index);
 #endif
