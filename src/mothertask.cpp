@@ -120,7 +120,7 @@ int main()
   argRC->mutCv=&condRCM;
   argRC->cv=&condRC;
   argRC->nbLots=0;
-  argRC->lots=&shMemLots;
+  argRC->shMemLots=&lots;
   argRC->finDeSerieMutex=&finSerieMutex;
   pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, argRC);
 
@@ -190,7 +190,7 @@ int main()
   NetworkInitInfo * info = new NetworkInitInfo();
   info->netmb_ptr = &balMessages;
   info->socket_ptr = new int(0);
-  info->shMemLot =&lots;
+  info->shMemLots =&lots;
   pthread_create (&serveur_reception, NULL, (void *(*)(void *)) thread_network, (void *)info);
 
 
@@ -215,9 +215,6 @@ int main()
   cin>>a;
   cout<<endl<<endl<<endl;
   cout<<"Phase de destruction"<<endl;
-
-
-  cout<<"Envoyé :"<<pthread_kill(controleur,SIGUSR2)<<endl;
 
 
   pthread_join(gestion_series, NULL);
