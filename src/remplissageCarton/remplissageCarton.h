@@ -10,11 +10,12 @@ typedef struct tInitRemplissageCarton{
   Mailbox<Carton>* pBalCartons;
   Mailbox<Event>* pBalEvenements;
   sem_t* sem_fin_de_serie;
-  pthread_mutex_t* mutCartonPresent;
+  Mutex* mutCartonPresent;
   bool* pCartonPresent;
   pthread_cond_t* cv;
-  pthread_mutex_t* mutCv;
+  Mutex* mutCv;
   SharedMemoryLots* lots;
+  sem_t* semLireLots;
 }tInitRemplissageCarton;
 
 void * remplirCarton(void * index);

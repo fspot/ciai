@@ -19,9 +19,9 @@ static unsigned int serieCourante;
 
 static void wait()
 {
-	pthread_mutex_lock(init->mutCv);
-	pthread_cond_wait(init->cv,init->mutCv);
-	pthread_mutex_unlock(init->mutCv);
+	init->mutCv->lock();
+	pthread_cond_wait(init->cv,init->mutCv->getMutex());
+	init->mutCv->unlock();
 }
 
 void* remplirCarton(void * index)
@@ -29,6 +29,7 @@ void* remplirCarton(void * index)
 	init=(tInitRemplissageCarton *)index;
 	serieCourante=0;
 
+	sem_wait(init->semLireLots);
 	init->lots->mutex.lock();
 	listeLots=new vector<Lot>(init->lots->content->lots);
 	init->lots->mutex.unlock();
@@ -40,12 +41,12 @@ void* remplirCarton(void * index)
 	for(;;)
 	{
 		Piece piece=init->pBalPieces->Pull();
-		if(piece.fin=true)
+		if(piece.fin==true)
 			pthread_exit(NULL);
 		
-		pthread_mutex_lock(init->mutCartonPresent);
+		init->mutCartonPresent->lock();
 		bool retour=(*(init->pCartonPresent));
-		pthread_mutex_unlock(init->mutCartonPresent);
+		init->mutCartonPresent->unlock();
 		if(!retour)
 		{
 			init->pBalEvenements->Push(Event(ABSCARTON),1);
@@ -74,10 +75,11 @@ void* remplirCarton(void * index)
 			nbPiecesDsCarton++;
 			if(nbPiecesDsCarton>=lotCourant->pieces)
 			{
-				nbPiecesDsCarton=0;
 				Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
 				init->pBalCartons->Push(carton,1);
 				nbCartonsRestant--;
+				nbPiecesDsRebut=0;
+				nbPiecesDsCarton=0;
 				if(nbCartonsRestant<=0)
 				{
 					serieCourante++;

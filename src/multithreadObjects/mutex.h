@@ -9,7 +9,7 @@ class Mutex
 		Mutex();
 		~Mutex();
 
-		pthread_mutex_t* getMutex();
+		pthread_mutex_t* getMutex();//retourne le mutex
 
 		void lock(); 		// prendre le mutex (peut être bloquant)
 		bool trylock();		// essaye de prendre le mutex, renvoie true si ok. (jamais bloquant)
