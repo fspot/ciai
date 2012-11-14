@@ -59,6 +59,7 @@ struct Event {
 
 struct Message {
   std::string contenu;
+  bool fin; // vaut true si fin de la tâche, false sinon.
 }; 
 
 struct ListeLots {
@@ -78,6 +79,7 @@ struct ListeCommandes {
 		else
 			return "A#0\r\n"; // pas ok
 	}
+  bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
 struct Palette {
@@ -88,6 +90,7 @@ struct Palette {
 		ss << "P#" << lot->nom << "\r\n"; // msg envoyé qd palette finie.
 		return ss.str();
 	}
+  bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
 struct Carton {
@@ -99,16 +102,18 @@ struct Carton {
 		ss << "B#" << lot->nom << "," << nbrebut << "\r\n"; // msg envoyé qd carton rempli.
 		return ss.str();
 	}
-        std::string netstr_palette() {
-          std::stringstream ss;
-          ss << "D#" << lot->nom << "\r\n"; // msg envoyé qd carton paletté.
-          return ss.str();
-        }
+  std::string netstr_palette() {
+    std::stringstream ss;
+    ss << "D#" << lot->nom << "\r\n"; // msg envoyé qd carton paletté.
+    return ss.str();
+  }
+  bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
 struct Piece {
 	// Carton *carton; // ?
 	int dim[3]; // en mm
+  bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
 
