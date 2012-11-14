@@ -109,7 +109,7 @@ void* remplirCarton(void * index)
 	idCarton=0;
 
 	signal(SIGUSR1,remplirCartonReel);
-	signal(SIGUSR2,remplirCartonReel);
+	//signal(SIGUSR2,remplirCartonReel);
 
 	time(&timeBegin);
 

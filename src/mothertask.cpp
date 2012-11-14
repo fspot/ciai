@@ -19,6 +19,7 @@
 #include "log/log.h"
 #include "remplirCarton/remplirCarton.h"
 #include "gestionserie/gestionserie.h"
+#include <signal.h>
 //------------------------------------------------------ Name spaces
 using namespace std;
 
@@ -56,6 +57,11 @@ int main()
 // Allocation des ressources, initialisation et lancement des autres threads 
 
 {
+
+  struct sigaction actions;
+  actions.sa_flags = 0;
+  sigaction(SIGUSR1,&actions,NULL);
+  sigaction(SIGUSR2,&actions,NULL);
  
   // Initialisation des boites aux lettres
   Mailbox<Event>  balEvenements;
@@ -210,6 +216,9 @@ int main()
   cin>>a;
   cout<<endl<<endl<<endl;
   cout<<"Phase de destruction"<<endl;
+
+
+  cout<<"Envoyé :"<<pthread_kill(controleur,SIGUSR2)<<endl;
 
 
   pthread_join(gestion_series, NULL);
