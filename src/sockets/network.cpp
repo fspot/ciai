@@ -20,7 +20,7 @@
 
 // DEFINES
 
-#define PORT 4522
+#define PORT 8761
 #define MAX_SIZE_MSG 1024
 #define GOOD_MSG 1
 #define BAD_MSG -1

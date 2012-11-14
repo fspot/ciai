@@ -1,7 +1,7 @@
 #include <time.h>
 #include <signal.h>
 #include <unistd.h>
-#include "remplissageCarton.h"
+#include "remplirCarton.h"
 #include "../mailbox/mailbox.h"
 #include "../modeles/modeles.h"
 #include "utilTest.h"
@@ -9,7 +9,7 @@
 using namespace std;
 
 static time_t timeBegin;
-static tInitRemplissageCarton* init;
+static ArgRemplirCarton* init;
 static Lot *lotCourant;
 static unsigned int nbCartonsRestant;
 static unsigned int nbPiecesDsRebut;
@@ -84,6 +84,7 @@ static void remplirCartonReel(int noSignal)
 			}
 		}
 	}
+<<<<<<< HEAD:src/remplissageCarton/remplissageCarton.cpp
 	alarm(TIME_MAX);
 }
 
@@ -93,14 +94,22 @@ static void alarm(int noSignal)
 	init->pBalEvenements->Push(Event(ABSPIECE),1);
 	wait();
 	alarm(TIME_MAX);
+=======
+	else
+	{
+		cout<<"Merde"<<endl;
+	}
+	time(&timeBegin);
+>>>>>>> a8d7c07b181fd06d3bb9b7399adcdeb59b950fe2:src/remplirCarton/remplirCarton.cpp
 }
 
 void* remplirCarton(void * index)
 {
-	init=(tInitRemplissageCarton *)index;
+	init=(ArgRemplirCarton *)index;
 	serieCourante=0;
-	lotCourant=&(init->lots[serieCourante]);	
-	nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
+      
+	//lotCourant=&(init->lots[serieCourante]);	
+	//nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 	nbPiecesDsCarton=0;
 	idCarton=0;
 
@@ -109,5 +118,20 @@ void* remplirCarton(void * index)
 
 	alarm(TIME_MAX);
 
+<<<<<<< HEAD:src/remplissageCarton/remplissageCarton.cpp
 	for(;;){}
 }
+=======
+
+	for(;;)
+	{
+		sleep(1);
+		if(difftime(time(NULL),timeBegin)>TIME_MAX)
+		{
+			cout<<"heu8"<<endl;
+			init->pBalEvenements->Push(Event(ABSPIECE),1);
+			wait();
+		}
+	}
+}
+>>>>>>> a8d7c07b181fd06d3bb9b7399adcdeb59b950fe2:src/remplirCarton/remplirCarton.cpp

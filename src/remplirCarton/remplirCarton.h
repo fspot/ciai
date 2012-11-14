@@ -1,41 +1,38 @@
+
 /*************************************************************************
-                           controleur.h  -  description
-                             -------------------
+                           remplirCarton  -  Tâche qui gère le remplir
 *************************************************************************/
 
-//---------- Interface de la tâche controleur
-#if ! defined ( controleur_H )
-#define controleur_H
+//---------- Interface de la tâche remplir carton -------
+#if ! defined ( remplirCarton_H )
+#define remplirCarton_H
+
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisées
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
-#include "../log/log.h" 
-#include <pthread.h>
-#include <map>
 //------------------------------------------------------------- Constantes 
 
 //------------------------------------------------------------------ Types 
-
-struct InfoThread
-{
-  pthread_t id;
-  pthread_cond_t * cw;
-  pthread_mutex_t * mx;
-};
-
-struct ArgControleur
-{
-  Mailbox<Event> * eventBox;
-  Mailbox<Message> * msgBox;
-  Log * gestionnaireLog;
-  map<Task,InfoThread> threads;
+struct ArgRemplirCarton{
+  Mailbox<Piece>* pBalPieces;
+  Mailbox<Carton>* pBalCartons;
+  Mailbox<Event>* pBalEvenements;
+  pthread_mutex_t* mutCartonPresent;
+  sem_t* sem_fin_de_serie;
+  bool* pCartonPresent;
+  Lot* lots;
+  unsigned int nbLots;
+  sem_t * finDeSerieMutex;
+  pthread_cond_t* cv;
+  pthread_mutex_t* mutCv;
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-int controleur_thread(void * argsUnconverted);
+void * remplirCarton(void * index);
 
-#endif // XXX_H
+
+#endif // remplirCarton_H
 
 
