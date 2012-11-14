@@ -113,4 +113,15 @@ struct Piece {
 };
 
 
+
+
+#include <pthread.h>
+
+struct SharedMemoryLots
+{
+	Mutex mutex;
+	ListeLots * content;	
+
+} ;
+
 #endif

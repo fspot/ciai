@@ -12,6 +12,7 @@
 //--------------------------------------------------- Interfaces utilisées
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
+#include "../multithreadObjects/sharedMemory.h"
 //------------------------------------------------------------- Constantes 
 
 //------------------------------------------------------------------ Types 
@@ -22,7 +23,8 @@ struct ArgRemplirCarton{
   pthread_mutex_t* mutCartonPresent;
   sem_t* sem_fin_de_serie;
   bool* pCartonPresent;
-  Lot* lots;
+  Lot * lots;
+  SharedMemoryLots *listeLots;
   unsigned int nbLots;
   sem_t * finDeSerieMutex;
   pthread_cond_t* cv;
