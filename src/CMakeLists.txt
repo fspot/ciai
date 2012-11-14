@@ -13,7 +13,9 @@ set(SOURCES sockets/network.cpp
 	    log/log.cpp
 	    remplirCarton/remplirCarton.cpp
 	    controleur/controleur.cpp
-	    gestionserie/gestionserie.cpp)
+	    gestionserie/gestionserie.cpp
+	    destock/destock.cpp
+	    stock/stock.cpp)
 
 add_executable(mothertask mothertask.cpp ${SOURCES})
 target_link_libraries (mothertask ${CMAKE_THREAD_LIBS_INIT})

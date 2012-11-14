@@ -12,7 +12,7 @@
 //--------------------------------------------------- Interfaces utilisées
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
-#include "../multithreadObjects/sharedMemory.h"
+
 //------------------------------------------------------------- Constantes 
 
 //------------------------------------------------------------------ Types 
@@ -20,7 +20,7 @@ struct ArgRemplirCarton{
   Mailbox<Piece>* pBalPieces;
   Mailbox<Carton>* pBalCartons;
   Mailbox<Event>* pBalEvenements;
-  pthread_mutex_t* mutCartonPresent;
+  Mutex* mutCartonPresent;
   sem_t* sem_fin_de_serie;
   bool* pCartonPresent;
   Lot * lots;

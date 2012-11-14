@@ -9,6 +9,7 @@ using namespace std;
 
 static time_t timeBegin;
 static ArgRemplirCarton* init;
+static vector<Lot>* listeLots;
 static Lot *lotCourant;
 static unsigned int nbCartonsRestant;
 static unsigned int nbPiecesDsRebut;
@@ -23,21 +24,34 @@ static void wait()
 	pthread_mutex_unlock(init->mutCv);
 }
 
-static void remplirCartonReel(int noSignal)
+void* remplirCarton(void * index)
 {
-	alarm(0);
-	if(noSignal==SIGUSR1)
+	init=(ArgRemplirCarton *)index;
+	serieCourante=0;
+
+	sem_wait(init->debutSyncro);
+	init->shMemLots->mutex.lock();
+	listeLots=new vector<Lot>(init->shMemLots->content->lots);
+	init->shMemLots->mutex.unlock();
+	lotCourant=&(listeLots->at(serieCourante));	
+	nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
+	nbPiecesDsCarton=0;
+	idCarton=0;
+
+	for(;;)
 	{
-		pthread_mutex_lock(init->mutCartonPresent);
+		Piece piece=init->pBalPieces->Pull();
+		if(piece.fin==true)
+			pthread_exit(NULL);
+		
+		init->mutCartonPresent->lock();
 		bool retour=(*(init->pCartonPresent));
-		pthread_mutex_unlock(init->mutCartonPresent);
+		init->mutCartonPresent->unlock();
 		if(!retour)
 		{
 			init->pBalEvenements->Push(Event(ABSCARTON),1);
 			wait();
 		}
-
-		Piece piece=init->pBalPieces->Pull();
 
 		int i=0;
 		bool valide=true;
@@ -61,21 +75,22 @@ static void remplirCartonReel(int noSignal)
 			nbPiecesDsCarton++;
 			if(nbPiecesDsCarton>=lotCourant->pieces)
 			{
-				nbPiecesDsCarton=0;
 				Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
 				init->pBalCartons->Push(carton,1);
 				nbCartonsRestant--;
+				nbPiecesDsRebut=0;
+				nbPiecesDsCarton=0;
 				if(nbCartonsRestant<=0)
 				{
 					serieCourante++;
-					if((serieCourante+1)>init->nbLots)
+					if((serieCourante+1)>init->shMemLots->content->lots.size())
 					{
 						init->pBalEvenements->Push(Event(FIN),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
-						wait();
+						pthread_exit(NULL);
 					}
 					else
 					{
-						lotCourant=&(init->lots[serieCourante]);
+						lotCourant=&(init->shMemLots->content->lots[serieCourante]);
 						nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 						sem_post(init->sem_fin_de_serie);
 					}
@@ -83,54 +98,4 @@ static void remplirCartonReel(int noSignal)
 			}
 		}
 	}
-<<<<<<< HEAD:src/remplissageCarton/remplissageCarton.cpp
-	alarm(TIME_MAX);
 }
-
-static void alarm(int noSignal)
-{
-	alarm(0);
-	init->pBalEvenements->Push(Event(ABSPIECE),1);
-	wait();
-	alarm(TIME_MAX);
-=======
-	else
-	{
-		cout<<"Merde"<<endl;
-	}
-	time(&timeBegin);
->>>>>>> a8d7c07b181fd06d3bb9b7399adcdeb59b950fe2:src/remplirCarton/remplirCarton.cpp
-}
-
-void* remplirCarton(void * index)
-{
-	init=(ArgRemplirCarton *)index;
-	serieCourante=0;
-      
-	//lotCourant=&(init->lots[serieCourante]);	
-	//nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
-	nbPiecesDsCarton=0;
-	idCarton=0;
-
-	signal(SIGUSR1,remplirCartonReel);
-	signal(SIGALRM,alarm);
-
-	alarm(TIME_MAX);
-
-<<<<<<< HEAD:src/remplissageCarton/remplissageCarton.cpp
-	for(;;){}
-}
-=======
-
-	for(;;)
-	{
-		sleep(1);
-		if(difftime(time(NULL),timeBegin)>TIME_MAX)
-		{
-			cout<<"heu8"<<endl;
-			init->pBalEvenements->Push(Event(ABSPIECE),1);
-			wait();
-		}
-	}
-}
->>>>>>> a8d7c07b181fd06d3bb9b7399adcdeb59b950fe2:src/remplirCarton/remplirCarton.cpp
