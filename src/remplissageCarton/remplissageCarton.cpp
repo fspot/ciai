@@ -84,7 +84,7 @@ void* remplirCarton(void * index)
 					if((serieCourante+1)>init->lots->content->lots.size())
 					{
 						init->pBalEvenements->Push(Event(FIN),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
-						wait();
+						pthread_exit(NULL);
 					}
 					else
 					{

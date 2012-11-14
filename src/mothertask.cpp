@@ -18,6 +18,8 @@
 #include "log/log.h"
 #include "remplirCarton/remplirCarton.h"
 #include "gestionserie/gestionserie.h"
+#include "stock/stock.h"
+#include "destock/destock.h"                             
 #include <signal.h>
 //------------------------------------------------------ Name spaces
 using namespace std;
@@ -64,11 +66,17 @@ int main()
   Mailbox<Palette> balStockage;
   Mailbox<Message> balMessages;
   Mailbox<Piece> balPiece;
+  Mailbox<ListeCommandes> balCommandes; // tâche destock
 
   // Initialisation mémoires partagées
+
+  // * shmem de la liste des lots :
   SharedMemoryLots lots;
   ListeLots listeLots;
   lots.content=&listeLots;
+
+  // * shmem du stock :
+  SharedMemoryStock stock;
 
 
   // Initialisation du générateur
@@ -91,22 +99,35 @@ int main()
 
 
   // Allocation des mutex et variables conditionnelles
-  pthread_t remplir_carton, imprimer, remplir_palette,stocker_palette,destocker_palette,controleur,serveur_reception,serveur_envoi,gestion_series;
-  pthread_cond_t condRC=PTHREAD_COND_INITIALIZER,
-    condIMP=PTHREAD_COND_INITIALIZER,
-    condRP=PTHREAD_COND_INITIALIZER,
-    condSP=PTHREAD_COND_INITIALIZER,
-    condDP=PTHREAD_COND_INITIALIZER;
+  pthread_t 
+    remplir_carton, 
+    imprimer, 
+    remplir_palette,
+    stocker_palette,
+    destocker_palette,
+    controleur,
+    serveur_reception,
+    serveur_envoi,
+    gestion_series;
+
+  pthread_cond_t 
+    condRC=PTHREAD_COND_INITIALIZER, // remplir carton
+    condIMP=PTHREAD_COND_INITIALIZER, // imprimer
+    condRP=PTHREAD_COND_INITIALIZER, // remplir palette
+    condSP=PTHREAD_COND_INITIALIZER, // stocker
+    condDP=PTHREAD_COND_INITIALIZER; // destocker
  
+  pthread_mutex_t 
+    condRCM=PTHREAD_MUTEX_INITIALIZER, // remplir carton
+    condIMPM=PTHREAD_MUTEX_INITIALIZER, // imprimer
+    condRPM=PTHREAD_MUTEX_INITIALIZER, // remplir palette
+    condSPM=PTHREAD_MUTEX_INITIALIZER, // stocker
+    condDPM=PTHREAD_MUTEX_INITIALIZER; // destocker
 
-  pthread_mutex_t condRCM=PTHREAD_MUTEX_INITIALIZER,
-    condIMPM=PTHREAD_MUTEX_INITIALIZER,
-    condRPM=PTHREAD_MUTEX_INITIALIZER,
-    condSPM=PTHREAD_MUTEX_INITIALIZER,
-    condDPM=PTHREAD_MUTEX_INITIALIZER;
 
-
-  //Creation des threads
+  // ===================================
+  // ====== Creation des threads =======
+  // ===================================
 
   // Création du thread remplir carton
   ArgRemplirCarton * argRC = new ArgRemplirCarton();
@@ -140,11 +161,29 @@ int main()
   // Création du thread remplir palette
   pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplir_palette_function, NULL);
 
+
   //Creation du thread stocker palette
-  pthread_create (&stocker_palette, NULL, (void *(*)(void *)) &stocker_palette_function, NULL);
+  ArgStock argStock;
+  argStock.balStockage = &balStockage;
+  argStock.balEvenements = &balEvenements;
+  // argStock.reprise = ?; // reprise après erreur
+  argStock.debutSyncro = &debutSyncro;
+  argStock.shMemLots = &shMemLots;
+  argStock.cv = &condSP;
+  argStock.mutCv = &condSPM;
+  argStock.stock = &stock;
+  pthread_create (&stocker_palette, NULL, thread_stock, (void*) &argStock);
+
 
   //Création du thread destocker palette
-  pthread_create (&destocker_palette, NULL, (void *(*)(void *)) destocker_palette_function, NULL);
+  ArgDestock argDestock;
+  argDestock.balEvenements = &balEvenements;
+  argDestock.balCommandes = &balCommandes;
+  argDestock.cv = &condDP;
+  argDestock.mutCv = &condDPM;
+  argDestock.stock = &stock;
+  pthread_create (&destocker_palette, NULL, thread_destock, (void*) &argDestock);
+  
   
   //Création du thread controleur
    

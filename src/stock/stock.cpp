@@ -1,7 +1,8 @@
 #include <iostream>
 
-#include "stock.h"
 #include "pthread.h"
+
+#include "stock.h"
 #include "../mailbox/mailbox.h"
 #include "../modeles/modeles.h"
 
@@ -14,12 +15,12 @@ void *thread_stock(void *argStock)
 
 	// ==== unpack arguments
 	ArgStock *infos = (ArgStock*) argStock;
-	Mailbox<Palette>* balStockage = argStock->balStockage;
-	Mailbox<Event>* balEvenements = argStock->balEvenements;
-	sem_t* reprise = argStock->reprise;
-	pthread_cond_t* cv  = argStock->cv;
-	pthread_mutex_t* mutCv = argStock->mutCv;
-	SharedMemoryLots *shMemLots = argStock->shMemLots;
+	Mailbox<Palette>* balStockage = infos->balStockage;
+	Mailbox<Event>* balEvenements = infos->balEvenements;
+	sem_t* reprise = infos->reprise;
+	pthread_cond_t* cv  = infos->cv;
+	pthread_mutex_t* mutCv = infos->mutCv;
+	SharedMemoryLots *shMemLots = infos->shMemLots;
 	// stock ?
 
 	// ==== semaphore wait (synchronisation du lancement des threads moteurs)
