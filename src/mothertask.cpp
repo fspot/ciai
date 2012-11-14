@@ -119,6 +119,7 @@ int main()
   argRC->cv=&condRC;
   argRC->nbLots=0;
   argRC->shMemLots=&lots;
+  argRC->debutSyncro=&debutSyncro;
   argRC->finDeSerieMutex=&finSerieMutex;
   pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, argRC);
 
@@ -131,6 +132,7 @@ int main()
   argImprimer->balPalette=&balPalette;
   argImprimer->varCond=&condIMP;
   argImprimer->mutex=&condIMPM;
+  argImprimer->debutSyncro=&debutSyncro;
   pthread_create (&imprimer, NULL, (void *(*)(void *)) &imprimer_thread, (void *)argImprimer);
 
 

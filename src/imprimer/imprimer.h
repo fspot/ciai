@@ -13,6 +13,7 @@ struct ArgImprimer
   pthread_cond_t * varCond;
   pthread_mutex_t * mutex;
   SharedMemoryLots * Lots;
+  sem_t * debutSyncro;
 
 };
 
