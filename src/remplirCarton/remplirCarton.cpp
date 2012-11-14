@@ -93,7 +93,7 @@ static void remplirCartonReel(int noSignal)
 	}
 	else
 	{
-		wait();
+		cout<<"Merde"<<endl;
 	}
 	time(&timeBegin);
 }
@@ -109,7 +109,7 @@ void* remplirCarton(void * index)
 	idCarton=0;
 
 	signal(SIGUSR1,remplirCartonReel);
-	//signal(SIGUSR2,remplirCartonReel);
+	signal(SIGUSR2,remplirCartonReel);
 
 	time(&timeBegin);
 
