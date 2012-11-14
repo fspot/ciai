@@ -76,6 +76,8 @@ int main()
   lots.content=&listeLots;
 
 
+  // Initialisation du générateur
+  //srand(time(NULL));
 
   // Mutex
   Mutex  sortieStdMutex;
@@ -118,6 +120,7 @@ int main()
   argRC->mutCv=&condRCM;
   argRC->cv=&condRC;
   argRC->nbLots=0;
+  argRC->lots=&shMemLots;
   argRC->finDeSerieMutex=&finSerieMutex;
   pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, argRC);
 
@@ -187,6 +190,7 @@ int main()
   NetworkInitInfo * info = new NetworkInitInfo();
   info->netmb_ptr = &balMessages;
   info->socket_ptr = new int(0);
+  info->shMemLot =&lots;
   pthread_create (&serveur_reception, NULL, (void *(*)(void *)) thread_network, (void *)info);
 
 
