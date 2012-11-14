@@ -34,7 +34,7 @@ public:
 	Mailbox();
 	~Mailbox();
 
-	void Push(const T& element, unsigned int priority);
+	void Push(const T& element, unsigned int priority = PRIO_MAX-1);
 	//	permet d'insérer un element de type T dans la mailbox, avec la priorité priority.
 	//	un message est d'autant plus prioritaire que sa priorité est petite.
 
