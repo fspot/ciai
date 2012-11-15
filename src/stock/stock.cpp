@@ -30,6 +30,7 @@ void *thread_stock(void *argStock)
 	int lot = 0, pal = 0; // num lot actuel, num palette actuelle (au sein du lot)
 
 	while(lot < shMemLots->content->tot)
+	{
 		p = balStockage->Pull(); // opération qui peut être bloquante : réception d'une palette à stocker.
 
 		if (p.fin) // test cas spécial
