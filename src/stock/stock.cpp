@@ -44,7 +44,7 @@ void *thread_stock(void *argStock)
 		// rendu du mutex du stock
 
 		pal++;
-		if (pal == shMemLots->content->lots.palettes) {
+		if (pal == shMemLots->content->lots[lot].palettes) {
 			lot++; // passage au lot suivant
 			pal = 0;
 		}
