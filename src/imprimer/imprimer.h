@@ -12,7 +12,7 @@ struct ArgImprimer
   Mailbox<Carton> * balPalette;
   pthread_cond_t * varCond;
   pthread_mutex_t * mutex;
-  SharedMemoryLots * Lots;
+  SharedMemoryLots * Lots; // vérifier si fin du lot pour tuer tache, à faire
   sem_t * debutSyncro;
   bool * panneImprim;
   Mutex * mutexPanne;
@@ -36,15 +36,16 @@ int imprimer_thread(void * argsUnconverted)
 			pthread_exit(0);
 		cout<<"\nCarton récupéré "<< cartonImpression.id<<endl;
 
-		// Verification panne imprimante
+		// Verification panne imprimante, panneImprim a simuler
 		// mutexPanne->lock();
-		// panneImprimante = &panneImprim;
+		// panneImprimante = args->panneImprim;
 		// mutexPanne->unlock();
 
 		if (!panneImprimante) {
 
 			if (args->balPalette->Size() < 10) {
 
+				// Depot Carton dans la bal balPalette
 				args->balPalette->Push(cartonImpression,0);
 
 			}
