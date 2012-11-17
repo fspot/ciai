@@ -147,6 +147,7 @@ int main()
   argRP->shMemLots=&lots;
   pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplirPalette_thread, argRP);
 
+  
 
   //Creation du thread stocker palette
   ArgStock argStock;
