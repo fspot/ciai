@@ -24,10 +24,6 @@ void * thread_stock(void *argStock)
 	SharedMemoryLots *shMemLots = infos->shMemLots;
 	SharedMemoryStock *shMemStock = infos->stock;
 	// stock ?
-
-	// ==== semaphore wait (synchronisation du lancement des threads moteurs)
-	sem_wait(infos->debutSyncro);
-
 	Palette p;
 	int lot = 0, pal = 0; // num lot actuel, num palette actuelle (au sein du lot)
 
@@ -41,8 +37,8 @@ void * thread_stock(void *argStock)
 		// "eventuellement" on peut verifier si la palette correspond..
 
 		// ==== phase de stockage
-		string nomLot = shMemLots->content->lots[lot].nom;
 		shMemStock->mutex.lock();
+		string nomLot = shMemLots->content->lots[lot].nom;
 		shMemStock->stock[nomLot]++;
 		shMemStock->mutex.unlock();
 
