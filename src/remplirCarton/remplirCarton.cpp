@@ -39,7 +39,6 @@ void* remplirCarton(void * index)
 	init=(ArgRemplirCarton *)index;
         ecriture_log_remplirCarton(init->gestionnaireLog,"Lancement de la tâche remplir carton",EVENT);
 	serieCourante=0;
-
 	sem_wait(init->debutSyncro);
 	init->shMemLots->mutex.lock();
 	listeLots=new vector<Lot>(init->shMemLots->content->lots);
@@ -52,9 +51,12 @@ void* remplirCarton(void * index)
 	for(;;)
 	{
 		Piece piece=init->pBalPieces->Pull();
+                ecriture_log_remplirCarton(init->gestionnaireLog,"Piece recue - rempli carton",EVENT);
 		if(piece.fin==true)
+		{
+                        ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tâche rempli carton",EVENT);
 			pthread_exit(NULL);
-		
+		}
 		init->mutCartonPresent->lock();
 		bool retour=(*(init->pCartonPresent));
 		init->mutCartonPresent->unlock();
