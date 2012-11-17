@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 
 #include "pthread.h"
 
@@ -12,8 +13,7 @@ using namespace std;
 
 void * thread_stock(void *argStock)
 {
-	cout << "Thread Stock launched" << endl;
-
+	cout << "thread stock launched." << endl;
 	// ==== unpack arguments
 	ArgStock *infos = (ArgStock*) argStock;
 	Mailbox<Palette>* balStockage = infos->balStockage;
@@ -22,6 +22,7 @@ void * thread_stock(void *argStock)
 	pthread_cond_t* cv  = infos->cv;
 	pthread_mutex_t* mutCv = infos->mutCv;
 	SharedMemoryLots *shMemLots = infos->shMemLots;
+	SharedMemoryStock *shMemStock = infos->stock;
 	// stock ?
 
 	// ==== semaphore wait (synchronisation du lancement des threads moteurs)
@@ -30,7 +31,7 @@ void * thread_stock(void *argStock)
 	Palette p;
 	int lot = 0, pal = 0; // num lot actuel, num palette actuelle (au sein du lot)
 
-	while(lot < shMemLots->content->tot)
+	while(1)
 	{
 		p = balStockage->Pull(); // opération qui peut être bloquante : réception d'une palette à stocker.
 
@@ -40,14 +41,21 @@ void * thread_stock(void *argStock)
 		// "eventuellement" on peut verifier si la palette correspond..
 
 		// ==== phase de stockage
-		// prise du mutex du stock
-		// stock[nomLot]++; // stockage 
-		// rendu du mutex du stock
+		string nomLot = shMemLots->content->lots[lot].nom;
+		shMemStock->mutex.lock();
+		shMemStock->stock[nomLot]++;
+		shMemStock->mutex.unlock();
 
+		// passage à la palette suivante :
 		pal++;
 		if (pal == shMemLots->content->lots[lot].palettes) {
-			lot++; // passage au lot suivant
+			// passage au lot suivant :
 			pal = 0;
+			lot++;
+
+			// test de fin de production :
+			if (lot == shMemLots->content->lots.size())
+				break;
 		}
 	}
 

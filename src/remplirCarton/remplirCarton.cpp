@@ -40,13 +40,12 @@ void* remplirCarton(void * index)
         ecriture_log_remplirCarton(init->gestionnaireLog,"Lancement de la tâche remplir carton",EVENT);
 	serieCourante=0;
 	sem_wait(init->debutSyncro);
-	init->shMemLots->mutex.lock();
-	listeLots=new vector<Lot>(init->shMemLots->content->lots);
-	init->shMemLots->mutex.unlock();
+	listeLots = &init->shMemLots->content->lots;
 	lotCourant=&(listeLots->at(serieCourante));	
 	nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 	nbPiecesDsCarton=0;
 	idCarton=0;
+
 
 	for(;;)
 	{

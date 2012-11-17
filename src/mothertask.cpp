@@ -135,7 +135,6 @@ int main()
   argImprimer->balPalette=&balPalette;
   argImprimer->varCond=&condIMP;
   argImprimer->mutex=&condIMPM;
-  argImprimer->debutSyncro=&debutSyncro;
   pthread_create (&imprimer, NULL, (void *(*)(void *)) &imprimer_thread, (void *)argImprimer);
 
 
@@ -152,6 +151,7 @@ int main()
   argRP->debutSyncro=&debutSyncro;
   pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplirPalette_thread, argRP);
 
+  
 
   //Creation du thread stocker palette
   ArgStock argStock;
@@ -159,7 +159,6 @@ int main()
   argStock.balStockage = &balStockage;
   argStock.balEvenements = &balEvenements;
   // argStock.reprise = ?; // reprise après erreur
-  argStock.debutSyncro = &debutSyncro;
   argStock.shMemLots = &lots;
   argStock.cv = &condSP;
   argStock.mutCv = &condSPM;
@@ -230,6 +229,7 @@ int main()
   info->netmb_ptr = &balMessages;
   info->socket_ptr = new int(0);
   info->shMemLots =&lots;
+  info->debutSyncro = &debutSyncro;
   pthread_create (&serveur_reception, NULL, (void *(*)(void *)) thread_network, (void *)info);
 
 

@@ -13,6 +13,7 @@ void remplirPalette_thread(void * argsUncasted)
 		sem_wait(args->debutSyncro);
 		args->shMemLots->mutex.lock();
 		int cartonsMax = args->shMemLots->content->lots[lotnb].cartons;
+		sleep(10);
 		int palettesMax = args->shMemLots->content->lots[lotnb].palettes;
 		args->shMemLots->mutex.unlock();
 		int countPalettes = 0;

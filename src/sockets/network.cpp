@@ -3,6 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -36,7 +37,9 @@ enum e_sockstate {
 
 // STATICS
 
-SharedMemoryLots *stat_lots;
+static int sockstate;
+static SharedMemoryLots *stat_lots; // mem partagée avec toutes les infos sur les lots
+static sem_t *stat_sync; // sémaphore de synchronisation de début d'appli
 
 // SIGNATURES
 
@@ -45,10 +48,6 @@ int waitClient(int listener);
 int handle(char* data, char *buf);
 int handle_BEGIN(char *str);
 int handle_MIDDLE(char *str);
-
-// STATICS
-
-static int sockstate;
 
 // CODE STARTS HERE
 
@@ -151,6 +150,7 @@ int handle_BEGIN(char *str)
 	}
 	printf("(BEGIN RCV : %s)\n", str);
 	sockstate = MIDDLE;
+	sem_post(stat_sync);
 	return GOOD_MSG;
 }
 
@@ -191,6 +191,7 @@ void* thread_network(void* arg)
 	// Mailbox<string> *netmb = infos->netmb_ptr;
 	int *client = infos->socket_ptr;
 	stat_lots = (SharedMemoryLots*) infos->shMemLots;
+	stat_sync = infos->debutSyncro;
 	int listener = initListener();
 	
 	while(1)
