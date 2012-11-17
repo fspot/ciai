@@ -18,7 +18,7 @@ set(SOURCES sockets/network.cpp
 	    stock/stock.cpp
 	    remplirPalette/remplirPalette.cpp
 	    stubs/stubs.cpp
-	    imprimer/imprimer.cpp)
+	    imprimer/imprimer.cpp
 	    piece/piece.cpp)
 
 add_executable(mothertask mothertask.cpp ${SOURCES})
