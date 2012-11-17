@@ -1,5 +1,8 @@
 #include "remplirPalette.h"
 
+
+
+
 void remplirPalette_thread(void * argsUncasted)
 {
     static unsigned int idpalette = 0;
@@ -7,13 +10,14 @@ void remplirPalette_thread(void * argsUncasted)
     unsigned int lotnb = 0;
     while (1)
     {
-
+		sem_wait(args->debutSyncro);
 		args->shMemLots->mutex.lock();
 		int cartonsMax = args->shMemLots->content->lots[lotnb].cartons;
 		sleep(10);
 		int palettesMax = args->shMemLots->content->lots[lotnb].palettes;
 		args->shMemLots->mutex.unlock();
 		int countPalettes = 0;
+
 		while (countPalettes < palettesMax)
 		{
 			if (stubPresencePalette())

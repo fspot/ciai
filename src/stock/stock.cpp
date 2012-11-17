@@ -10,7 +10,8 @@
 using namespace std; 
 
 
-void *thread_stock(void *argStock)
+
+void * thread_stock(void *argStock)
 {
 	cout << "thread stock launched." << endl;
 	// ==== unpack arguments
@@ -23,6 +24,9 @@ void *thread_stock(void *argStock)
 	SharedMemoryLots *shMemLots = infos->shMemLots;
 	SharedMemoryStock *shMemStock = infos->stock;
 	// stock ?
+
+	// ==== semaphore wait (synchronisation du lancement des threads moteurs)
+	sem_wait(infos->debutSyncro);
 
 	Palette p;
 	int lot = 0, pal = 0; // num lot actuel, num palette actuelle (au sein du lot)

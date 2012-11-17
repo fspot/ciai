@@ -53,6 +53,9 @@ int handle_MIDDLE(char *str);
 
 using namespace std;
 
+
+
+
 int initListener()
 {
 	// initialisation du main socket (qui reçoit les clients)
