@@ -19,13 +19,21 @@ using namespace std;
 
 void* thread_netsend(void* arg)
 {
+	NetSendInitInfo *infos = (NetSendInitInfo*) arg;
+	Mailbox<Message> *netmb = infos->netmb_ptr;
+	int *client = infos->socket_ptr;
+	string msg;
 
+	/*
+	int i=0;
 	// dummy example :
-	// for(;;)
-	// {
-	// 	sleep(1);
-	// 	printf("<thread 2 says socket = %d>\n", *client);
-	// }
+	 for(;;)
+	 {
+	 	sleep(1);
+	 	cout<<"<thread 2 says socket "<<i<<endl;
+		i++;
+	 }
+	 /**/
 
 	/*
 	en vérité le thread n'a pas pour seul argument le socket :
@@ -34,12 +42,8 @@ void* thread_netsend(void* arg)
 	Puis on envoie ce message (primitive send() TCP)
 	*/
 
-	NetSendInitInfo *infos = (NetSendInitInfo*) arg;
-	Mailbox<string> *netmb = infos->netmb_ptr;
-	int *client = infos->socket_ptr;
-	string msg;
-
-	while ((msg = netmb->Pull()) != "EXIT_TASK")
+	//*
+	while ((msg = netmb->Pull().contenu) != "EXIT_TASK")
 	{
 		if(send(*client, msg.c_str(), strlen(msg.c_str()), 0) < 0)
 		{
@@ -48,6 +52,7 @@ void* thread_netsend(void* arg)
 		}
 		cout << "<thread 2 sent \"" << msg << "\">" << endl;
 	}
-	
+	/**/
+
 	pthread_exit(0);
 }

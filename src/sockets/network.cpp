@@ -20,7 +20,7 @@
 
 // DEFINES
 
-#define PORT 4522
+#define PORT 8761
 #define MAX_SIZE_MSG 1024
 #define GOOD_MSG 1
 #define BAD_MSG -1
@@ -33,6 +33,10 @@ enum e_sockstate {
 	BEGIN,
 	MIDDLE
 };
+
+// STATICS
+
+SharedMemoryLots *stat_lots;
 
 // SIGNATURES
 
@@ -130,13 +134,17 @@ int handle(char* data, char *buf)
 
 int handle_BEGIN(char *str)
 {
-	ListeLots ll;
-	int err = parse_I(str, &ll);
+	int err = parse_I(str, stat_lots->content);
 	if (err == -1) {
 		return BAD_MSG;
 	}
-	for (int i=0 ; i<ll.lots.size() ; i++) {
-		printf("(%d/%d) => Prod %d palettes de %s\n", i+1, ll.tot, ll.lots[i].palettes, ll.lots[i].nom.c_str());
+	for (int i=0 ; i < stat_lots->content->lots.size() ; i++) {
+		printf("(%d/%d) => Prod %d palettes de %s\n",
+			i+1, 
+			stat_lots->content->tot, 
+			stat_lots->content->lots[i].palettes, 
+			stat_lots->content->lots[i].nom.c_str()
+		);
 	}
 	printf("(BEGIN RCV : %s)\n", str);
 	sockstate = MIDDLE;
@@ -175,9 +183,11 @@ int handle_MIDDLE(char *str)
 // tâche de réception de messages en provenance du client windows
 void* thread_network(void* arg)
 {
+	puts("Thread network launched");
 	NetworkInitInfo *infos = (NetworkInitInfo*) arg;
-	Mailbox<string> *netmb = infos->netmb_ptr;
+	// Mailbox<string> *netmb = infos->netmb_ptr;
 	int *client = infos->socket_ptr;
+	stat_lots = (SharedMemoryLots*) infos->shMemLots;
 	int listener = initListener();
 	
 	while(1)

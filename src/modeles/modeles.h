@@ -1,53 +1,85 @@
 #ifndef MODELES_H
 #define MODELES_H
 
+// includes C++
+#include <map>
 #include <vector>
 #include <string>
 #include <sstream>
 
+// includes C
+#include <pthread.h>
+
+// includes perso
+#include "../mailbox/mailbox.h"
+
+
 // http://lite.framapad.org/p/ideemodeleciai
 
 /* Note de Fred :
-	la méthode netstr() renvoie une chaîne formatée de façon à ce qu'elle puisse être envoyée sur le réseau.
-	Du coup si vous voulez modifier les structures suivantes, pensez simplement à faire en sorte que ces
-		méthodes fonctionnent toujours (en y ajoutant des paramètres si besoin).
+   la méthode netstr() renvoie une chaîne formatée de façon à ce qu'elle puisse être envoyée sur le réseau.
+   Du coup si vous voulez modifier les structures suivantes, pensez simplement à faire en sorte que ces
+   méthodes fonctionnent toujours (en y ajoutant des paramètres si besoin).
 */
 
 struct Lot {
-	std::string nom;
-	int pieces, cartons, palettes, rebut, dim[3];
-	std::string netstr() { return "L\r\n"; } // msg envoyé lors du passage au lot suivant
+  std::string nom;
+  int pieces, cartons, palettes, rebut, dim[3];
+  std::string netstr() { return "L\r\n"; } // msg envoyé lors du passage au lot suivant (== nouveau lot)
 }; 
 
 
-enum EventType            
+enum Task
 {
-    ABSCCARTON,      
-    PANNEIMPRIM ,     
-    ABSCPALETTE,         
-    TAUXERR,
-    FILEATTPLEINE,      
-    ARRETGENCES,
-    REPRISEERREUR,
-    PAUSE,
-    ERREMBALAGES,
-    ERRCOMMANDE,
-    REPRISEPAUSE		
+  REMPLIRCARTON,
+  REMPLIRPALETTE,
+  IMPRIMER,
+  STOCKERPALETTE,
+  DESTOCKERPALETTE
+};
+
+enum EventType            
+
+{
+  ABSCARTON,      
+  PANNEIMPRIM ,     
+  ABSPALETTE,         
+  TAUXERR,
+  FILEATTPLEINE,      
+  ARTURG,
+  REPRISEERREUR,
+  PAUSE,
+  ERREMBALAGES,
+  ERRCOMMANDE,
+  REPRISEPAUSE,
+  ABSPIECE,
+  FIN,
+  FINERREUR
 } ;
 
 
 struct Event {
-	EventType event	;
+  EventType event	;
+  Event(EventType e):event(e){}
+}; 
+
+
+
+
+struct Message {
+  std::string contenu;
+  bool fin; // vaut true si fin de la tâche, false sinon.
 }; 
 
 struct ListeLots {
-	std::vector<Lot> lots;
-	int cur, tot;
+  std::vector<Lot> lots;
+  int tot;
+  int cur;
 };
 
 struct Commande {
-	std::string nom; // nom du produit
-	int palettes; // nombre de palettes commandées
+  std::string nom; // nom du produit
+  int palettes; // nombre de palettes commandées
 };
 
 struct ListeCommandes {
@@ -58,15 +90,7 @@ struct ListeCommandes {
 		else
 			return "A#0\r\n"; // pas ok
 	}
-};
-
-struct Erreur {
-	int code;
-	std::string netstr() {
-		std::stringstream ss;
-		ss << "E#" << code << "\r\n"; // msg envoyé lors d'une erreur.
-		return ss.str();
-	}
+  bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
 struct Palette {
@@ -74,26 +98,49 @@ struct Palette {
 	Lot *lot;
 	std::string netstr() {
 		std::stringstream ss;
-		ss << "P#" << lot->nom << "," << lot->cartons << "\r\n"; // msg envoyé qd palette finie.
+		ss << "P#" << lot->nom << "\r\n"; // msg envoyé qd palette finie.
 		return ss.str();
 	}
+  bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
 struct Carton {
 	int id;
-	int nbrebut;
 	Lot *lot;
-	std::string netstr() {
+	int nbrebut;
+	std::string netstr_rempli() {
 		std::stringstream ss;
-		ss << "B#" << lot->nom << "," << lot->pieces << "," << nbrebut << "\r\n"; // msg envoyé qd carton fini.
+		ss << "B#" << lot->nom << "," << nbrebut << "\r\n"; // msg envoyé qd carton rempli.
 		return ss.str();
 	}
-	// Palette *palette; // ?
+  std::string netstr_palette() {
+    std::stringstream ss;
+    ss << "D#" << lot->nom << "\r\n"; // msg envoyé qd carton paletté.
+    return ss.str();
+  }
+  bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
 struct Piece {
 	// Carton *carton; // ?
-	int x,y,z; // en mm
+	int dim[3]; // en mm
+  bool fin; // vaut true si fin de la tâche, false sinon.
 };
+
+
+// SHARED MEMORY :
+
+struct SharedMemoryLots
+{
+	Mutex mutex;
+	ListeLots * content;	
+};
+
+struct SharedMemoryStock // utilisé par stock et destock :
+{
+  Mutex mutex;
+  std::map<std::string, int> stock; // associe un nom de lot à un compteur (nb de palettes)
+};
+
 
 #endif
