@@ -17,6 +17,8 @@ static unsigned int nbPiecesDsCarton;
 static unsigned int idCarton;
 static unsigned int serieCourante;
 
+//procédure privée qui permet à un thread de se mettre en pause 
+//et d'attendre la réactivation par un autre thread
 static void wait()
 {
 	pthread_mutex_lock(init->mutCv);
@@ -24,6 +26,7 @@ static void wait()
 	pthread_mutex_unlock(init->mutCv);
 }
 
+//procédure qui permet d'écrire dans le journal interne du système Linux
 void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
@@ -33,7 +36,7 @@ void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType un
   #endif 
 }
 
-
+//procédure public qui permet de remplir des pièces dans un carton et de gérer tous les cas prévus
 void* remplirCarton(void * index)
 {
 	init=(ArgRemplirCarton *)index;
@@ -49,13 +52,18 @@ void* remplirCarton(void * index)
 
 	for(;;)
 	{
+		//on reçoit une pièce
 		Piece piece=init->pBalPieces->Pull();
                 ecriture_log_remplirCarton(init->gestionnaireLog,"Piece recue - rempli carton",EVENT);
+
+        //on vérifie si la pièce lue dans la boite aux lettres n'est pas un message de pause en réalité
 		if(piece.fin==true)
 		{
                         ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tâche rempli carton",EVENT);
 			pthread_exit(NULL);
 		}
+
+		//on vérifie qu'un carton est présent
 		init->mutCartonPresent->lock();
 		bool retour=(*(init->pCartonPresent));
 		init->mutCartonPresent->unlock();
@@ -65,6 +73,7 @@ void* remplirCarton(void * index)
 			wait();
 		}
 
+		//on vérifie que la dimension de la pièce est bien celle voulue
 		int i=0;
 		bool valide=true;
 		while(i<3 && valide)
@@ -77,6 +86,8 @@ void* remplirCarton(void * index)
 		if(!valide)
 			nbPiecesDsRebut++;
 
+		//on vérifie que le nombre de pièce dans le rebut pour un carton n'est pas
+		//supérieur au seuil fixé
 		if(nbPiecesDsRebut>lotCourant->rebut)
 		{
 			init->pBalEvenements->Push(Event(TAUXERR),1);
@@ -85,6 +96,8 @@ void* remplirCarton(void * index)
 		else
 		{
 			nbPiecesDsCarton++;
+
+			//on vérifie si le carton est pas plein
 			if(nbPiecesDsCarton>=lotCourant->pieces)
 			{
 				Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
@@ -92,12 +105,16 @@ void* remplirCarton(void * index)
 				nbCartonsRestant--;
 				nbPiecesDsRebut=0;
 				nbPiecesDsCarton=0;
+
+				//on vérifie si on a terminé une série
 				if(nbCartonsRestant<=0)
 				{
 					serieCourante++;
+
+					//on vérifie si on a fini toutes les séries.
 					if((serieCourante+1)>init->shMemLots->content->lots.size())
 					{
-						init->pBalEvenements->Push(Event(FIN),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
+						init->pBalEvenements->Push(Event(FIN),1);
 						pthread_exit(NULL);
 					}
 					else

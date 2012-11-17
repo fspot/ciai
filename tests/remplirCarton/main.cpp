@@ -3,9 +3,7 @@ using namespace std;
 #include <signal.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include "../modeles/modeles.h"
-#include "../mailbox/mailbox.h"
-#include "remplissageCarton.h"
+#include "../../src/remplirCarton/remplirCarton.h"
 #include <string>
 #include <signal.h>
 #include <time.h>
@@ -13,7 +11,7 @@ using namespace std;
 static bool cartonPresent=true;
 static Mutex* mutCartonPresent;
 static sem_t sem_fin_de_serie;
-static sem_t semLireLots;
+static sem_t debutSyncro;
 static pthread_t threadRemplirCarton;
 static pthread_cond_t cvThreadRemplirCarton;
 static Mutex* mutCvRemplirCarton;
@@ -22,12 +20,14 @@ static Mailbox<Carton>* pBalCartons;
 static Mailbox<Event>* pBalEvenements;
 static int nbTests;
 static int nbMauvaisTests;
-static SharedMemoryLots sml; 
-static tInitRemplissageCarton initRemplissageCarton;
+static SharedMemoryLots shMemLots; 
+static ArgRemplirCarton argRemplirCarton;
+static Mutex mtxStandardOutput;
+static Log *gestionnaireLog;
 
 static bool test1()
 {
-	sem_post(&semLireLots);
+	sem_post(&debutSyncro);
 	for(int i=0; i<8;i++)
 	{
 		sleep(1);
@@ -56,7 +56,7 @@ static bool test1()
 
 static bool test2()
 {
-	sem_post(&semLireLots);
+	sem_post(&debutSyncro);
 	for(int i=0; i<7;i++)
 	{
 		sleep(1);
@@ -88,7 +88,7 @@ static bool test2()
 
 static bool test3()
 {
-	sem_post(&semLireLots);
+	sem_post(&debutSyncro);
 	for(int i=0; i<3;i++)
 	{
 		sleep(1);
@@ -127,13 +127,13 @@ static void reset()
 	delete(mutCartonPresent);
 	delete(mutCvRemplirCarton);
 	sem_destroy(&sem_fin_de_serie);
-	sem_destroy(&semLireLots);
+	sem_destroy(&debutSyncro);
 	delete(pBalPieces);
 	delete(pBalCartons);
 	delete(pBalEvenements);
 
 	sem_init(&sem_fin_de_serie,0,0);
-	sem_init(&semLireLots,0,0);
+	sem_init(&debutSyncro,0,0);
 	pthread_cond_init(&cvThreadRemplirCarton, NULL);
 	cartonPresent=true;
 	mutCartonPresent=new Mutex();
@@ -141,10 +141,10 @@ static void reset()
 	pBalPieces=new Mailbox<Piece>;
 	pBalEvenements=new Mailbox<Event>;
 	pBalCartons=new Mailbox<Carton>;
-	initRemplissageCarton={pBalPieces,pBalCartons,pBalEvenements,&sem_fin_de_serie,
+	argRemplirCarton={pBalPieces,pBalCartons,pBalEvenements,&sem_fin_de_serie,
 		mutCartonPresent,&cartonPresent,&cvThreadRemplirCarton,
-		mutCvRemplirCarton,&sml,&semLireLots};
-	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)&initRemplissageCarton)!=0)
+		mutCvRemplirCarton,&shMemLots,&debutSyncro};
+	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)&argRemplirCarton)!=0)
 		cerr<<"ERROR create threadRemplirCarton"<<endl;
 }
 
@@ -156,7 +156,7 @@ static void fin(int noSignal)
 		delete(mutCartonPresent);
 		delete(mutCvRemplirCarton);
 		sem_destroy(&sem_fin_de_serie);
-		sem_destroy(&semLireLots);
+		sem_destroy(&debutSyncro);
 		delete(pBalPieces);
 		delete(pBalCartons);
 		delete(pBalEvenements);
@@ -178,7 +178,7 @@ int main()
 	mutCartonPresent=new Mutex();
 	mutCvRemplirCarton=new Mutex();
 	sem_init(&sem_fin_de_serie,0,0);
-	sem_init(&semLireLots,0,0);
+	sem_init(&debutSyncro,0,0);
 
 	pBalPieces=new Mailbox<Piece>;
 	pBalEvenements=new Mailbox<Event>;
@@ -188,15 +188,17 @@ int main()
 	lots.lots.push_back({"A",2,2,2,1,{100,100,100}});
 	lots.lots.push_back({"B",2,2,2,1,{200,200,200}});
 
-	sml.content=&lots;
+	shMemLots.content=&lots;
 
-	initRemplissageCarton={pBalPieces,pBalCartons,pBalEvenements,&sem_fin_de_serie,
-		mutCartonPresent,&cartonPresent,&cvThreadRemplirCarton,
-		mutCvRemplirCarton,&sml,&semLireLots};
+	gestionnaireLog=new Log(mtxStandardOutput);
+
+	argRemplirCarton={pBalPieces,pBalCartons,pBalEvenements,gestionnaireLog,mutCartonPresent,
+		&sem_fin_de_serie,&cartonPresent,&cvThreadRemplirCarton,
+		mutCvRemplirCarton,&shMemLots,&debutSyncro};
 
 	sigaction(SIGINT,&action,NULL);
 
-	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)&initRemplissageCarton)!=0)
+	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)&argRemplirCarton)!=0)
 		cerr<<"ERROR create threadRemplirCarton"<<endl;
 
 	//test 1
