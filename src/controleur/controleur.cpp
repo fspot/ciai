@@ -48,10 +48,13 @@ void reprendre_tache(InfoThread aThread)
 int controleur_thread(void * argsUnconverted)
 {
   ArgControleur  * args= (ArgControleur *)argsUnconverted;
+  ecriture_log_controleur(args->gestionnaireLog,"Lancement de la tâche controleur",EVENT);
   while(1)
     {
-      Event nextEvent = args->eventBox->Pull();
+      Event nextEvent = args->balEvenements->Pull();
+      ecriture_log_controleur(args->gestionnaireLog,"Nouvel evenement a traiter - controleur",EVENT);
       Message aMsg;
+      ListeCommandes lca;
       switch (nextEvent.event)
 	{
 
@@ -143,6 +146,7 @@ int controleur_thread(void * argsUnconverted)
 	  pthread_exit(0);
           break;
 	case FINERREUR:
+           ecriture_log_controleur(args->gestionnaireLog,"Terminaison de l'application apres erreur - controleur",EVENT);
            Carton c;
 	   c.fin=true;
 	   args->balImprimante->Push(c,0);
@@ -153,6 +157,10 @@ int controleur_thread(void * argsUnconverted)
 	   Piece pe;
 	   pe.fin=true;
            args->balPiece->Push(pe,0);
+
+  	   lca.fin=true;
+	   args->balCommandes->Push(lca,0);
+           ecriture_log_controleur(args->gestionnaireLog,"Fin de la tâche controleur",EVENT);
 	   pthread_exit(0);
 	  break;
 	default:

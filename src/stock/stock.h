@@ -13,6 +13,7 @@
 
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
+#include "../log/log.h" 
 
 //------------------------------------------------------------- Constantes 
 
@@ -21,6 +22,7 @@
 struct ArgStock {
 	Mailbox<Palette>* balStockage;
 	Mailbox<Event>* balEvenements;
+  	Log * gestionnaireLog;
 	sem_t* reprise; // reprise après erreur
 	SharedMemoryLots *shMemLots;
 	SharedMemoryStock *stock;

@@ -24,9 +24,20 @@ static void wait()
 	pthread_mutex_unlock(init->mutCv);
 }
 
+void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
+{
+  #ifdef DEBUG
+    unGestionnaire->Write(msg,unType,true);
+  #else
+    unGestionnaire->Write(msg,unType,false);
+  #endif 
+}
+
+
 void* remplirCarton(void * index)
 {
 	init=(ArgRemplirCarton *)index;
+        ecriture_log_remplirCarton(init->gestionnaireLog,"Lancement de la tâche remplir carton",EVENT);
 	serieCourante=0;
 
 	sem_wait(init->debutSyncro);

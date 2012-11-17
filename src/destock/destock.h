@@ -13,6 +13,7 @@
 
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
+#include "../log/log.h" 
 
 //------------------------------------------------------------- Constantes 
 
@@ -22,6 +23,7 @@ struct ArgDestock {
 	SharedMemoryStock *stock;
 	Mailbox<Event>* balEvenements;
 	Mailbox<ListeCommandes>* balCommandes;
+  	Log * gestionnaireLog;
 	pthread_cond_t* cv;
 	pthread_mutex_t* mutCv;
 };

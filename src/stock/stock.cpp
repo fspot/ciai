@@ -9,7 +9,8 @@
 using namespace std; 
 
 
-void *thread_stock(void *argStock)
+
+void * thread_stock(void *argStock)
 {
 	cout << "Thread Stock launched" << endl;
 
@@ -24,7 +25,7 @@ void *thread_stock(void *argStock)
 	// stock ?
 
 	// ==== semaphore wait (synchronisation du lancement des threads moteurs)
-	// SEM_WAIT()
+	sem_wait(infos->debutSyncro);
 
 	Palette p;
 	int lot = 0, pal = 0; // num lot actuel, num palette actuelle (au sein du lot)

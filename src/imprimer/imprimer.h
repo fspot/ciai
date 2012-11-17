@@ -2,6 +2,7 @@
 
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
+#include "../log/log.h" 
 
 using namespace std;
 
@@ -9,6 +10,7 @@ struct ArgImprimer
 {
   Mailbox<Event> * eventBox;
   Mailbox<Carton> * balImprimante;
+  Log * gestionnaireLog;
   Mailbox<Carton> * balPalette;
   pthread_cond_t * varCond;
   pthread_mutex_t * mutex;
@@ -17,6 +19,8 @@ struct ArgImprimer
   bool * panneImprim;
   Mutex * mutexPanne;
 };
+
+
 
 int imprimer_thread(void * argsUnconverted)
 {

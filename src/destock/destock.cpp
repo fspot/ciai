@@ -10,17 +10,29 @@
 
 using namespace std; 
 
+void ecriture_log_destock(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
+{
+  #ifdef DEBUG
+    unGestionnaire->Write(msg,unType,true);
+  #else
+    unGestionnaire->Write(msg,unType,false);
+  #endif 
+}
 
 void *thread_destock(void * argDestock)
 {
 	ArgDestock *arg = (ArgDestock*) argDestock; // cast
-
+        ecriture_log_destock(arg->gestionnaireLog,"Lancement de la tâche destock",EVENT);
 	ListeCommandes lc;
 	while(1) {
 		lc = arg->balCommandes->Pull(); // bloquant
+        	ecriture_log_destock(arg->gestionnaireLog,"Commande recue - destock",EVENT);
 		if (lc.fin)
+		{
+        		ecriture_log_destock(arg->gestionnaireLog,"Fin de la tâche destock",EVENT);
+			pthread_exit(0);
 			break;
-
+		}
 		// LOCK :
 		arg->stock->mutex.lock();
 
@@ -48,6 +60,5 @@ void *thread_destock(void * argDestock)
 		// UNLOCK :
 		arg->stock->mutex.unlock();
 	}
-
-	pthread_exit(0);
+	
 }

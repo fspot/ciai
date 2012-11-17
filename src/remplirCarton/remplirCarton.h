@@ -12,6 +12,7 @@
 //--------------------------------------------------- Interfaces utilisées
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
+#include "../log/log.h" 
 
 //------------------------------------------------------------- Constantes 
 
@@ -20,6 +21,7 @@ struct ArgRemplirCarton{
   Mailbox<Piece>* pBalPieces;
   Mailbox<Carton>* pBalCartons;
   Mailbox<Event>* pBalEvenements;
+  Log * gestionnaireLog;
   Mutex* mutCartonPresent;
   sem_t* sem_fin_de_serie;
   bool* pCartonPresent;

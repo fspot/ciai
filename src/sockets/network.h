@@ -3,11 +3,13 @@
 
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
+#include "../log/log.h" 
 
 struct NetworkInitInfo {
 	Mailbox<Message> *netmb_ptr;
 	int *socket_ptr;
 	SharedMemoryLots *shMemLots;
+  	Log * gestionnaireLog;
 };
 
 void* thread_network(void* arg);
