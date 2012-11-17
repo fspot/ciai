@@ -53,16 +53,23 @@ int handle_MIDDLE(char *str);
 
 using namespace std;
 
+void ecriture_log_network(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
+{
+  #ifdef DEBUG
+    unGestionnaire->Write(msg,unType,true);
+  #else
+    unGestionnaire->Write(msg,unType,false);
+  #endif 
+}
 
 
-
-int initListener()
+int initListener(NetworkInitInfo *infos)
 {
 	// initialisation du main socket (qui reçoit les clients)
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock == -1)
     {
-        perror("socket()");
+        ecriture_log_network(infos->gestionnaireLog,"Erreur socket - serveur reception",ERROR);
         exit(errno);
     }
 
@@ -72,26 +79,26 @@ int initListener()
     sin.sin_port = htons(PORT);
     if(bind (sock, (Sockaddr *) &sin, sizeof sin) == -1)
     {
-        perror("bind()");
+        ecriture_log_network(infos->gestionnaireLog,"Erreur bind - serveur reception",ERROR);
         exit(errno);
     }
     
     if(listen(sock, 5) == -1)
 	{
-		perror("listen()");
+                ecriture_log_network(infos->gestionnaireLog,"Erreur ecoute - serveur reception",ERROR);
 		exit(errno);
 	}
 	return sock;
 }
 
-int waitClient(int listener)
+int waitClient(int listener, NetworkInitInfo *infos)
 {
 	Sockaddr_in csin = { 0 };
 	unsigned int sinsize = sizeof(csin);
 	int csock = accept(listener, (Sockaddr *)&csin, &sinsize);
 	if(csock == -1)
 	{
-		perror("FAIL ON accept()");
+                ecriture_log_network(infos->gestionnaireLog,"Erreur connexion - serveur reception",ERROR);
 		exit(errno);
 	}
 	return csock;
@@ -103,8 +110,9 @@ int handle(char* data, char *buf)
 		return -1; // msg > 1024 o
 
 	int ret = 1;
+	bool flagEndWhile=true;
 	char *str = strcat(data, buf);
-	while (strlen(str) != 0)
+	while ((strlen(str) != 0) && flagEndWhile)
 	{
 		int ofs = 0; // ofs --> offset
 		while(strlen(str)-ofs >= 2 && (str[ofs+1] != '\r' && str[ofs+2] != '\n'))
@@ -117,7 +125,6 @@ int handle(char* data, char *buf)
 		strncpy(message, str, ofs+1);
 		message[ofs+1] = '\0';
 		str += (ofs+3); // str pointe plus loin dans data
-
 		switch(sockstate)
 		{
 			case BEGIN:
@@ -128,7 +135,10 @@ int handle(char* data, char *buf)
 				break;
 		}
 		if (ret <= 0)
-			break;
+		{
+			flagEndWhile=false;
+		}
+
 	}
 	strcpy(data, str); // it works !
 	return ret;
@@ -141,14 +151,14 @@ int handle_BEGIN(char *str)
 		return BAD_MSG;
 	}
 	for (int i=0 ; i < stat_lots->content->lots.size() ; i++) {
-		printf("(%d/%d) => Prod %d palettes de %s\n",
+		/*printf("(%d/%d) => Prod %d palettes de %s\n",
 			i+1, 
 			stat_lots->content->tot, 
 			stat_lots->content->lots[i].palettes, 
 			stat_lots->content->lots[i].nom.c_str()
-		);
+		);*/
 	}
-	printf("(BEGIN RCV : %s)\n", str);
+	//printf("(BEGIN RCV : %s)\n", str);
 	sockstate = MIDDLE;
 	sem_post(stat_sync);
 	return GOOD_MSG;
@@ -161,7 +171,7 @@ int handle_MIDDLE(char *str)
 		int val;
 		int err = parse_R(str, &val);
 		if (err != -1) {
-			printf("(MIDDLE RCV : %s, VAL IS %d)\n", str, val);
+			//printf("(MIDDLE RCV : %s, VAL IS %d)\n", str, val);
 			return GOOD_MSG;
 		}
 		return BAD_MSG;
@@ -173,12 +183,12 @@ int handle_MIDDLE(char *str)
 			return BAD_MSG;
 		}
 		for (int i=0 ; i<lc.commandes.size() ; i++) {
-			printf("(%d/%d) => Commande de %d palettes de %s\n", i+1, lc.commandes.size(), lc.commandes[i].palettes, lc.commandes[i].nom.c_str());
+			//printf("(%d/%d) => Commande de %d palettes de %s\n", i+1, lc.commandes.size(), lc.commandes[i].palettes, lc.commandes[i].nom.c_str());
 		}
-		printf("(MIDDLE RCV : %s)\n", str);
+		//printf("(MIDDLE RCV : %s)\n", str);
 		return GOOD_MSG;
 	} else {
-		puts("KO :(");
+		//puts("KO :(");
 		return BAD_MSG;
 	}
 }
@@ -186,21 +196,20 @@ int handle_MIDDLE(char *str)
 // tâche de réception de messages en provenance du client windows
 void* thread_network(void* arg)
 {
-	puts("Thread network launched");
 	NetworkInitInfo *infos = (NetworkInitInfo*) arg;
+        ecriture_log_network(infos->gestionnaireLog,"Lancement de la tâche serveur reception",EVENT);
 	// Mailbox<string> *netmb = infos->netmb_ptr;
 	int *client = infos->socket_ptr;
 	stat_lots = (SharedMemoryLots*) infos->shMemLots;
 	stat_sync = infos->debutSyncro;
-	int listener = initListener();
-	
+	int listener = initListener(infos);
 	while(1)
 	{
 		// On va attendre un client...
 		sockstate = BEGIN;
-		puts("Waiting for *one* client... ... ... ...");
-		*client = waitClient(listener);
-		puts(">>>> Client got ! :)");
+                ecriture_log_network(infos->gestionnaireLog,"Attente connexion - serveur reception",EVENT);
+		*client = waitClient(listener,infos);
+                ecriture_log_network(infos->gestionnaireLog,"Client connecté - serveur reception",EVENT);
 	
 		// reception string
 		char data[MAX_SIZE_MSG];  // contiendra les msg a traiter (1024 char max!)
@@ -210,16 +219,20 @@ void* thread_network(void* arg)
 		while(continuer > 0) 
 		{
 			if((n = recv(*client, buffer, sizeof(buffer)-1, 0)) <= 0)
-				break;
+			{
+				puts("vv");
+				close(listener);
+                		ecriture_log_network(infos->gestionnaireLog,"Client deconnécté && Fin de la tache serveur reception",EVENT);
+				pthread_exit(0);
+			}
 			buffer[n] = '\0';
 			continuer = handle(data, buffer);
+
 			if (continuer <= 0)
-				puts("<<<< Client gone :( ...");
+                		ecriture_log_network(infos->gestionnaireLog,"Client deconnécté - serveur reception",EVENT);
 		}
 		close(*client);
 	}
 	
-	close(listener);
-	
-	pthread_exit(0);
+
 }

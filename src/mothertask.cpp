@@ -29,6 +29,14 @@ using namespace std;
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
+void ecriture_log_mere(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
+{
+  #ifdef DEBUG
+    unGestionnaire->Write(msg,unType,true);
+  #else
+    unGestionnaire->Write(msg,unType,false);
+  #endif 
+}
 
 // Tâche mère
 
@@ -37,7 +45,7 @@ int main()
 // Allocation des ressources, initialisation et lancement des autres threads 
 
 {
- 
+
   // Initialisation des boites aux lettres
   Mailbox<Event>  balEvenements;
   Mailbox<Carton> balImprimante;
@@ -76,6 +84,8 @@ int main()
 
   // Creation du gestionnaire de Log
   Log gestionnaireLog(sortieStdMutex);
+
+  ecriture_log_mere(&gestionnaireLog,"Lancement de la tâche mère",EVENT);
 
 
   // Allocation des mutex et variables conditionnelles
@@ -251,11 +261,10 @@ int main()
   pthread_create (&gestion_series, NULL, (void *(*)(void *)) gestionserie_thread, (void *) gestionSerie);
 
 
-  cout<<"Phase moteur"<<endl;
+  ecriture_log_mere(&gestionnaireLog,"Phase moteur - tache mere",EVENT);
   int a;
   cin>>a;
-  cout<<endl<<endl<<endl;
-  cout<<"Phase de destruction"<<endl;
+  ecriture_log_mere(&gestionnaireLog,"Phase de destruction - tâche mère",EVENT);
   Event e(FINERREUR);
   balEvenements.Push(e,0);
 
@@ -285,7 +294,7 @@ int main()
   delete argRC->pCartonPresent;
   
   delete argRC;
-
+  ecriture_log_mere(&gestionnaireLog,"Destruction tâche mère",EVENT);
   return 0;
   
 }

@@ -31,16 +31,18 @@ void Mailbox<T>::Push(const T& element, unsigned int priority)
 	writeMutex[priority].lock();
 	queues[priority].push(element);
 	writeMutex[priority].unlock();
+	std::cout<<"Depo jeton"<<std::endl;
 	sem_post(&countSemaphore);
 }
 
 template <typename T>
 T Mailbox<T>::Pull()
 {
+	std::cout<<"Pull"<<std::endl;
 	sem_wait(&countSemaphore);
 	for (unsigned int i=0 ; true ; i++ )
 	{
-		if (queues[i].size())
+		if (queues[i].size()>0)
 		{
 			writeMutex[i].lock();
 			T returnedElt = queues[i].front();

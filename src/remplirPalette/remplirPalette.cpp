@@ -1,22 +1,32 @@
 #include "remplirPalette.h"
 
 
-
+void ecriture_log_remplirPalette(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
+{
+  #ifdef DEBUG
+    unGestionnaire->Write(msg,unType,true);
+  #else
+    unGestionnaire->Write(msg,unType,false);
+  #endif 
+}
 
 void remplirPalette_thread(void * argsUncasted)
 {
     static unsigned int idpalette = 0;
     ArgsRemplirPalette * args = (ArgsRemplirPalette *) argsUncasted;
-
+    ecriture_log_remplirPalette(args->gestionnaireLog,"Lancement de la tache remplir palette",EVENT);
     Palette palette;
     int countCarton = 0, countPalette = 0, countLot = 0;
 
     while (1)
     {
     	Carton carton = args->balImprimante->Pull(); // appel bloquant
+	ecriture_log_remplirPalette(args->gestionnaireLog,"Carton recu - remplir palette",EVENT);
     	if (carton.fin)
-    		break;
-
+        {	
+		ecriture_log_remplirPalette(args->gestionnaireLog,"Fin de la tache - remplir palette",EVENT);
+    		pthread_exit(0);
+	}
     	// passage au carton suivant :
     	countCarton++;
     	if (countCarton == args->shMemLots->content->lots[countLot].cartons) { // next palette

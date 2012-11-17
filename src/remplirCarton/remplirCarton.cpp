@@ -17,12 +17,6 @@ static unsigned int nbPiecesDsCarton;
 static unsigned int idCarton;
 static unsigned int serieCourante;
 
-static void wait()
-{
-	pthread_mutex_lock(init->mutCv);
-	pthread_cond_wait(init->cv,init->mutCv);
-	pthread_mutex_unlock(init->mutCv);
-}
 
 void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
@@ -33,6 +27,16 @@ void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType un
   #endif 
 }
 
+static void wait()
+{
+        ecriture_log_remplirCarton(init->gestionnaireLog,"Attente de deblocage - remplir Carton",ERROR);
+	pthread_mutex_lock(init->mutCv);
+	pthread_cond_wait(init->cv,init->mutCv);
+	pthread_mutex_unlock(init->mutCv);
+}
+
+
+
 
 void* remplirCarton(void * index)
 {
@@ -40,6 +44,7 @@ void* remplirCarton(void * index)
         ecriture_log_remplirCarton(init->gestionnaireLog,"Lancement de la tâche remplir carton",EVENT);
 	serieCourante=0;
 	sem_wait(init->debutSyncro);
+        ecriture_log_remplirCarton(init->gestionnaireLog,"Initialisation finie - remplir carton",EVENT);
 	listeLots = &init->shMemLots->content->lots;
 	lotCourant=&(listeLots->at(serieCourante));	
 	nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
@@ -50,10 +55,10 @@ void* remplirCarton(void * index)
 	for(;;)
 	{
 		Piece piece=init->pBalPieces->Pull();
-                ecriture_log_remplirCarton(init->gestionnaireLog,"Piece recue - rempli carton",EVENT);
+                ecriture_log_remplirCarton(init->gestionnaireLog,"Piece recue - remplir carton",EVENT);
 		if(piece.fin==true)
 		{
-                        ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tâche rempli carton",EVENT);
+                        ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tâche remplir carton",EVENT);
 			pthread_exit(NULL);
 		}
 		init->mutCartonPresent->lock();
@@ -61,6 +66,7 @@ void* remplirCarton(void * index)
 		init->mutCartonPresent->unlock();
 		if(!retour)
 		{
+                        ecriture_log_remplirCarton(init->gestionnaireLog,"Carton abscent - remplir carton",EVENT);
 			init->pBalEvenements->Push(Event(ABSCARTON),1);
 			wait();
 		}
@@ -79,6 +85,7 @@ void* remplirCarton(void * index)
 
 		if(nbPiecesDsRebut>lotCourant->rebut)
 		{
+                        ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
 			init->pBalEvenements->Push(Event(TAUXERR),1);
 			wait();
 		}
@@ -97,11 +104,13 @@ void* remplirCarton(void * index)
 					serieCourante++;
 					if((serieCourante+1)>init->shMemLots->content->lots.size())
 					{
+                        			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la dernière série - remplir carton",EVENT);
 						init->pBalEvenements->Push(Event(FIN),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
 						pthread_exit(NULL);
 					}
 					else
 					{
+                        			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
 						lotCourant=&(init->shMemLots->content->lots[serieCourante]);
 						nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 						sem_post(init->sem_fin_de_serie);

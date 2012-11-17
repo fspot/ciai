@@ -18,11 +18,19 @@
 using namespace std;
 
 
-
+void ecriture_log_netsend(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
+{
+  #ifdef DEBUG
+    unGestionnaire->Write(msg,unType,true);
+  #else
+    unGestionnaire->Write(msg,unType,false);
+  #endif 
+}
 
 void* thread_netsend(void* arg)
 {
 	NetSendInitInfo *infos = (NetSendInitInfo*) arg;
+        ecriture_log_netsend(infos->gestionnaireLog,"Lancement de la tâche serveur envoi",EVENT);
 	Mailbox<Message> *netmb = infos->netmb_ptr;
 	int *client = infos->socket_ptr;
 	string msg;
@@ -48,14 +56,15 @@ void* thread_netsend(void* arg)
 	//*
 	while ((msg = netmb->Pull().contenu) != "EXIT_TASK")
 	{
+        	ecriture_log_netsend(infos->gestionnaireLog,"Message a envoyer - serveur envoi",EVENT);
 		if(send(*client, msg.c_str(), strlen(msg.c_str()), 0) < 0)
 		{
-		    cerr << "send() error" << endl;
+        	    ecriture_log_netsend(infos->gestionnaireLog,"Erreur envoi - serveur envoi",ERROR);
 		    break;
 		}
-		cout << "<thread 2 sent \"" << msg << "\">" << endl;
+        	ecriture_log_netsend(infos->gestionnaireLog,"Message envoyé - serveur envoi",EVENT);
 	}
 	/**/
-
+        ecriture_log_netsend(infos->gestionnaireLog,"Fin de la tache serveur envoi",EVENT);
 	pthread_exit(0);
 }

@@ -147,17 +147,22 @@ int controleur_thread(void * argsUnconverted)
           break;
 	case FINERREUR:
            ecriture_log_controleur(args->gestionnaireLog,"Terminaison de l'application apres erreur - controleur",EVENT);
-           Carton c;
-	   c.fin=true;
-	   args->balImprimante->Push(c,0);
-  	   args->balPalette->Push(c,0);
+           Carton c2;
+	   c2.fin=true;
+           cout<<"palette"<<endl;
+  	   args->balPalette->Push(c2,0);
  	   Palette p;
 	   p.fin=true;
+           cout<<"stockage"<<endl;
            args->balStockage->Push(p,0);
 	   Piece pe;
 	   pe.fin=true;
+           cout<<"remplircarton"<<endl;
            args->balPiece->Push(pe,0);
-
+	   Carton c1;
+	   c1.fin=true;
+           cout<<"imprimante"<<endl;
+	   args->balImprimante->Push(c1,1);		
   	   lca.fin=true;
 	   args->balCommandes->Push(lca,0);
            ecriture_log_controleur(args->gestionnaireLog,"Fin de la tâche controleur",EVENT);
