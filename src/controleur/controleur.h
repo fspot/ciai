@@ -31,8 +31,9 @@ struct ArgControleur
   Mailbox<Carton>  * balPalette;
   Mailbox<Palette> *balStockage;
   Mailbox<Piece> * balPiece;
-  Mailbox<Event> * eventBox;
+  Mailbox<Event> * balEvenements;
   Mailbox<Message> * msgBox;
+  Mailbox<ListeCommandes> * balCommandes;
   Log * gestionnaireLog;
   map<Task,InfoThread> threads;
 };

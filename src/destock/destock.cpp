@@ -10,26 +10,38 @@
 
 using namespace std; 
 
-
-void *thread_destock(void *argDestock)
+void ecriture_log_destock(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
-	ArgDestock arg = (ArgDestock) *argDestock; // cast
+  #ifdef DEBUG
+    unGestionnaire->Write(msg,unType,true);
+  #else
+    unGestionnaire->Write(msg,unType,false);
+  #endif 
+}
 
+void *thread_destock(void * argDestock)
+{
+	ArgDestock *arg = (ArgDestock*) argDestock; // cast
+        ecriture_log_destock(arg->gestionnaireLog,"Lancement de la tâche destock",EVENT);
 	ListeCommandes lc;
 	while(1) {
-		lc = arg.balCommandes->Pull(); // bloquant
+		lc = arg->balCommandes->Pull(); // bloquant
+        	ecriture_log_destock(arg->gestionnaireLog,"Commande recue - destock",EVENT);
 		if (lc.fin)
+		{
+        		ecriture_log_destock(arg->gestionnaireLog,"Fin de la tâche destock",EVENT);
+			pthread_exit(0);
 			break;
-
+		}
 		// LOCK :
-		arg.stock->mutex.lock();
+		arg->stock->mutex.lock();
 
 		// vérif commandes OK :
 		bool ok = true;
 		for (int i=0 ; i<lc.commandes.size() ; i++) {
 			string nom = lc.commandes[i].nom;
 			int qte = lc.commandes[i].palettes;
-			if (arg.stock->stock[nom] < qte) { // oups, pas assez !
+			if (arg->stock->stock[nom] < qte) { // oups, pas assez !
 				ok = false;
 			}
 		}
@@ -39,15 +51,14 @@ void *thread_destock(void *argDestock)
 			for (int i=0 ; i<lc.commandes.size() ; i++) {
 				string nom = lc.commandes[i].nom;
 				int qte = lc.commandes[i].palettes;
-				arg.stock->stock[nom] -= qte;
+				arg->stock->stock[nom] -= qte;
 			}	
 		} else { // si PAS OK : msg réseau ack + remonter dans balEvent ?
 
 		}
 
 		// UNLOCK :
-		arg.stock->mutex.unlock();
+		arg->stock->mutex.unlock();
 	}
-
-	pthread_exit(0);
+	
 }

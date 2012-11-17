@@ -1,7 +1,9 @@
 #include <pthread.h>
+#include <iostream>
 
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
+#include "../log/log.h" 
 
 using namespace std;
 
@@ -9,19 +11,21 @@ struct ArgImprimer
 {
   Mailbox<Event> * eventBox;
   Mailbox<Carton> * balImprimante;
+  Log * gestionnaireLog;
   Mailbox<Carton> * balPalette;
   pthread_cond_t * varCond;
   pthread_mutex_t * mutex;
-  SharedMemoryLots * Lots;
-  sem_t * debutSyncro;
+  SharedMemoryLots * Lots; // vérifier si fin du lot pour tuer tache, à faire
   bool * panneImprim;
   Mutex * mutexPanne;
 };
 
+
+
 int imprimer_thread(void * argsUnconverted)
 {
+	cout << "thread imprimer launched" << endl;
 	ArgImprimer * args= (ArgImprimer *)argsUnconverted;
-	cout<<"Tâche imprimer lancée"<<endl;
 	
 	bool panneImprimante = false;
 	Carton cartonImpression;
@@ -36,15 +40,16 @@ int imprimer_thread(void * argsUnconverted)
 			pthread_exit(0);
 		cout<<"\nCarton récupéré "<< cartonImpression.id<<endl;
 
-		// Verification panne imprimante
+		// Verification panne imprimante, panneImprim a simuler
 		// mutexPanne->lock();
-		// panneImprimante = &panneImprim;
+		// panneImprimante = args->panneImprim;
 		// mutexPanne->unlock();
 
 		if (!panneImprimante) {
 
 			if (args->balPalette->Size() < 10) {
 
+				// Depot Carton dans la bal balPalette
 				args->balPalette->Push(cartonImpression,0);
 
 			}

@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.6)
  
 project(mothertask)
-#set (CMAKE_CXX_FLAGS "-fpermissive") 
+set (CMAKE_CXX_FLAGS "-g -fpermissive") 
  
 find_package (Threads)
 
@@ -15,7 +15,10 @@ set(SOURCES sockets/network.cpp
 	    controleur/controleur.cpp
 	    gestionserie/gestionserie.cpp
 	    destock/destock.cpp
-	    stock/stock.cpp)
+	    stock/stock.cpp
+	    remplirPalette/remplirPalette.cpp
+	    stubs/stubs.cpp
+	    piece/piece.cpp)
 
 add_executable(mothertask mothertask.cpp ${SOURCES})
 target_link_libraries (mothertask ${CMAKE_THREAD_LIBS_INIT})

@@ -1,43 +1,37 @@
 
 /*************************************************************************
-                           remplirCarton  -  Tâche qui gère le remplir
+  piece  -  Tâche qui gère la génération des pièces.
 *************************************************************************/
 
-//---------- Interface de la tâche remplir carton -------
-#if ! defined ( remplirCarton_H )
-#define remplirCarton_H
+//---------- Interface de la tâche piece ---
 
+#ifndef PIECE_H
+#define PIECE_H
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisées
+
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
+#include "../multithreadObjects/mutex.h"
 #include "../log/log.h" 
 
 //------------------------------------------------------------- Constantes 
 
 //------------------------------------------------------------------ Types 
-struct ArgRemplirCarton{
-  Mailbox<Piece>* pBalPieces;
-  Mailbox<Carton>* pBalCartons;
-  Mailbox<Event>* pBalEvenements;
-  Log * gestionnaireLog;
-  Mutex* mutCartonPresent;
-  sem_t* sem_fin_de_serie;
-  bool* pCartonPresent;
-  Lot * lots;
-  SharedMemoryLots *shMemLots;
-  unsigned int nbLots;
-  sem_t * finDeSerieMutex;
-  pthread_cond_t* cv;
-  pthread_mutex_t* mutCv;
-  sem_t * debutSyncro;
+
+struct ArgPiece {
+	Mailbox<Piece>* balPiece;
+	Mailbox<Event>* balEvenements;
+  	Log * gestionnaireLog;
+  	sem_t * debutSyncro;
+  	Mutex *clapet;
+	//pthread_cond_t* cv;
+	//pthread_mutex_t* mutCv;
 };
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void * remplirCarton(void * index);
+void *thread_piece(void *argPiece);
 
-
-#endif // remplirCarton_H
-
-
+#endif

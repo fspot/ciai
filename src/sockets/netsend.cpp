@@ -17,6 +17,9 @@
 
 using namespace std;
 
+
+
+
 void* thread_netsend(void* arg)
 {
 	NetSendInitInfo *infos = (NetSendInitInfo*) arg;

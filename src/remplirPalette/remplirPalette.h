@@ -3,17 +3,21 @@
 #include "../stubs/stubs.h"
 #include "../mailbox/mailbox.h"
 #include "../modeles/modeles.h"
+#include "../log/log.h" 
 #include <pthread.h>
 
-struct remplirPaletteArgs{
+struct ArgsRemplirPalette{
   Mailbox<Carton>* balImprimante;
+  Log * gestionnaireLog;
   Mailbox<Palette>* balPalette;
   Mailbox<Event>* eventBox;
-  sem_t* afterErrorRestart;
+  pthread_cond_t *cw;
+  pthread_mutex_t* mxcw;
   SharedMemoryLots* shMemLots;
+  sem_t * debutSyncro;
 };
 
-
+void remplirPalette_thread(void * args);
 
 
 
