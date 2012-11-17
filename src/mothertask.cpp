@@ -15,6 +15,7 @@
 #include "sockets/network.h"
 #include "sockets/netsend.h"
 #include "imprimer/imprimer.h"
+#include "piece/piece.h"
 #include "log/log.h"
 #include "remplirCarton/remplirCarton.h"
 #include "remplirPalette/remplirPalette.h"
@@ -65,13 +66,13 @@ int main()
   // * shmem du stock :
   SharedMemoryStock stock;
 
-
   // Initialisation du générateur
   //srand(time(NULL));
 
   // Mutex
   Mutex  sortieStdMutex;
   Mutex  cartonPresent;
+  Mutex  clapet;
 
   sem_t  debutSyncro;
   sem_init(&debutSyncro, 0, 0);
@@ -90,6 +91,7 @@ int main()
 
   // Allocation des mutex et variables conditionnelles
   pthread_t 
+    genere_piece,
     remplir_carton, 
     imprimer, 
     remplir_palette,
@@ -185,6 +187,16 @@ int main()
   argDestock.mutCv = &condDPM;
   argDestock.stock = &stock;
   pthread_create (&destocker_palette, NULL, thread_destock, (void*) &argDestock);
+
+
+  // Création du thread genere_piece
+  ArgPiece argPiece;
+  argPiece.balPiece =&balPiece;
+  argPiece.balEvenements = &balEvenements;
+  argPiece.gestionnaireLog = &gestionnaireLog;
+  argPiece.clapet = &clapet;
+  argPiece.debutSyncro = &debutSyncro;
+  pthread_create (&genere_piece, NULL, thread_piece, (void*) &argPiece);
   
   
   //Création du thread controleur
