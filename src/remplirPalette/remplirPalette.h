@@ -5,15 +5,16 @@
 #include "../modeles/modeles.h"
 #include <pthread.h>
 
-struct remplirPaletteArgs{
+struct ArgsRemplirPalette{
   Mailbox<Carton>* balImprimante;
   Mailbox<Palette>* balPalette;
   Mailbox<Event>* eventBox;
-  sem_t* afterErrorRestart;
+  pthread_cond_t *cw;
+  pthread_mutex_t* mxcw;
   SharedMemoryLots* shMemLots;
 };
 
-
+void remplirPalette_thread(void * args);
 
 
 
