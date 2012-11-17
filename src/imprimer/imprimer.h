@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <iostream>
 
 #include "../modeles/modeles.h"
 #include "../mailbox/mailbox.h"
@@ -13,15 +14,14 @@ struct ArgImprimer
   pthread_cond_t * varCond;
   pthread_mutex_t * mutex;
   SharedMemoryLots * Lots; // vérifier si fin du lot pour tuer tache, à faire
-  sem_t * debutSyncro;
   bool * panneImprim;
   Mutex * mutexPanne;
 };
 
 int imprimer_thread(void * argsUnconverted)
 {
+	cout << "thread imprimer launched" << endl;
 	ArgImprimer * args= (ArgImprimer *)argsUnconverted;
-	cout<<"Tâche imprimer lancée"<<endl;
 	
 	bool panneImprimante = false;
 	Carton cartonImpression;

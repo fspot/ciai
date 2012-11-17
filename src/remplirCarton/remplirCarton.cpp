@@ -29,14 +29,17 @@ void* remplirCarton(void * index)
 	init=(ArgRemplirCarton *)index;
 	serieCourante=0;
 
+	cout << "thread remplirCarton : attente sync..." << endl;
 	sem_wait(init->debutSyncro);
-	init->shMemLots->mutex.lock();
-	listeLots=new vector<Lot>(init->shMemLots->content->lots);
-	init->shMemLots->mutex.unlock();
+	cout << "thread remplirCarton : je peux commencer !" << endl;
+
+	listeLots = &init->shMemLots->content->lots;
+	cout << "Premier lot = " << listeLots->at(0).nom << " " << listeLots->at(0).palettes << endl;
 	lotCourant=&(listeLots->at(serieCourante));	
 	nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 	nbPiecesDsCarton=0;
 	idCarton=0;
+
 
 	for(;;)
 	{
