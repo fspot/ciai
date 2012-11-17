@@ -8,12 +8,12 @@ void remplirPalette_thread(void * argsUncasted)
     static unsigned int idpalette = 0;
     ArgsRemplirPalette * args = (ArgsRemplirPalette *) argsUncasted;
     unsigned int lotnb = 0;
+    sem_wait(args->debutSyncro);
     while (1)
     {
-		sem_wait(args->debutSyncro);
+		
 		args->shMemLots->mutex.lock();
 		int cartonsMax = args->shMemLots->content->lots[lotnb].cartons;
-		sleep(10);
 		int palettesMax = args->shMemLots->content->lots[lotnb].palettes;
 		args->shMemLots->mutex.unlock();
 		int countPalettes = 0;
