@@ -4,7 +4,7 @@ bool stubPresencePalette()
 {
 #ifdef ABS_PALETTE
 	return false;
-#elif
+#else if
 	return (rand() % PROBA_ABS_PALETTE != 0);
 #endif
 }
@@ -13,7 +13,7 @@ bool stubErrEmbalagePalette()
 {
 #ifdef ERR_EMBALAGE
 	return true;
-#elif
+#else if
 	return (rand() % PROBA_ERR_EMBALAGE == 0);
 #endif
 }

@@ -17,6 +17,7 @@
 #include "imprimer/imprimer.h"
 #include "log/log.h"
 #include "remplirCarton/remplirCarton.h"
+#include "remplirPalette/remplirPalette.h"
 #include "gestionserie/gestionserie.h"
 #include "stock/stock.h"
 #include "destock/destock.h"                             
@@ -28,28 +29,6 @@ using namespace std;
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
-// Fonctions temporaires
-void * remplir_palette_function()
-{
-  cout<<"\t\tTâche remplir palette lancée"<<endl;
-  pthread_exit(0);
-}
-void * stocker_palette_function()
-{
-  cout<<"\t\tTâche stocker palette lancée"<<endl;
-  pthread_exit(0);
-}
-void * destocker_palette_function()
-{
-  cout<<"\t\tTâche destocker palette lancée"<<endl;
-  pthread_exit(0);
-}
-
-void * gestion_series_function()
-{
-  cout<<"\t\tTâche gestion series lancée"<<endl;
-  pthread_exit(0);
-}
 
 // Tâche mère
 
@@ -160,7 +139,14 @@ int main()
 
 
   // Création du thread remplir palette
-  pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplir_palette_function, NULL);
+  ArgsRemplirPalette * argRP = new ArgsRemplirPalette();
+  argRP->balImprimante=&balImprimante;
+  argRP->balPalette=&balStockage;
+  argRP->eventBox=&balEvenements;
+  argRP->cw=&condRP;
+  argRP->mxcw=&condRPM;
+  argRP->shMemLots=&lots;
+  pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplirPalette_thread, argRP);
 
 
   //Creation du thread stocker palette
