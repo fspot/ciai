@@ -11,6 +11,7 @@ struct ArgsRemplirPalette{
   Log * gestionnaireLog;
   Mailbox<Palette>* balStockage;
   Mailbox<Event>* eventBox;
+  Mailbox<Message>* balMessages;
   pthread_cond_t *cw;
   pthread_mutex_t* mxcw;
   SharedMemoryLots* shMemLots;

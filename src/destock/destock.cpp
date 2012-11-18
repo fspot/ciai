@@ -22,14 +22,14 @@ void ecriture_log_destock(Log * unGestionnaire, std::string msg,logType unType)
 void *thread_destock(void * argDestock)
 {
 	ArgDestock *arg = (ArgDestock*) argDestock; // cast
-        ecriture_log_destock(arg->gestionnaireLog,"Lancement de la tâche destock",EVENT);
+    ecriture_log_destock(arg->gestionnaireLog,"Lancement de la tâche destock",EVENT);
 	ListeCommandes lc;
 	while(1) {
 		lc = arg->balCommandes->Pull(); // bloquant
-        	ecriture_log_destock(arg->gestionnaireLog,"Commande recue - destock",EVENT);
+    	ecriture_log_destock(arg->gestionnaireLog,"Commande recue - destock",EVENT);
 		if (lc.fin)
 		{
-        		ecriture_log_destock(arg->gestionnaireLog,"Fin de la tâche destock",EVENT);
+    		ecriture_log_destock(arg->gestionnaireLog,"Fin de la tâche destock",EVENT);
 			pthread_exit(0);
 			break;
 		}
@@ -52,10 +52,12 @@ void *thread_destock(void * argDestock)
 				string nom = lc.commandes[i].nom;
 				int qte = lc.commandes[i].palettes;
 				arg->stock->stock[nom] -= qte;
-			}	
-		} else { // si PAS OK : msg réseau ack + remonter dans balEvent ?
-
+			}
 		}
+
+		// Msg réseau acquittement :
+		Message msg = {lc.netstr(ok), false};
+		arg->balMessages->Push(msg, 2);
 
 		// UNLOCK :
 		arg->stock->mutex.unlock();

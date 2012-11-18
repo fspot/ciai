@@ -135,6 +135,7 @@ int main()
   argRC.pBalPieces=&balPiece;
   argRC.pBalCartons = &balImprimante;
   argRC.pBalEvenements = &balEvenements;
+  argRC.pBalMessages = &balMessages;
   argRC.gestionnaireLog=&gestionnaireLog;
   argRC.mutCartonPresent=&cartonPresent;
   argRC.pCartonPresent = new bool(true);
@@ -170,6 +171,7 @@ int main()
   argRP.balPalette=&balPalette;
   argRP.balStockage=&balStockage;
   argRP.eventBox=&balEvenements;
+  argRP.balMessages = &balMessages;
   argRP.cw=&condRP;
   argRP.mxcw=&condRPM;
   argRP.shMemLots=&lots;
@@ -199,6 +201,7 @@ int main()
   argDestock.cv = &condDP;
   argDestock.mutCv = &condDPM;
   argDestock.stock = &stock;
+  argDestock.balMessages = &balMessages;
   pthread_create (&destocker_palette, NULL, thread_destock, (void*) &argDestock);
 
 

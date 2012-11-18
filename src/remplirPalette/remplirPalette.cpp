@@ -21,15 +21,19 @@ void remplirPalette_thread(void * argsUncasted)
     while (1)
     {
     	Carton carton = args->balPalette->Pull(); // appel bloquant
-	ecriture_log_remplirPalette(args->gestionnaireLog,"Carton recu - remplir palette",EVENT);
+		ecriture_log_remplirPalette(args->gestionnaireLog,"Carton recu - remplir palette",EVENT);
     	if (carton.fin)
         {	
-		ecriture_log_remplirPalette(args->gestionnaireLog,"Fin de la tache - remplir palette",EVENT);
-		Palette p;
-		p.fin=true;
+			ecriture_log_remplirPalette(args->gestionnaireLog,"Fin de la tache - remplir palette",EVENT);
+			Palette p;
+			p.fin=true;
     		args->balStockage->Push(p,0);
     		pthread_exit(0);
-	}
+		}
+		// Message réseau carton empaletté :
+		Message msg = {carton.netstr_palette(), false};
+		args->balMessages->Push(msg, 2);
+
     	// passage au carton suivant :
     	countCarton++;
     	if (countCarton == args->shMemLots->content->lots[countLot].cartons) { // next palette
@@ -49,6 +53,10 @@ void remplirPalette_thread(void * argsUncasted)
 
     		// on push la palette
     		args->balStockage->Push(palette,0);
+    		
+    		// Message réseau palette finie :
+    		Message msg = {palette.netstr(), false};
+    		args->balMessages->Push(msg, 2);
 
     		countCarton = 0;
 	    	countPalette++;

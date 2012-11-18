@@ -26,6 +26,8 @@ static Mutex mtxStandardOutput;
 static Mutex mtxLotCourant;
 static Log *gestionnaireLog;
 
+
+//on teste un cas normal sans erreur
 static bool test1()
 {
 	sem_post(&debutSyncro);
@@ -55,6 +57,7 @@ static bool test1()
 	return false;
 }
 
+//on teste le cas où une absence de carton est observée
 static bool test2()
 {
 	sem_post(&debutSyncro);
@@ -87,6 +90,7 @@ static bool test2()
 	return false;
 }
 
+//on teste le cas où trop de pièces défectueuese par carton ont été observés
 static bool test3()
 {
 	sem_post(&debutSyncro);
@@ -99,7 +103,7 @@ static bool test3()
 		sleep(1);
 		Piece piece={{200,200,200},false};
 		pBalPieces->Push(piece);
-	for(int i=0; i<3;i++)
+	for(int i=0; i<8;i++)
 	{
 		sleep(1);
 		Piece piece={{100,100,100},false};
