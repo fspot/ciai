@@ -62,7 +62,6 @@ void* thread_netsend(void* arg)
 
 		msg = m.contenu;
 		ecriture_log_netsend(infos->gestionnaireLog,"Message a envoyer - serveur envoi", EVENT);
-		cout << "LE CLIENT " << *client << endl;
 		if(send(*client, msg.c_str(), strlen(msg.c_str()), 0) < 0)
 		{
 			ecriture_log_netsend(infos->gestionnaireLog,"Erreur envoi - serveur envoi",ERROR);
