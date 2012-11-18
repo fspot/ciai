@@ -21,6 +21,7 @@ struct ArgRemplirCarton{
   Mailbox<Piece>* pBalPieces;
   Mailbox<Carton>* pBalCartons;
   Mailbox<Event>* pBalEvenements;
+  Mailbox<Message>* pBalMessages;
   Log * gestionnaireLog;
   Mutex* mutCartonPresent;
   sem_t* sem_fin_de_serie;

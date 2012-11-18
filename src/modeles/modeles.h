@@ -61,8 +61,12 @@ enum EventType
 struct Event {
   EventType event	;
   Event(EventType e):event(e){}
+  std::string netstr() {
+    std::stringstream ss;
+    ss << "E#" << event << "\r\n"; // msg envoyé qd palette finie.
+    return ss.str();
+  }
 }; 
-
 
 
 
