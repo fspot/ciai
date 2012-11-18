@@ -76,9 +76,11 @@ void* remplirCarton(void * index)
 		
 		while(i<3 && valide)
 		{
+			cout<<piece.dim[i]<<" "<<lotCourant->dim[i]<<endl;
 			if(piece.dim[i]!=lotCourant->dim[i])
 			{
 				valide=false;
+
 			}			
 			i++;
 		}
@@ -86,10 +88,15 @@ void* remplirCarton(void * index)
 		if(!valide)
 		{
 			nbPiecesDsRebut++;
+			cout<<"Piece defaillainte"<<endl;
+		}
+		else	
+		{
+			cout<<"valide"<<endl;
 		}
 		if(nbPiecesDsRebut>lotCourant->rebut)
 		{
-            ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
+            		ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
 			init->pBalEvenements->Push(Event(TAUXERR),0);
 			wait();
 			nbPiecesDsRebut=0;
@@ -134,6 +141,7 @@ void* remplirCarton(void * index)
 						init->lotCourantMutex->lock();
 						(*(init->lotCourant))+=1;
 						init->lotCourantMutex->unlock();
+						cout<<"lot "<<(*(init->lotCourant))<<endl;
                         ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
 						lotCourant=&(init->shMemLots->content->lots[serieCourante]);
 						nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
