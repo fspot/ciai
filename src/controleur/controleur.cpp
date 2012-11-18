@@ -22,10 +22,19 @@ using namespace std;
 
 //------------------------------------------------------ Fonctions privées
 
-void fermeture_clapet()
+void fermeture_clapet(Mutex * clapet)
 {
-  // a ecrire
+   cout<<"Clapet fermé"<<endl;
+   clapet->lock();
 }
+
+void ouverture_clapet(Mutex * clapet)
+{
+   cout<<"Clapet ouvert"<<endl;
+   clapet->unlock();
+
+}
+
 
 void ecriture_log_controleur(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
@@ -59,77 +68,79 @@ int controleur_thread(void * argsUnconverted)
 	{
 
 	case ABSCARTON:
-	  fermeture_clapet();
+	  fermeture_clapet(args->clapet);
 	  ecriture_log_controleur(args->gestionnaireLog,"Abscence carton",ERROR);
-	  aMsg.contenu ="Abscence carton";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Abscence carton - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;
 
 	case PANNEIMPRIM:
-	  fermeture_clapet();
+	  fermeture_clapet(args->clapet);
 	  ecriture_log_controleur(args->gestionnaireLog,"Panne imprimante",ERROR);
-	  aMsg.contenu ="Panne imprimante";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Panne imprimante - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;
 
 	case ABSPALETTE:
-	  fermeture_clapet();
+	  fermeture_clapet(args->clapet);
 	  ecriture_log_controleur(args->gestionnaireLog,"Abscence palette",ERROR);
-	  aMsg.contenu ="Abscence palette";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Abscence palette - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;
 
 	case TAUXERR:
-	  fermeture_clapet();
+	  fermeture_clapet(args->clapet);
 	  ecriture_log_controleur(args->gestionnaireLog,"Taux erreur",ERROR);
-	  aMsg.contenu ="Taux erreur";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Taux erreur - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
+
 	  break;
 
 	case FILEATTPLEINE:
-	  fermeture_clapet();
+	  fermeture_clapet(args->clapet);
 	  ecriture_log_controleur(args->gestionnaireLog,"File d'attente pleine",ERROR);
-	  aMsg.contenu ="File d'attente pleine";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="File d'attente pleine - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;      
 
 
 	case ARTURG:
 	  ecriture_log_controleur(args->gestionnaireLog,"Arret d'urgence",ERROR);
-	  aMsg.contenu ="Arret d'urgence";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Arret d'urgence - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;
 
 
 	case REPRISEERREUR:
+	  ouverture_clapet(args->clapet);
 	  reprendre_tache(args->threads[DESTOCKERPALETTE]);
 	  reprendre_tache(args->threads[STOCKERPALETTE]);
 	  reprendre_tache(args->threads[REMPLIRPALETTE]);
 	  reprendre_tache(args->threads[IMPRIMER]);
 	  reprendre_tache(args->threads[REMPLIRCARTON]);
 	  ecriture_log_controleur(args->gestionnaireLog,"Reprise pause",ERROR);
-	  aMsg.contenu ="Reprise pause";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Reprise pause - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;
 
 	case PAUSE:
-	  fermeture_clapet();
+	  fermeture_clapet(args->clapet);
 	  ecriture_log_controleur(args->gestionnaireLog,"Pause fin de serie",EVENT);
-	  aMsg.contenu ="Pause fin de serie";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Pause fin de serie - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;
 
 	case ERREMBALAGES:
-	  fermeture_clapet();
+	  fermeture_clapet(args->clapet);
 	  ecriture_log_controleur(args->gestionnaireLog, "Erreur embalage",ERROR);
-	  aMsg.contenu ="Erreur embalage";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Erreur embalage - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;
 
 	case ERRCOMMANDE:
 	  ecriture_log_controleur(args->gestionnaireLog,"Erreur commande",ERROR);
-	  aMsg.contenu ="Erreur commande";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Erreur commande - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;
 
 	case REPRISEPAUSE:
@@ -139,30 +150,29 @@ int controleur_thread(void * argsUnconverted)
 	  reprendre_tache(args->threads[IMPRIMER]);
 	  reprendre_tache(args->threads[REMPLIRCARTON]);
 	  ecriture_log_controleur(args->gestionnaireLog,"Reprise pause",EVENT);
-	  aMsg.contenu ="Reprise pause";
-	  args->msgBox->Push(aMsg,0);
+	  aMsg.contenu ="Reprise pause - Tache controleur";
+	  args->balMessages->Push(aMsg,0);
 	  break;
 	case FIN:
+	  fermeture_clapet(args->clapet);
+  	  lca.fin=true;
+	  args->balCommandes->Push(lca,0);
 	  pthread_exit(0);
           break;
 	case FINERREUR:
            ecriture_log_controleur(args->gestionnaireLog,"Terminaison de l'application apres erreur - controleur",EVENT);
            Carton c2;
 	   c2.fin=true;
-           cout<<"palette"<<endl;
   	   args->balPalette->Push(c2,0);
  	   Palette p;
 	   p.fin=true;
-           cout<<"stockage"<<endl;
            args->balStockage->Push(p,0);
 	   Piece pe;
 	   pe.fin=true;
-           cout<<"remplircarton"<<endl;
            args->balPiece->Push(pe,0);
 	   Carton c1;
 	   c1.fin=true;
-           cout<<"imprimante"<<endl;
-	   args->balImprimante->Push(c1,1);		
+	   args->balImprimante->Push(c1,0);		
   	   lca.fin=true;
 	   args->balCommandes->Push(lca,0);
            ecriture_log_controleur(args->gestionnaireLog,"Fin de la tâche controleur",EVENT);
@@ -172,6 +182,7 @@ int controleur_thread(void * argsUnconverted)
 	    ecriture_log_controleur(args->gestionnaireLog,"Erreur non gérée",ERROR);
 	break;
 	}
+
     }
 
 }

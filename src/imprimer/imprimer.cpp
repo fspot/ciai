@@ -29,6 +29,9 @@ int imprimer_thread(void * argsUnconverted)
 		if(cartonImpression.fin==true)
  		{
                 	ecriture_log_imprimer(args->gestionnaireLog,"Fin de la tache imprimer",ERROR);
+			Carton c;
+			c.fin=true;
+			args->balPalette->Push(c,0);
 			pthread_exit(0);
 		}
 

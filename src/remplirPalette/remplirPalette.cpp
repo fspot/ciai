@@ -20,11 +20,14 @@ void remplirPalette_thread(void * argsUncasted)
 
     while (1)
     {
-    	Carton carton = args->balImprimante->Pull(); // appel bloquant
+    	Carton carton = args->balPalette->Pull(); // appel bloquant
 	ecriture_log_remplirPalette(args->gestionnaireLog,"Carton recu - remplir palette",EVENT);
     	if (carton.fin)
         {	
 		ecriture_log_remplirPalette(args->gestionnaireLog,"Fin de la tache - remplir palette",EVENT);
+		Palette p;
+		p.fin=true;
+    		args->balStockage->Push(p,0);
     		pthread_exit(0);
 	}
     	// passage au carton suivant :
@@ -45,7 +48,7 @@ void remplirPalette_thread(void * argsUncasted)
     		args->shMemLots->mutex.unlock();
 
     		// on push la palette
-    		args->balPalette->Push(palette,0);
+    		args->balStockage->Push(palette,0);
 
     		countCarton = 0;
 	    	countPalette++;

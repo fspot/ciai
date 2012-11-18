@@ -25,9 +25,9 @@ struct ArgRemplirCarton{
   Mutex* mutCartonPresent;
   sem_t* sem_fin_de_serie;
   bool* pCartonPresent;
-  Lot * lots;
+  Mutex * lotCourantMutex;
   SharedMemoryLots *shMemLots;
-  unsigned int nbLots;
+  int * lotCourant;
   sem_t * finDeSerieMutex;
   pthread_cond_t* cv;
   pthread_mutex_t* mutCv;

@@ -40,6 +40,7 @@ enum e_sockstate {
 static int sockstate;
 static SharedMemoryLots *stat_lots; // mem partagée avec toutes les infos sur les lots
 static sem_t *stat_sync; // sémaphore de synchronisation de début d'appli
+static NetworkInitInfo * infos;
 
 // SIGNATURES
 
@@ -160,7 +161,10 @@ int handle_BEGIN(char *str)
 	}
 	//printf("(BEGIN RCV : %s)\n", str);
 	sockstate = MIDDLE;
-	sem_post(stat_sync);
+	for(int i=0;i<2;i++)
+	{
+		sem_post(stat_sync);
+	}		
 	return GOOD_MSG;
 }
 
@@ -170,8 +174,27 @@ int handle_MIDDLE(char *str)
 	if (c == REPRISE) {
 		int val;
 		int err = parse_R(str, &val);
-		if (err != -1) {
-			//printf("(MIDDLE RCV : %s, VAL IS %d)\n", str, val);
+		if (err != -1) 
+		{
+			switch (val)
+			{
+				case 0:
+					infos->balEvenements->Push(Event(FINERREUR),0);
+					cout<<"Remonte"<<endl;
+				break;
+				case 1:
+					infos->balEvenements->Push(Event(REPRISEERREUR),0);
+				break;
+				case 2:
+					infos->balEvenements->Push(Event(PAUSE),0);
+				break;
+				case 3:
+					infos->balEvenements->Push(Event(REPRISEPAUSE),0);
+				break;
+				default:
+				break;
+			};
+			printf("(MIDDLE RCV : %s, VAL IS %d)\n", str, val);
 			return GOOD_MSG;
 		}
 		return BAD_MSG;
@@ -196,7 +219,7 @@ int handle_MIDDLE(char *str)
 // tâche de réception de messages en provenance du client windows
 void* thread_network(void* arg)
 {
-	NetworkInitInfo *infos = (NetworkInitInfo*) arg;
+	infos = (NetworkInitInfo*) arg;
         ecriture_log_network(infos->gestionnaireLog,"Lancement de la tâche serveur reception",EVENT);
 	// Mailbox<string> *netmb = infos->netmb_ptr;
 	int *client = infos->socket_ptr;
@@ -220,7 +243,6 @@ void* thread_network(void* arg)
 		{
 			if((n = recv(*client, buffer, sizeof(buffer)-1, 0)) <= 0)
 			{
-				puts("vv");
 				close(listener);
                 		ecriture_log_network(infos->gestionnaireLog,"Client deconnécté && Fin de la tache serveur reception",EVENT);
 				pthread_exit(0);

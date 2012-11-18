@@ -74,6 +74,8 @@ int main()
   Mutex  cartonPresent;
   Mutex  clapet;
 
+  Mutex memLotCourant;
+
   sem_t  debutSyncro;
   sem_init(&debutSyncro, 0, 0);
 
@@ -117,6 +119,10 @@ int main()
     condDPM=PTHREAD_MUTEX_INITIALIZER; // destocker
 
 
+  // Variables necessaires à la simulation
+
+
+  int lotCourant=0;
   // ===================================
   // ====== Creation des threads =======
   // ===================================
@@ -131,7 +137,11 @@ int main()
   argRC->pCartonPresent = new bool(true);
   argRC->mutCv=&condRCM;
   argRC->cv=&condRC;
-  argRC->nbLots=0;
+
+  //gestion du lot courant pour simul 
+  argRC->lotCourant=&lotCourant;
+  argRC->lotCourantMutex=&memLotCourant;
+
   argRC->shMemLots=&lots;
   argRC->debutSyncro=&debutSyncro;
   argRC->finDeSerieMutex=&finSerieMutex;
@@ -154,8 +164,8 @@ int main()
   // Création du thread remplir palette
   ArgsRemplirPalette * argRP = new ArgsRemplirPalette();
   argRP->gestionnaireLog=&gestionnaireLog;
-  argRP->balImprimante=&balImprimante;
-  argRP->balPalette=&balStockage;
+  argRP->balPalette=&balPalette;
+  argRP->balStockage=&balStockage;
   argRP->eventBox=&balEvenements;
   argRP->cw=&condRP;
   argRP->mxcw=&condRPM;
@@ -190,13 +200,17 @@ int main()
 
 
   // Création du thread genere_piece
-  ArgPiece argPiece;
-  argPiece.balPiece =&balPiece;
-  argPiece.balEvenements = &balEvenements;
-  argPiece.gestionnaireLog = &gestionnaireLog;
-  argPiece.clapet = &clapet;
-  argPiece.debutSyncro = &debutSyncro;
-  pthread_create (&genere_piece, NULL, thread_piece, (void*) &argPiece);
+  ArgPiece * argPiece = new ArgPiece();
+  argPiece->balPiece =&balPiece;
+  argPiece->balEvenements = &balEvenements;
+  argPiece->gestionnaireLog = &gestionnaireLog;
+  argPiece->clapet = &clapet;
+  argPiece->debutSyncro = &debutSyncro;
+  argPiece->shMemLots = &lots;
+  //gestion du lot courant pour simul 
+  argPiece->lotCourant=&lotCourant;
+  argPiece->lotCourantMutex=&memLotCourant;
+  pthread_create (&genere_piece, NULL, thread_piece, (void*) argPiece);
   
   
   //Création du thread controleur
@@ -209,6 +223,8 @@ int main()
   argControleur->balStockage=&balStockage;
   argControleur->balPiece=&balPiece;
   argControleur->balCommandes=&balCommandes;
+  argControleur->clapet=&clapet;
+  argControleur->balMessages=&balMessages;
 
   
   InfoThread remplirCarton;
@@ -236,11 +252,6 @@ int main()
   stockerPalette.mx=&condSPM;
   argControleur->threads[STOCKERPALETTE]=stockerPalette;
 
-  InfoThread destockerPalette;
-  destockerPalette.id =destocker_palette;
-  destockerPalette.cw=&condDP;
-  destockerPalette.mx=&condDPM;
-  argControleur->threads[DESTOCKERPALETTE]=destockerPalette;
 
   pthread_create (&controleur, NULL, (void *(*)(void *)) controleur_thread, (void *) argControleur);
 
@@ -248,6 +259,7 @@ int main()
   // Création du thread de reception(serveur)
   NetworkInitInfo * info = new NetworkInitInfo();
   info->gestionnaireLog=&gestionnaireLog;
+  info->balEvenements=&balEvenements;
   info->netmb_ptr = &balMessages;
   info->socket_ptr = new int(0);
   info->shMemLots =&lots;
@@ -264,33 +276,18 @@ int main()
 
 
 
-  //Création du thread de gestion des séries
-  ArgGestionSerie * gestionSerie = new ArgGestionSerie();
-  gestionSerie ->gestionnaireLog=&gestionnaireLog;
-  gestionSerie->mtxPauseRequest=&pauseSerieMutex;
-  gestionSerie->finDeSerie=&finSerieMutex;
-  gestionSerie->eventBox=&balEvenements;
-  pthread_create (&gestion_series, NULL, (void *(*)(void *)) gestionserie_thread, (void *) gestionSerie);
-
-
   ecriture_log_mere(&gestionnaireLog,"Phase moteur - tache mere",EVENT);
-  int a;
-  cin>>a;
-  ecriture_log_mere(&gestionnaireLog,"Phase de destruction - tâche mère",EVENT);
-  Event e(FINERREUR);
-  balEvenements.Push(e,0);
 
 
-  pthread_join(gestion_series, NULL);
-  pthread_join(serveur_reception, NULL);
-  pthread_join(serveur_envoi, NULL);
-  pthread_join(serveur_reception, NULL);
+  
   pthread_join(controleur, NULL);
   pthread_join(destocker_palette, NULL);
   pthread_join(stocker_palette, NULL);
   pthread_join(remplir_palette, NULL);
   pthread_join(imprimer, NULL);
   pthread_join(remplir_carton, NULL);
+  pthread_cancel(serveur_envoi);
+  pthread_cancel(serveur_reception);
 
 
   delete infoSend->socket_ptr;

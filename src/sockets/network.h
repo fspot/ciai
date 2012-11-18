@@ -6,6 +6,7 @@
 #include "../log/log.h" 
 
 struct NetworkInitInfo {
+	Mailbox<Event> * balEvenements;
 	Mailbox<Message> *netmb_ptr;
 	int *socket_ptr;
 	SharedMemoryLots *shMemLots;

@@ -12,7 +12,7 @@ static ArgRemplirCarton* init;
 static vector<Lot>* listeLots;
 static Lot *lotCourant;
 static unsigned int nbCartonsRestant;
-static unsigned int nbPiecesDsRebut;
+static unsigned int nbPiecesDsRebut=0;
 static unsigned int nbPiecesDsCarton;
 static unsigned int idCarton;
 static unsigned int serieCourante;
@@ -73,39 +73,59 @@ void* remplirCarton(void * index)
 
 		int i=0;
 		bool valide=true;
+		/*
 		while(i<3 && valide)
 		{
+			cout<<piece.dim[i]<<lotCourant->dim[i]<<endl;
 			if(piece.dim[i]!=lotCourant->dim[i])
+			{
 				valide=false;
+				cout<<"Non valide"<<endl;
+			}			
 			i++;
 		}
-
+		*/
 		if(!valide)
+		{
 			nbPiecesDsRebut++;
-
+			cout<<"Incrémentation"<<endl;
+		}
+		cout<<"Nombre pieces non valides"<<nbPiecesDsRebut<<endl;
 		if(nbPiecesDsRebut>lotCourant->rebut)
 		{
                         ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
-			init->pBalEvenements->Push(Event(TAUXERR),1);
+			init->pBalEvenements->Push(Event(TAUXERR),0);
 			wait();
+			nbPiecesDsRebut=0;
+
 		}
 		else
 		{
 			nbPiecesDsCarton++;
 			if(nbPiecesDsCarton>=lotCourant->pieces)
 			{
+				cout<<"Carton suivant"<<endl;
 				Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
-				init->pBalCartons->Push(carton,1);
+				init->pBalCartons->Push(carton,0);
 				nbCartonsRestant--;
 				nbPiecesDsRebut=0;
 				nbPiecesDsCarton=0;
 				if(nbCartonsRestant<=0)
 				{
+
+					cout<<"Serie suivant"<<endl;
 					serieCourante++;
+					init->lotCourantMutex->lock();
+					init->lotCourant++;
+					init->lotCourantMutex->unlock();
 					if((serieCourante+1)>init->shMemLots->content->lots.size())
 					{
                         			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la dernière série - remplir carton",EVENT);
 						init->pBalEvenements->Push(Event(FIN),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
+						Carton c;
+						c.fin=true;
+						init->pBalCartons->Push(c,0);
+                        			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tache remplir carton",EVENT);
 						pthread_exit(NULL);
 					}
 					else
@@ -113,7 +133,6 @@ void* remplirCarton(void * index)
                         			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
 						lotCourant=&(init->shMemLots->content->lots[serieCourante]);
 						nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
-						sem_post(init->sem_fin_de_serie);
 					}
 				}
 			}
