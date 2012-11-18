@@ -48,6 +48,6 @@ void *thread_piece(void * argPiece)
 	
 		arg->balPiece->Push(p,0);
 		// pause :
-		sleep(0.5);
+		sleep(2);
 	}
 }

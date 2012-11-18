@@ -66,6 +66,9 @@ int main()
   // * shmem du stock :
   SharedMemoryStock stock;
 
+  // socket
+  int socket_ptr;
+
   // Initialisation du générateur
   //srand(time(NULL));
 
@@ -261,7 +264,7 @@ int main()
   info.gestionnaireLog=&gestionnaireLog;
   info.balEvenements=&balEvenements;
   info.netmb_ptr = &balMessages;
-  info.socket_ptr = new int(0);
+  info.socket_ptr = &socket_ptr;
   info.shMemLots =&lots;
   info.debutSyncro = &debutSyncro;
   pthread_create (&serveur_reception, NULL, (void *(*)(void *)) thread_network, (void *)&info);
@@ -271,7 +274,7 @@ int main()
   NetSendInitInfo  infoSend ;
   infoSend.gestionnaireLog=&gestionnaireLog;
   infoSend.netmb_ptr = &balMessages;
-  infoSend.socket_ptr = new int(0);
+  infoSend.socket_ptr = &socket_ptr;
   pthread_create (&serveur_envoi, NULL, (void *(*)(void *)) thread_netsend, (void *) &infoSend);
 
 
