@@ -293,7 +293,7 @@ int main()
   pthread_join(remplir_palette, NULL);
   pthread_join(imprimer, NULL);
   pthread_join(remplir_carton, NULL);
-  pthread_cancel(serveur_envoi);
+  pthread_join(serveur_envoi, NULL);
   pthread_cancel(serveur_reception);
 
   delete argRC.pCartonPresent;
