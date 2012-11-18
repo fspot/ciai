@@ -73,24 +73,20 @@ void* remplirCarton(void * index)
 
 		int i=0;
 		bool valide=true;
-		/*
+		
 		while(i<3 && valide)
 		{
-			cout<<piece.dim[i]<<lotCourant->dim[i]<<endl;
 			if(piece.dim[i]!=lotCourant->dim[i])
 			{
 				valide=false;
-				cout<<"Non valide"<<endl;
 			}			
 			i++;
 		}
-		*/
+		
 		if(!valide)
 		{
 			nbPiecesDsRebut++;
-			cout<<"Incrémentation"<<endl;
 		}
-		cout<<"Nombre pieces non valides"<<nbPiecesDsRebut<<endl;
 		if(nbPiecesDsRebut>lotCourant->rebut)
 		{
             ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
@@ -104,7 +100,6 @@ void* remplirCarton(void * index)
 			nbPiecesDsCarton++;
 			if(nbPiecesDsCarton>=lotCourant->pieces)
 			{
-				cout<<"Carton suivant"<<endl;
 				Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
 				init->pBalCartons->Push(carton,0);
 				
@@ -118,11 +113,8 @@ void* remplirCarton(void * index)
 				if(nbCartonsRestant<=0)
 				{
 
-					cout<<"Serie suivant"<<endl;
 					serieCourante++;
-					init->lotCourantMutex->lock();
-					init->lotCourant++;
-					init->lotCourantMutex->unlock();
+
 					if((serieCourante+1)>init->shMemLots->content->lots.size())
 					{
             			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la dernière série - remplir carton",EVENT);
@@ -135,12 +127,14 @@ void* remplirCarton(void * index)
 					}
 					else
 					{
-            			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
-            			
             			// Message réseau série finie :
             			Message msg = {lotCourant->netstr(), false};
             			init->pBalMessages->Push(msg, 2);
 
+						init->lotCourantMutex->lock();
+						(*(init->lotCourant))+=1;
+						init->lotCourantMutex->unlock();
+                        ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
 						lotCourant=&(init->shMemLots->content->lots[serieCourante]);
 						nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
 					}
