@@ -40,7 +40,7 @@ T Mailbox<T>::Pull()
 	sem_wait(&countSemaphore);
 	for (unsigned int i=0 ; true ; i++ )
 	{
-		if (queues[i].size())
+		if (queues[i].size()>0)
 		{
 			writeMutex[i].lock();
 			T returnedElt = queues[i].front();

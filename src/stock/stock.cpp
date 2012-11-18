@@ -9,13 +9,22 @@
 
 using namespace std; 
 
+void ecriture_log_stock(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
+{
+  #ifdef DEBUG
+    unGestionnaire->Write(msg,unType,true);
+  #else
+    unGestionnaire->Write(msg,unType,false);
+  #endif 
+}
 
 
 void * thread_stock(void *argStock)
 {
-	cout << "thread stock launched." << endl;
+
 	// ==== unpack arguments
 	ArgStock *infos = (ArgStock*) argStock;
+        ecriture_log_stock(infos->gestionnaireLog,"Lancement de la tache de stock",EVENT);
 	Mailbox<Palette>* balStockage = infos->balStockage;
 	Mailbox<Event>* balEvenements = infos->balEvenements;
 	sem_t* reprise = infos->reprise;
@@ -30,10 +39,12 @@ void * thread_stock(void *argStock)
 	while(1)
 	{
 		p = balStockage->Pull(); // opération qui peut être bloquante : réception d'une palette à stocker.
-
+        	ecriture_log_stock(infos->gestionnaireLog,"Une palette arrivee - tache stock",EVENT);
 		if (p.fin) // test cas spécial
-			break;
-
+		{
+        		ecriture_log_stock(infos->gestionnaireLog,"Fin de la tache stock",EVENT);
+			pthread_exit(0);
+		}
 		// "eventuellement" on peut verifier si la palette correspond..
 
 		// ==== phase de stockage
@@ -51,7 +62,10 @@ void * thread_stock(void *argStock)
 
 			// test de fin de production :
 			if (lot == shMemLots->content->lots.size())
-				break;
+			{
+        			ecriture_log_stock(infos->gestionnaireLog,"Fin de la tache stock ",EVENT);
+				pthread_exit(0);
+			}
 		}
 	}
 

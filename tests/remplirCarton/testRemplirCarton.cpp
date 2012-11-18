@@ -21,8 +21,9 @@ static Mailbox<Event>* pBalEvenements;
 static int nbTests;
 static int nbMauvaisTests;
 static SharedMemoryLots shMemLots; 
-static ArgRemplirCarton argRemplirCarton;
+static ArgRemplirCarton* pArgRemplirCarton;
 static Mutex mtxStandardOutput;
+static Mutex mtxLotCourant;
 static Log *gestionnaireLog;
 
 static bool test1()
@@ -41,7 +42,7 @@ static bool test1()
 		pBalPieces->Push(piece);
 	}
 	sleep(2);
-	if(pBalCartons->Size()==8)
+	if(pBalCartons->Size()==9)
 	{
 		if(pBalEvenements->Size()==1)
 		{
@@ -55,38 +56,6 @@ static bool test1()
 }
 
 static bool test2()
-{
-	sem_post(&debutSyncro);
-	for(int i=0; i<7;i++)
-	{
-		sleep(1);
-		Piece piece={{100,100,100},false};
-		pBalPieces->Push(piece);
-	}
-		sleep(1);
-		Piece piece={{200,200,200},false};
-		pBalPieces->Push(piece);
-	for(int i=0; i<8;i++)
-	{
-		sleep(1);
-		Piece piece={{100,100,100},false};
-		pBalPieces->Push(piece);
-	}
-	sleep(2);
-	if(pBalCartons->Size()==4)
-	{
-		if(pBalEvenements->Size()==1)
-		{
-			if(pBalEvenements->Pull().event==TAUXERR)
-			{
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-static bool test3()
 {
 	sem_post(&debutSyncro);
 	for(int i=0; i<3;i++)
@@ -118,12 +87,45 @@ static bool test3()
 	return false;
 }
 
+static bool test3()
+{
+	sem_post(&debutSyncro);
+	for(int i=0; i<7;i++)
+	{
+		sleep(1);
+		Piece piece={{100,100,100},false};
+		pBalPieces->Push(piece);
+	}
+		sleep(1);
+		Piece piece={{200,200,200},false};
+		pBalPieces->Push(piece);
+	for(int i=0; i<3;i++)
+	{
+		sleep(1);
+		Piece piece={{100,100,100},false};
+		pBalPieces->Push(piece);
+	}
+	sleep(2);
+	if(pBalCartons->Size()==4)
+	{
+		if(pBalEvenements->Size()==1)
+		{
+			if(pBalEvenements->Pull().event==TAUXERR)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 
 
 static void reset()
 {
 	pthread_cancel(threadRemplirCarton);
 	sleep(1);
+	pthread_cond_destroy(&cvThreadRemplirCarton);
 	delete(mutCartonPresent);
 	delete(mutCvRemplirCarton);
 	sem_destroy(&sem_fin_de_serie);
@@ -131,6 +133,7 @@ static void reset()
 	delete(pBalPieces);
 	delete(pBalCartons);
 	delete(pBalEvenements);
+	delete(pArgRemplirCarton);
 
 	sem_init(&sem_fin_de_serie,0,0);
 	sem_init(&debutSyncro,0,0);
@@ -141,10 +144,11 @@ static void reset()
 	pBalPieces=new Mailbox<Piece>;
 	pBalEvenements=new Mailbox<Event>;
 	pBalCartons=new Mailbox<Carton>;
-	argRemplirCarton={pBalPieces,pBalCartons,pBalEvenements,&sem_fin_de_serie,
-		mutCartonPresent,&cartonPresent,&cvThreadRemplirCarton,
-		mutCvRemplirCarton,&shMemLots,&debutSyncro};
-	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)&argRemplirCarton)!=0)
+	pArgRemplirCarton=new ArgRemplirCarton(pBalPieces,pBalCartons,pBalEvenements,gestionnaireLog,mutCartonPresent,
+		&sem_fin_de_serie,&cartonPresent,&mtxLotCourant,&shMemLots,0,NULL,&cvThreadRemplirCarton,
+		mutCvRemplirCarton,&debutSyncro);
+	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)
+		pArgRemplirCarton)!=0)
 		cerr<<"ERROR create threadRemplirCarton"<<endl;
 }
 
@@ -153,6 +157,8 @@ static void fin(int noSignal)
 	if(noSignal==SIGINT)
 	{
 		pthread_cancel(threadRemplirCarton);
+		sleep(1);
+		pthread_cond_destroy(&cvThreadRemplirCarton);
 		delete(mutCartonPresent);
 		delete(mutCvRemplirCarton);
 		sem_destroy(&sem_fin_de_serie);
@@ -192,13 +198,13 @@ int main()
 
 	gestionnaireLog=new Log(mtxStandardOutput);
 
-	argRemplirCarton={pBalPieces,pBalCartons,pBalEvenements,gestionnaireLog,mutCartonPresent,
-		&sem_fin_de_serie,&cartonPresent,&cvThreadRemplirCarton,
-		mutCvRemplirCarton,&shMemLots,&debutSyncro};
+	pArgRemplirCarton=new ArgRemplirCarton(pBalPieces,pBalCartons,pBalEvenements,gestionnaireLog,mutCartonPresent,
+		&sem_fin_de_serie,&cartonPresent,&mtxLotCourant,&shMemLots,0,NULL,&cvThreadRemplirCarton,
+		mutCvRemplirCarton,&debutSyncro);
 
 	sigaction(SIGINT,&action,NULL);
 
-	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)&argRemplirCarton)!=0)
+	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)pArgRemplirCarton)!=0)
 		cerr<<"ERROR create threadRemplirCarton"<<endl;
 
 	//test 1
@@ -214,7 +220,7 @@ int main()
 	//test2
 	nbTests++;
 	cout<<"Debut Test "<<nbTests<<endl;	
-	if(!test3())
+	if(!test2())
 	{
 		cout<<"==========>Test "<<nbTests<<": ERROR"<<endl;
 		nbMauvaisTests++;
@@ -224,7 +230,7 @@ int main()
 	//test3
 	nbTests++;	
 	cout<<"Debut Test "<<nbTests<<endl;	
-	if(!test2())
+	if(!test3())
 	{
 		cout<<"==========>Test "<<nbTests<<": ERROR"<<endl;
 		nbMauvaisTests++;

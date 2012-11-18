@@ -32,10 +32,11 @@ struct ArgControleur
   Mailbox<Palette> *balStockage;
   Mailbox<Piece> * balPiece;
   Mailbox<Event> * balEvenements;
-  Mailbox<Message> * msgBox;
+  Mailbox<Message> * balMessages;
   Mailbox<ListeCommandes> * balCommandes;
   Log * gestionnaireLog;
-  map<Task,InfoThread> threads;
+  std::map<Task,InfoThread> threads;
+  Mutex * clapet;
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques

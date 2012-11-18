@@ -26,6 +26,9 @@ struct ArgPiece {
   	Log * gestionnaireLog;
   	sem_t * debutSyncro;
   	Mutex *clapet;
+	int * lotCourant;
+	Mutex * lotCourantMutex;
+	SharedMemoryLots * shMemLots;
 	//pthread_cond_t* cv;
 	//pthread_mutex_t* mutCv;
 };

@@ -7,9 +7,9 @@
 #include <pthread.h>
 
 struct ArgsRemplirPalette{
-  Mailbox<Carton>* balImprimante;
+  Mailbox<Carton>* balPalette;
   Log * gestionnaireLog;
-  Mailbox<Palette>* balPalette;
+  Mailbox<Palette>* balStockage;
   Mailbox<Event>* eventBox;
   pthread_cond_t *cw;
   pthread_mutex_t* mxcw;
