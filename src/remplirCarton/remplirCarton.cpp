@@ -86,14 +86,13 @@ void* remplirCarton(void * index)
 		if(!valide)
 		{
 			nbPiecesDsRebut++;
-		}
-		if(nbPiecesDsRebut>lotCourant->rebut)
-		{
-            ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
-			init->pBalEvenements->Push(Event(TAUXERR),0);
-			wait();
-			nbPiecesDsRebut=0;
-
+			if(nbPiecesDsRebut>lotCourant->rebut)
+			{
+	            ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
+				init->pBalEvenements->Push(Event(TAUXERR),0);
+				wait();
+				nbPiecesDsRebut=0;
+			}
 		}
 		else
 		{
