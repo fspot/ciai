@@ -24,13 +24,11 @@ using namespace std;
 
 void fermeture_clapet(Mutex * clapet)
 {
-  cout<<"Clapet fermé"<<endl;
   clapet->lock();
 }
 
 void ouverture_clapet(Mutex * clapet)
 {
-   cout<<"Clapet ouvert"<<endl;
    clapet->unlock();
 }
 

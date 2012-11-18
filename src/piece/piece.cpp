@@ -45,9 +45,8 @@ void *thread_piece(void * argPiece)
 			p.dim[j]=arg->shMemLots->content->lots[i].dim[j];
 		}		
 		arg->shMemLots->mutex.unlock();
-	
 		arg->balPiece->Push(p,0);
 		// pause :
-		sleep(2);
+		sleep(0.5);
 	}
 }
