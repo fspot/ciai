@@ -197,7 +197,6 @@ int main()
   argDestock.balEvenements = &balEvenements;
   argDestock.balCommandes = &balCommandes;
   argDestock.cv = &condDP;
-  cout << "La condition Destock has @ " << &condDP << endl;
   argDestock.mutCv = &condDPM;
   argDestock.stock = &stock;
   pthread_create (&destocker_palette, NULL, thread_destock, (void*) &argDestock);

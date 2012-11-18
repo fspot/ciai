@@ -144,6 +144,7 @@ int controleur_thread(void * argsUnconverted)
 	  break;
 
 	case REPRISEPAUSE:
+	  ouverture_clapet(args->clapet);
 	  reprendre_tache(args->threads[DESTOCKERPALETTE]);
 	  reprendre_tache(args->threads[STOCKERPALETTE]);
 	  reprendre_tache(args->threads[REMPLIRPALETTE]);
