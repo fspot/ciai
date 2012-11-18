@@ -35,7 +35,7 @@ struct ArgControleur
   Mailbox<Message> * balMessages;
   Mailbox<ListeCommandes> * balCommandes;
   Log * gestionnaireLog;
-  map<Task,InfoThread> threads;
+  std::map<Task,InfoThread> threads;
   Mutex * clapet;
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
