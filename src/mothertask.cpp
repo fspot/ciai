@@ -128,50 +128,50 @@ int main()
   // ===================================
 
   // Création du thread remplir carton
-  ArgRemplirCarton * argRC = new ArgRemplirCarton();
-  argRC->pBalPieces=&balPiece;
-  argRC->pBalCartons = &balImprimante;
-  argRC->pBalEvenements = &balEvenements;
-  argRC->gestionnaireLog=&gestionnaireLog;
-  argRC->mutCartonPresent=&cartonPresent;
-  argRC->pCartonPresent = new bool(true);
-  argRC->mutCv=&condRCM;
-  argRC->cv=&condRC;
+  ArgRemplirCarton  argRC;
+  argRC.pBalPieces=&balPiece;
+  argRC.pBalCartons = &balImprimante;
+  argRC.pBalEvenements = &balEvenements;
+  argRC.gestionnaireLog=&gestionnaireLog;
+  argRC.mutCartonPresent=&cartonPresent;
+  argRC.pCartonPresent = new bool(true);
+  argRC.mutCv=&condRCM;
+  argRC.cv=&condRC;
 
   //gestion du lot courant pour simul 
-  argRC->lotCourant=&lotCourant;
-  argRC->lotCourantMutex=&memLotCourant;
+  argRC.lotCourant=&lotCourant;
+  argRC.lotCourantMutex=&memLotCourant;
 
-  argRC->shMemLots=&lots;
-  argRC->debutSyncro=&debutSyncro;
-  argRC->finDeSerieMutex=&finSerieMutex;
-  pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, argRC);
+  argRC.shMemLots=&lots;
+  argRC.debutSyncro=&debutSyncro;
+  argRC.finDeSerieMutex=&finSerieMutex;
+  pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, (void *)&argRC);
 
 
 
   // Création du thread imprimer
-  ArgImprimer * argImprimer = new ArgImprimer();
-  argImprimer->gestionnaireLog=&gestionnaireLog;
-  argImprimer->eventBox= &balEvenements;
-  argImprimer->balImprimante=&balImprimante;
-  argImprimer->balPalette=&balPalette;
-  argImprimer->varCond=&condIMP;
-  argImprimer->mutex=&condIMPM;
-  pthread_create (&imprimer, NULL, (void *(*)(void *)) &imprimer_thread, (void *)argImprimer);
+  ArgImprimer  argImprimer;
+  argImprimer.gestionnaireLog=&gestionnaireLog;
+  argImprimer.eventBox= &balEvenements;
+  argImprimer.balImprimante=&balImprimante;
+  argImprimer.balPalette=&balPalette;
+  argImprimer.varCond=&condIMP;
+  argImprimer.mutex=&condIMPM;
+  pthread_create (&imprimer, NULL, (void *(*)(void *)) &imprimer_thread, (void *)&argImprimer);
 
 
 
   // Création du thread remplir palette
-  ArgsRemplirPalette * argRP = new ArgsRemplirPalette();
-  argRP->gestionnaireLog=&gestionnaireLog;
-  argRP->balPalette=&balPalette;
-  argRP->balStockage=&balStockage;
-  argRP->eventBox=&balEvenements;
-  argRP->cw=&condRP;
-  argRP->mxcw=&condRPM;
-  argRP->shMemLots=&lots;
-  argRP->debutSyncro=&debutSyncro;
-  pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplirPalette_thread, argRP);
+  ArgsRemplirPalette  argRP;
+  argRP.gestionnaireLog=&gestionnaireLog;
+  argRP.balPalette=&balPalette;
+  argRP.balStockage=&balStockage;
+  argRP.eventBox=&balEvenements;
+  argRP.cw=&condRP;
+  argRP.mxcw=&condRPM;
+  argRP.shMemLots=&lots;
+  argRP.debutSyncro=&debutSyncro;
+  pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplirPalette_thread, (void *)&argRP);
 
   
 
@@ -200,79 +200,79 @@ int main()
 
 
   // Création du thread genere_piece
-  ArgPiece * argPiece = new ArgPiece();
-  argPiece->balPiece =&balPiece;
-  argPiece->balEvenements = &balEvenements;
-  argPiece->gestionnaireLog = &gestionnaireLog;
-  argPiece->clapet = &clapet;
-  argPiece->debutSyncro = &debutSyncro;
-  argPiece->shMemLots = &lots;
+  ArgPiece  argPiece;
+  argPiece.balPiece =&balPiece;
+  argPiece.balEvenements = &balEvenements;
+  argPiece.gestionnaireLog = &gestionnaireLog;
+  argPiece.clapet = &clapet;
+  argPiece.debutSyncro = &debutSyncro;
+  argPiece.shMemLots = &lots;
   //gestion du lot courant pour simul 
-  argPiece->lotCourant=&lotCourant;
-  argPiece->lotCourantMutex=&memLotCourant;
-  pthread_create (&genere_piece, NULL, thread_piece, (void*) argPiece);
+  argPiece.lotCourant=&lotCourant;
+  argPiece.lotCourantMutex=&memLotCourant;
+  pthread_create (&genere_piece, NULL, thread_piece, (void*) &argPiece);
   
   
   //Création du thread controleur
    
-  ArgControleur * argControleur = new ArgControleur();
-  argControleur->balEvenements= &balEvenements;
-  argControleur->gestionnaireLog=&gestionnaireLog;
-  argControleur->balImprimante=&balImprimante;
-  argControleur->balPalette=&balPalette;
-  argControleur->balStockage=&balStockage;
-  argControleur->balPiece=&balPiece;
-  argControleur->balCommandes=&balCommandes;
-  argControleur->clapet=&clapet;
-  argControleur->balMessages=&balMessages;
+  ArgControleur  argControleur;
+  argControleur.balEvenements= &balEvenements;
+  argControleur.gestionnaireLog=&gestionnaireLog;
+  argControleur.balImprimante=&balImprimante;
+  argControleur.balPalette=&balPalette;
+  argControleur.balStockage=&balStockage;
+  argControleur.balPiece=&balPiece;
+  argControleur.balCommandes=&balCommandes;
+  argControleur.clapet=&clapet;
+  argControleur.balMessages=&balMessages;
 
   
   InfoThread remplirCarton;
   remplirCarton.id =remplir_carton;
   remplirCarton.cw=&condRC;
   remplirCarton.mx=&condRCM;
-  argControleur->threads[REMPLIRCARTON]=remplirCarton;
+  argControleur.threads[REMPLIRCARTON]=remplirCarton;
 
   InfoThread remplirPalette;
   remplirPalette.id =remplir_palette;
   remplirPalette.cw=&condRP;
   remplirPalette.mx=&condRPM;
-  argControleur->threads[REMPLIRPALETTE]=remplirPalette;
+  argControleur.threads[REMPLIRPALETTE]=remplirPalette;
 
   InfoThread imprimerTI;
   imprimerTI.id =imprimer;
   imprimerTI.cw=&condIMP;
   imprimerTI.mx=&condIMPM;
-  argControleur->threads[IMPRIMER]=imprimerTI;
+  argControleur.threads[IMPRIMER]=imprimerTI;
 
 
   InfoThread stockerPalette;
   stockerPalette.id =stocker_palette;
   stockerPalette.cw=&condSP;
   stockerPalette.mx=&condSPM;
-  argControleur->threads[STOCKERPALETTE]=stockerPalette;
+  argControleur.threads[STOCKERPALETTE]=stockerPalette;
 
 
-  pthread_create (&controleur, NULL, (void *(*)(void *)) controleur_thread, (void *) argControleur);
+  pthread_create (&controleur, NULL, (void *(*)(void *)) controleur_thread, (void *) &argControleur);
 
 
   // Création du thread de reception(serveur)
-  NetworkInitInfo * info = new NetworkInitInfo();
-  info->gestionnaireLog=&gestionnaireLog;
-  info->balEvenements=&balEvenements;
-  info->netmb_ptr = &balMessages;
-  info->socket_ptr = new int(0);
-  info->shMemLots =&lots;
-  info->debutSyncro = &debutSyncro;
-  pthread_create (&serveur_reception, NULL, (void *(*)(void *)) thread_network, (void *)info);
+  NetworkInitInfo  info;
+  info.gestionnaireLog=&gestionnaireLog;
+  info.balEvenements=&balEvenements;
+  info.netmb_ptr = &balMessages;
+  info.socket_ptr = new int(0);
+  info.shMemLots =&lots;
+  info.debutSyncro = &debutSyncro;
+  pthread_create (&serveur_reception, NULL, (void *(*)(void *)) thread_network, (void *)&info);
 
 
   // Création du thread d'envoi(server)
-  NetSendInitInfo * infoSend = new NetSendInitInfo();
-  infoSend->gestionnaireLog=&gestionnaireLog;
-  infoSend->netmb_ptr = &balMessages;
-  infoSend->socket_ptr = new int(0);
-  pthread_create (&serveur_envoi, NULL, (void *(*)(void *)) thread_netsend, (void *) infoSend);
+  NetSendInitInfo  infoSend ;
+  infoSend.gestionnaireLog=&gestionnaireLog;
+  infoSend.netmb_ptr = &balMessages;
+  infoSend.socket_ptr = new int(0);
+  pthread_create (&serveur_envoi, NULL, (void *(*)(void *)) thread_netsend, (void *) &infoSend);
 
 
 
@@ -290,20 +290,11 @@ int main()
   pthread_cancel(serveur_reception);
 
 
-  delete infoSend->socket_ptr;
-
-  delete infoSend;
-
-  delete info;
-
-  delete argControleur;
-
-  delete argImprimer;
-
-  delete argRC->pCartonPresent;
+  delete infoSend.socket_ptr;
+  delete info.socket_ptr;
+  delete argRC.pCartonPresent;
   
-  delete argRC;
-  ecriture_log_mere(&gestionnaireLog,"Destruction tâche mère",EVENT);
+  ecriture_log_mere(&gestionnaireLog,"Fin de la tâche mère",EVENT);
   return 0;
   
 }
