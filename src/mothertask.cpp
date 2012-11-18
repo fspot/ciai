@@ -197,6 +197,7 @@ int main()
   argDestock.balEvenements = &balEvenements;
   argDestock.balCommandes = &balCommandes;
   argDestock.cv = &condDP;
+  cout << "La condition Destock has @ " << &condDP << endl;
   argDestock.mutCv = &condDPM;
   argDestock.stock = &stock;
   pthread_create (&destocker_palette, NULL, thread_destock, (void*) &argDestock);
@@ -248,13 +249,17 @@ int main()
   imprimerTI.mx=&condIMPM;
   argControleur.threads[IMPRIMER]=imprimerTI;
 
-
   InfoThread stockerPalette;
   stockerPalette.id =stocker_palette;
   stockerPalette.cw=&condSP;
   stockerPalette.mx=&condSPM;
   argControleur.threads[STOCKERPALETTE]=stockerPalette;
 
+  InfoThread destockerPalette;
+  destockerPalette.id = destocker_palette;
+  destockerPalette.cw = &condDP;
+  destockerPalette.mx = &condDPM;
+  argControleur.threads[DESTOCKERPALETTE]=destockerPalette;
 
   pthread_create (&controleur, NULL, (void *(*)(void *)) controleur_thread, (void *) &argControleur);
 
