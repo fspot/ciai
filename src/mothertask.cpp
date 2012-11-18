@@ -296,9 +296,6 @@ int main()
   pthread_cancel(serveur_envoi);
   pthread_cancel(serveur_reception);
 
-
-  delete infoSend.socket_ptr;
-  delete info.socket_ptr;
   delete argRC.pCartonPresent;
   
   ecriture_log_mere(&gestionnaireLog,"Fin de la tâche mère",EVENT);

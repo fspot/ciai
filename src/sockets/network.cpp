@@ -78,15 +78,16 @@ int initListener(NetworkInitInfo *infos)
     sin.sin_addr.s_addr = htonl(INADDR_ANY); /* nous sommes un serveur, nous acceptons n'importe quelle adresse */
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT);
+
     if(bind (sock, (Sockaddr *) &sin, sizeof sin) == -1)
     {
-        ecriture_log_network(infos->gestionnaireLog,"Erreur bind - serveur reception",ERROR);
-        exit(errno);
+		ecriture_log_network(infos->gestionnaireLog,"Erreur bind - serveur reception",ERROR);
+		exit(errno);
     }
     
     if(listen(sock, 5) == -1)
 	{
-                ecriture_log_network(infos->gestionnaireLog,"Erreur ecoute - serveur reception",ERROR);
+		ecriture_log_network(infos->gestionnaireLog,"Erreur ecoute - serveur reception",ERROR);
 		exit(errno);
 	}
 	return sock;
