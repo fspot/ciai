@@ -8,6 +8,9 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
 #include <iostream>
+#include <sched.h>
+#include <signal.h>
+#include <unistd.h>
 //------------------------------------------------------ Include personnel
 #include "modeles/modeles.h"
 #include "mailbox/mailbox.h"
@@ -22,7 +25,6 @@
 #include "gestionserie/gestionserie.h"
 #include "stock/stock.h"
 #include "destock/destock.h"                             
-#include <signal.h>
 //------------------------------------------------------ Name spaces
 using namespace std;
 
@@ -121,6 +123,13 @@ int main()
     condSPM=PTHREAD_MUTEX_INITIALIZER, // stocker
     condDPM=PTHREAD_MUTEX_INITIALIZER; // destocker
 
+  // initialisation de attr et param pour les threads temps réel :
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  sched_param param;
+  pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+  pthread_attr_getschedparam(&attr, &param);
+
 
   // Variables necessaires à la simulation
 
@@ -149,7 +158,12 @@ int main()
   argRC.shMemLots=&lots;
   argRC.debutSyncro=&debutSyncro;
   argRC.finDeSerieMutex=&finSerieMutex;
-  pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, (void *)&argRC);
+
+  // thread temps réel : priorité 20
+  param.sched_priority = 20;
+  pthread_attr_setschedpolicy(&attr, SCHED_RR);
+  pthread_attr_setschedparam(&attr, &param);
+  pthread_create (&remplir_carton, &attr, (void *(*)(void *))&remplirCarton, (void *)&argRC);
 
 
 
@@ -161,7 +175,12 @@ int main()
   argImprimer.balPalette=&balPalette;
   argImprimer.varCond=&condIMP;
   argImprimer.mutex=&condIMPM;
-  pthread_create (&imprimer, NULL, (void *(*)(void *)) &imprimer_thread, (void *)&argImprimer);
+
+  // thread temps réel : priorité 30
+  param.sched_priority = 30;
+  pthread_attr_setschedpolicy(&attr, SCHED_RR);
+  pthread_attr_setschedparam(&attr, &param);
+  pthread_create (&imprimer, &attr, (void *(*)(void *)) &imprimer_thread, (void *)&argImprimer);
 
 
 
@@ -176,7 +195,12 @@ int main()
   argRP.mxcw=&condRPM;
   argRP.shMemLots=&lots;
   argRP.debutSyncro=&debutSyncro;
-  pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplirPalette_thread, (void *)&argRP);
+
+  // thread temps réel : priorité 40
+  param.sched_priority = 40;
+  pthread_attr_setschedpolicy(&attr, SCHED_RR);
+  pthread_attr_setschedparam(&attr, &param);
+  pthread_create (&remplir_palette, &attr, (void *(*)(void *)) &remplirPalette_thread, (void *)&argRP);
 
   
 
@@ -190,7 +214,12 @@ int main()
   argStock.cv = &condSP;
   argStock.mutCv = &condSPM;
   argStock.stock = &stock;
-  pthread_create (&stocker_palette, NULL, thread_stock, (void*) &argStock);
+
+  // thread temps réel : priorité 50
+  param.sched_priority = 50;
+  pthread_attr_setschedpolicy(&attr, SCHED_RR);
+  pthread_attr_setschedparam(&attr, &param);
+  pthread_create (&stocker_palette, &attr, thread_stock, (void*) &argStock);
 
 
   //Création du thread destocker palette
@@ -202,6 +231,8 @@ int main()
   argDestock.mutCv = &condDPM;
   argDestock.stock = &stock;
   argDestock.balMessages = &balMessages;
+
+  // thread temps partagé ou prio 70 ?
   pthread_create (&destocker_palette, NULL, thread_destock, (void*) &argDestock);
 
 
@@ -216,7 +247,12 @@ int main()
   //gestion du lot courant pour simul 
   argPiece.lotCourant=&lotCourant;
   argPiece.lotCourantMutex=&memLotCourant;
-  pthread_create (&genere_piece, NULL, thread_piece, (void*) &argPiece);
+
+  // thread temps réel : priorité 10
+  param.sched_priority = 10;
+  pthread_attr_setschedpolicy(&attr, SCHED_RR);
+  pthread_attr_setschedparam(&attr, &param);
+  pthread_create (&genere_piece, &attr, thread_piece, (void*) &argPiece);
   
   
   //Création du thread controleur
@@ -263,7 +299,11 @@ int main()
   destockerPalette.mx = &condDPM;
   argControleur.threads[DESTOCKERPALETTE]=destockerPalette;
 
-  pthread_create (&controleur, NULL, (void *(*)(void *)) controleur_thread, (void *) &argControleur);
+  // thread temps réel : priorité 80
+  param.sched_priority = 80;
+  pthread_attr_setschedpolicy(&attr, SCHED_RR);
+  pthread_attr_setschedparam(&attr, &param);
+  pthread_create (&controleur, &attr, (void *(*)(void *)) controleur_thread, (void *) &argControleur);
 
 
   // Création du thread de reception(serveur)
@@ -274,6 +314,8 @@ int main()
   info.socket_ptr = &socket_ptr;
   info.shMemLots =&lots;
   info.debutSyncro = &debutSyncro;
+
+  // thread tps partagé ou prio 60 ?
   pthread_create (&serveur_reception, NULL, (void *(*)(void *)) thread_network, (void *)&info);
 
 
@@ -282,9 +324,15 @@ int main()
   infoSend.gestionnaireLog=&gestionnaireLog;
   infoSend.netmb_ptr = &balMessages;
   infoSend.socket_ptr = &socket_ptr;
+
+  // thread tps partagé ou prio 85 ?
   pthread_create (&serveur_envoi, NULL, (void *(*)(void *)) thread_netsend, (void *) &infoSend);
 
 
+  // ===========================
+  // ==== FIN THREAD CREATE ====
+  // ===========================
+  
 
   ecriture_log_mere(&gestionnaireLog,"Phase moteur - tache mere",EVENT);
 
