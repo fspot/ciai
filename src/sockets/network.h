@@ -8,6 +8,7 @@
 struct NetworkInitInfo {
 	Mailbox<Event> * balEvenements;
 	Mailbox<Message> *netmb_ptr;
+	Mailbox<ListeCommandes> *balCommandes;
 	int *socket_ptr;
 	SharedMemoryLots *shMemLots;
 	sem_t * debutSyncro;

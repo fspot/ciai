@@ -308,6 +308,7 @@ int main()
   NetworkInitInfo  info;
   info.gestionnaireLog=&gestionnaireLog;
   info.balEvenements=&balEvenements;
+  info.balCommandes = &balCommandes;
   info.netmb_ptr = &balMessages;
   info.socket_ptr = &socket_ptr;
   info.shMemLots =&lots;
