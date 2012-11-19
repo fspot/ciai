@@ -18,6 +18,7 @@ static Mutex* mutCvRemplirCarton;
 static Mailbox<Piece>* pBalPieces;
 static Mailbox<Carton>* pBalCartons;
 static Mailbox<Event>* pBalEvenements;
+static Mailbox<Message>* pBalMessages;
 static int nbTests;
 static int nbMauvaisTests;
 static SharedMemoryLots shMemLots; 
@@ -25,6 +26,7 @@ static ArgRemplirCarton* pArgRemplirCarton;
 static Mutex mtxStandardOutput;
 static Mutex mtxLotCourant;
 static Log *gestionnaireLog;
+static int lotCourant=0;
 
 
 //on teste un cas normal sans erreur
@@ -77,6 +79,7 @@ static bool test2()
 		pBalPieces->Push(piece);
 	}
 	sleep(2);
+	cartonPresent=true;
 	if(pBalCartons->Size()==1)
 	{
 		if(pBalEvenements->Size()==1)
@@ -100,9 +103,9 @@ static bool test3()
 		Piece piece={{100,100,100},false};
 		pBalPieces->Push(piece);
 	}
-		sleep(1);
-		Piece piece={{200,200,200},false};
-		pBalPieces->Push(piece);
+	sleep(1);
+	Piece piece={{200,200,200},false};
+	pBalPieces->Push(piece);
 	for(int i=0; i<8;i++)
 	{
 		sleep(1);
@@ -123,34 +126,32 @@ static bool test3()
 	return false;
 }
 
+static void viderBals()
+{
+	while(pBalEvenements->Size()>0)
+	{
+		pBalEvenements->Pull();
+	}
+	while(pBalPieces->Size()>0)
+	{
+		pBalPieces->Pull();
+	}
+	while(pBalCartons->Size()>0)
+	{
+		pBalCartons->Pull();
+	}
+	while(pBalMessages->Size()>0)
+	{
+		pBalMessages->Pull();
+	}
+}
 
-
+//procédure qui réinitialise tout ce que touche le thread remplirCarton entre chaque test
 static void reset()
 {
 	pthread_cancel(threadRemplirCarton);
 	sleep(1);
-	pthread_cond_destroy(&cvThreadRemplirCarton);
-	delete(mutCartonPresent);
-	delete(mutCvRemplirCarton);
-	sem_destroy(&sem_fin_de_serie);
-	sem_destroy(&debutSyncro);
-	delete(pBalPieces);
-	delete(pBalCartons);
-	delete(pBalEvenements);
-	delete(pArgRemplirCarton);
 
-	sem_init(&sem_fin_de_serie,0,0);
-	sem_init(&debutSyncro,0,0);
-	pthread_cond_init(&cvThreadRemplirCarton, NULL);
-	cartonPresent=true;
-	mutCartonPresent=new Mutex();
-	mutCvRemplirCarton=new Mutex();
-	pBalPieces=new Mailbox<Piece>;
-	pBalEvenements=new Mailbox<Event>;
-	pBalCartons=new Mailbox<Carton>;
-	pArgRemplirCarton=new ArgRemplirCarton(pBalPieces,pBalCartons,pBalEvenements,gestionnaireLog,mutCartonPresent,
-		&sem_fin_de_serie,&cartonPresent,&mtxLotCourant,&shMemLots,0,NULL,&cvThreadRemplirCarton,
-		mutCvRemplirCarton,&debutSyncro);
 	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)
 		pArgRemplirCarton)!=0)
 		cerr<<"ERROR create threadRemplirCarton"<<endl;
@@ -193,6 +194,7 @@ int main()
 	pBalPieces=new Mailbox<Piece>;
 	pBalEvenements=new Mailbox<Event>;
 	pBalCartons=new Mailbox<Carton>;
+	pBalMessages=new Mailbox<Message>;
 
 	ListeLots lots;
 	lots.lots.push_back({"A",2,2,2,1,{100,100,100}});
@@ -202,8 +204,9 @@ int main()
 
 	gestionnaireLog=new Log(mtxStandardOutput);
 
-	pArgRemplirCarton=new ArgRemplirCarton(pBalPieces,pBalCartons,pBalEvenements,gestionnaireLog,mutCartonPresent,
-		&sem_fin_de_serie,&cartonPresent,&mtxLotCourant,&shMemLots,0,NULL,&cvThreadRemplirCarton,
+	pArgRemplirCarton=new ArgRemplirCarton(pBalPieces,pBalCartons,pBalEvenements
+		,pBalMessages,gestionnaireLog,mutCartonPresent,
+		&sem_fin_de_serie,&cartonPresent,&mtxLotCourant,&shMemLots,&lotCourant,NULL,&cvThreadRemplirCarton,
 		mutCvRemplirCarton,&debutSyncro);
 
 	sigaction(SIGINT,&action,NULL);
@@ -219,6 +222,7 @@ int main()
 		cout<<"==========>Test "<<nbTests<<": ERROR"<<endl;
 		nbMauvaisTests++;
 	}
+	viderBals();
 	reset();
 
 	//test2
@@ -229,6 +233,7 @@ int main()
 		cout<<"==========>Test "<<nbTests<<": ERROR"<<endl;
 		nbMauvaisTests++;
 	}
+	viderBals();
 	reset();
 
 	//test3
@@ -239,8 +244,10 @@ int main()
 		cout<<"==========>Test "<<nbTests<<": ERROR"<<endl;
 		nbMauvaisTests++;
 	}
-	reset();
+	viderBals();
 
 	cout<<"Le nombre de tests réussis est de "<<nbTests-nbMauvaisTests<<"/"<<nbTests<<endl;
-	fin(SIGINT);
+	pthread_cancel(threadRemplirCarton);
+	sleep(1);
+	pthread_exit(NULL);
 }

@@ -97,7 +97,6 @@ void* remplirCarton(void * index)
 			init->pBalEvenements->Push(Event(TAUXERR),0);
 			wait();
 			nbPiecesDsRebut=0;
-
 		}
 		else
 		{
@@ -122,6 +121,7 @@ void* remplirCarton(void * index)
 				{
 					serieCourante++;
 
+					//on vérifie si on a fini toutes les séries
 					if((serieCourante+1)>init->shMemLots->content->lots.size())
 					{
             			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la dernière série - remplir carton",EVENT);
