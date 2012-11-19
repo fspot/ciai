@@ -157,8 +157,6 @@ int main()
 
   argRC.shMemLots=&lots;
   argRC.debutSyncro=&debutSyncro;
-//  argRC.finDeSerieMutex=&finSerieMutex;
-  argRC.finDeSerieMutex=&finSerieMutex;
 
   // thread temps réel : priorité 20
   param.sched_priority = 20;
@@ -328,7 +326,10 @@ int main()
   infoSend.socket_ptr = &socket_ptr;
 
   // thread tps partagé ou prio 85 ?
-  pthread_create (&serveur_envoi, NULL, (void *(*)(void *)) thread_netsend, (void *) &infoSend);
+  param.sched_priority = 85;
+  pthread_attr_setschedpolicy(&attr, SCHED_RR);
+  pthread_attr_setschedparam(&attr, &param);
+  pthread_create (&serveur_envoi, &attr, (void *(*)(void *)) thread_netsend, (void *) &infoSend);
 
 
   // ===========================

@@ -54,7 +54,9 @@ enum EventType
   REPRISEPAUSE,
   ABSPIECE,
   FIN,
-  FINERREUR
+  FINERREUR,
+  FINLAST,
+  FINSERIE
 } ;
 
 

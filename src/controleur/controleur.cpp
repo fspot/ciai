@@ -116,8 +116,13 @@ int controleur_thread(void * argsUnconverted)
     	  break;
 
     	case PAUSE:
-    	  if (sem_trywait(args->pauseSerieMutex) != -1 && errno == EAGAIN )
+    	  sem_post(args->pauseSerieMutex);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Demande de pause traitée",EVENT);
+    	  break;
+    	case FINSERIE:
+    	  if (sem_trywait(args->pauseSerieMutex) != -1 )
 	  {
+    	    ecriture_log_controleur(args->gestionnaireLog,"En pause",EVENT);
             fermeture_clapet(args->clapet);
 	  }
     	  ecriture_log_controleur(args->gestionnaireLog,"Pause fin de serie",EVENT);
@@ -145,9 +150,10 @@ int controleur_thread(void * argsUnconverted)
     	  reprendre_tache(args->threads[REMPLIRCARTON]);
     	  ecriture_log_controleur(args->gestionnaireLog,"Reprise pause",EVENT);
     	  break;
-
-    	case FIN:
+    	case FINLAST:
           fermeture_clapet(args->clapet);
+          break;
+    	case FIN:
           lca.fin=true;
           args->balCommandes->Push(lca,0);
           aMsg.fin = true;
