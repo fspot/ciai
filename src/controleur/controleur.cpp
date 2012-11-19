@@ -158,6 +158,9 @@ int controleur_thread(void * argsUnconverted)
           args->balCommandes->Push(lca,0);
           aMsg.fin = true;
           args->balMessages->Push(aMsg,0);
+          aMsg.contenu = nextEvent.netstr();
+	  //Fin d'application à envoyer
+    	  //args->balMessages->Push(aMsg,0);
           pthread_exit(0);
           break;
     	case FINERREUR:

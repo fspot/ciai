@@ -84,8 +84,6 @@ int main()
   sem_t  debutSyncro;
   sem_init(&debutSyncro, 0, 0);
 
-//  sem_t  finSerieMutex;
-//  sem_init(&finSerieMutex, 0, 0);
   sem_t  pauseSerieMutex;
   sem_init(&pauseSerieMutex, 0, 0);
   
@@ -353,6 +351,10 @@ int main()
   delete argRC.pCartonPresent;
   
   ecriture_log_mere(&gestionnaireLog,"Fin de la tâche mère",EVENT);
+  sem_destroy(&debutSyncro);
+
+
+  sem_destroy(&pauseSerieMutex);
   return 0;
   
 }

@@ -67,7 +67,6 @@ void* thread_netsend(void* arg)
 			ecriture_log_netsend(infos->gestionnaireLog,"Erreur envoi - serveur envoi",ERROR);
 			break;
 		}
-		cout<<"Message envoyé "<<msg<<endl;
 		ecriture_log_netsend(infos->gestionnaireLog,"Message envoyé - serveur envoi",EVENT);
 	}
 	/**/
