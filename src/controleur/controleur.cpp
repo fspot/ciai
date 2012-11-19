@@ -158,9 +158,11 @@ int controleur_thread(void * argsUnconverted)
     	  reprendre_tache(args->threads[REMPLIRCARTON]);
     	  ecriture_log_controleur(args->gestionnaireLog,"Reprise pause",EVENT);
     	  break;
+
     	case FINLAST:
           fermeture_clapet(args->clapet);
           break;
+          
     	case FIN:
           lca.fin=true;
           args->balCommandes->Push(lca,0);
@@ -171,9 +173,16 @@ int controleur_thread(void * argsUnconverted)
     	  //args->balMessages->Push(aMsg,0);
           pthread_exit(0);
           break;
+
     	case FINERREUR:
           ecriture_log_controleur(args->gestionnaireLog,"Terminaison de l'application apres erreur - controleur",EVENT);
-	  // Arret des taches suivantes
+          // Déblocage des tâches :
+          reprendre_tache(args->threads[DESTOCKERPALETTE]);
+          reprendre_tache(args->threads[STOCKERPALETTE]);
+          reprendre_tache(args->threads[REMPLIRPALETTE]);
+          reprendre_tache(args->threads[IMPRIMER]);
+          reprendre_tache(args->threads[REMPLIRCARTON]);
+	        // Arret des taches suivantes
           Carton c2;
           c2.fin=true;
           args->balPalette->Push(c2,0);
