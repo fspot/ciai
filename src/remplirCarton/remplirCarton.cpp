@@ -1,12 +1,26 @@
+/*************************************************************************
+                           remplirCarton  -  description
+                             -------------------
+*************************************************************************/
+
+//---------- Réalisation de la tâche remplirCarton
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//-------------------------------------------------------- Include système
 #include <time.h>
 #include <signal.h>
 #include <unistd.h>
-#include "remplirCarton.h"
-#include "../mailbox/mailbox.h"
-#include "../modeles/modeles.h"
 #include <iostream>
-using namespace std;
+//------------------------------------------------------ Include personnel
+#include "remplirCarton.h"
+#include <mailbox/mailbox.h>
+#include <modeles/modeles.h>
+///////////////////////////////////////////////////////////////////  PRIVE
+//------------------------------------------------------------- Constantes
 
+//------------------------------------------------------------------ Types
+using namespace std;
+//---------------------------------------------------- Variables statiques
 static time_t timeBegin;
 static ArgRemplirCarton* init;
 static vector<Lot>* listeLots;
@@ -16,8 +30,9 @@ static unsigned int nbPiecesDsRebut=0;
 static unsigned int nbPiecesDsCarton;
 static unsigned int idCarton;
 static unsigned int serieCourante;
+//------------------------------------------------------ Fonctions privées
 
-
+// Méthode d'écriture dans le log
 void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
 #ifdef DEBUG
@@ -27,6 +42,7 @@ void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType un
 #endif 
 }
 
+// Méthode d'attente
 static void wait()
 {
   ecriture_log_remplirCarton(init->gestionnaireLog,"Attente de deblocage - remplir Carton",ERROR);
@@ -36,8 +52,8 @@ static void wait()
 }
 
 
-
-
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
 void* remplirCarton(void * index)
 {
   init=(ArgRemplirCarton *)index;

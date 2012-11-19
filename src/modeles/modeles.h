@@ -11,10 +11,8 @@
 #include <pthread.h>
 
 // includes perso
-#include "../mailbox/mailbox.h"
+#include <mailbox/mailbox.h>
 
-
-// http://lite.framapad.org/p/ideemodeleciai
 
 /* Note de Fred :
    la méthode netstr() renvoie une chaîne formatée de façon à ce qu'elle puisse être envoyée sur le réseau.

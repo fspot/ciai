@@ -1,11 +1,22 @@
-#ifndef REMPLIRPALETTE_H
-#define REMPLIRPALETTE_H
-#include "../stubs/stubs.h"
-#include "../mailbox/mailbox.h"
-#include "../modeles/modeles.h"
-#include "../log/log.h" 
-#include <pthread.h>
+/*************************************************************************
+                           remplirPalette.h  -  description
+                             -------------------
+*************************************************************************/
 
+//---------- Interface de la tâche remplirPalette
+#if ! defined ( remplirpalette_H )
+#define remplirpalette_H
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//--------------------------------------------------- Interfaces utilisées
+#include <stubs/stubs.h>
+#include <mailbox/mailbox.h>
+#include <modeles/modeles.h>
+#include <log/log.h>
+#include <pthread.h>
+//------------------------------------------------------------- Constantes 
+
+//------------------------------------------------------------------ Types 
 struct ArgsRemplirPalette{
   Mailbox<Carton>* balPalette;
   Log * gestionnaireLog;
@@ -18,9 +29,9 @@ struct ArgsRemplirPalette{
   sem_t * debutSyncro;
 };
 
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
 void remplirPalette_thread(void * args);
-
-
 
 
 #endif //REMPLIRPALETTE_H

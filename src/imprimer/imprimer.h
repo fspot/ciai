@@ -1,10 +1,22 @@
+/*************************************************************************
+                           imprimer.h  -  description
+                             -------------------
+*************************************************************************/
+
+//---------- Interface de la tâche controleur
+#if ! defined ( imprimer_H )
+#define imprimer_H
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//--------------------------------------------------- Interfaces utilisées
 #include <pthread.h>
 #include <iostream>
+#include <modeles/modeles.h>
+#include <mailbox/mailbox.h>
+#include <log/log.h>
+//------------------------------------------------------------- Constantes 
 
-#include "../modeles/modeles.h"
-#include "../mailbox/mailbox.h"
-#include "../log/log.h" 
-
+//------------------------------------------------------------------ Types 
 using namespace std;
 
 struct ArgImprimer
@@ -19,5 +31,8 @@ struct ArgImprimer
   bool * panneImprim;
   Mutex * mutexPanne;
 };
-
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
 int imprimer_thread(void * argsUnconverted);
+
+#endif // imprimer_H

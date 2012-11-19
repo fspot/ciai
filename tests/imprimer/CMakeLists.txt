@@ -14,7 +14,13 @@ set(SOURCES ${PROJECT_SOURCE_DIR}/../../src/sockets/network.cpp
 	    ${PROJECT_SOURCE_DIR}/../../src/log/log.cpp
 	    ${PROJECT_SOURCE_DIR}/../../src/remplirCarton/remplirCarton.cpp
 	    ${PROJECT_SOURCE_DIR}/../../src/controleur/controleur.cpp
-	    ${PROJECT_SOURCE_DIR}/../../src/gestionserie/gestionserie.cpp)
+	    ${PROJECT_SOURCE_DIR}/../../src/destock/destock.cpp
+	    ${PROJECT_SOURCE_DIR}/../../src/stock/stock.cpp
+	    ${PROJECT_SOURCE_DIR}/../../src/remplirPalette/remplirPalette.cpp
+	    ${PROJECT_SOURCE_DIR}/../../src/stubs/stubs.cpp
+	    ${PROJECT_SOURCE_DIR}/../../src/imprimer/imprimer.cpp
+	    ${PROJECT_SOURCE_DIR}/../../src/piece/piece.cpp)
+
 
 add_executable(testTacheImprimer testTacheImprimer.cpp ${SOURCES})
 target_link_libraries (testTacheImprimer ${CMAKE_THREAD_LIBS_INIT})

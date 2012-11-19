@@ -37,7 +37,7 @@ void ouverture_clapet(Mutex * clapet)
    clapet->unlock();
 }
 
-// Méthode d'écriture en fichier de log
+// Méthode d'écriture dans le log
 void ecriture_log_controleur(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
@@ -57,7 +57,7 @@ void reprendre_tache(InfoThread aThread)
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
-
+//Fonction du thread controleur
 int controleur_thread(void * argsUnconverted)
 {
   // Conversion des paramètre

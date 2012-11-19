@@ -22,7 +22,6 @@
 #include "log/log.h"
 #include "remplirCarton/remplirCarton.h"
 #include "remplirPalette/remplirPalette.h"
-#include "gestionserie/gestionserie.h"
 #include "stock/stock.h"
 #include "destock/destock.h"                             
 //------------------------------------------------------ Name spaces

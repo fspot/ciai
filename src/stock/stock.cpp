@@ -1,14 +1,31 @@
+/*************************************************************************
+                           stock  -  description
+                             -------------------
+*************************************************************************/
+
+//---------- Réalisation de la tâche stock
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//-------------------------------------------------------- Include système
 #include <iostream>
 #include <map>
-
 #include "pthread.h"
 
+
+//------------------------------------------------------ Include personnel
 #include "stock.h"
-#include "../mailbox/mailbox.h"
-#include "../modeles/modeles.h"
+#include <mailbox/mailbox.h>
+#include <modeles/modeles.h>
+///////////////////////////////////////////////////////////////////  PRIVE
+//------------------------------------------------------------- Constantes
 
-using namespace std; 
+//------------------------------------------------------------------ Types
+using namespace std;
+//---------------------------------------------------- Variables statiques
 
+//------------------------------------------------------ Fonctions privées
+
+// Méthode d'écriture dans le log
 void ecriture_log_stock(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
@@ -18,7 +35,10 @@ void ecriture_log_stock(Log * unGestionnaire, std::string msg,logType unType)
   #endif 
 }
 
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
 
+//Fonction du thread stock
 void * thread_stock(void *argStock)
 {
 
