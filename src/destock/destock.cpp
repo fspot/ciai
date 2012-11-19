@@ -74,10 +74,10 @@ void *thread_destock(void * argDestock)
 	  arg->stock->stock[nom] -= qte;
 	}
       }
+	// Msg réseau acquittement :
+	Message msg = {lc.netstr(ok), false};
+	arg->balMessages->Push(msg, 1);
 
-      // Msg réseau acquittement :
-      Message msg = {lc.netstr(ok), false};
-      arg->balMessages->Push(msg, 2);
 
       // UNLOCK :
     arg->stock->mutex.unlock();

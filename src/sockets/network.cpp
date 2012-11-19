@@ -201,18 +201,14 @@ int handle_MIDDLE(char *str)
 		return BAD_MSG;
 	} else if (c == COMMANDE) {
 		ListeCommandes lc;
+		lc.fin = false;
 		int err = parse_C(str, &lc);
-		puts("A");
 		if (err == -1) {
 			return BAD_MSG;
 		}
-		for (int i=0 ; i<lc.commandes.size() ; i++) {
-			//printf("(%d/%d) => Commande de %d palettes de %s\n", i+1, lc.commandes.size(), lc.commandes[i].palettes, lc.commandes[i].nom.c_str());
-		}
-		//printf("(MIDDLE RCV : %s)\n", str);
+		infos->balCommandes->Push(lc, 1);
 		return GOOD_MSG;
 	} else {
-		//puts("KO :(");
 		return BAD_MSG;
 	}
 }
