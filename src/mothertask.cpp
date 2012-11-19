@@ -180,7 +180,7 @@ int main()
   param.sched_priority = 30;
   pthread_attr_setschedpolicy(&attr, SCHED_RR);
   pthread_attr_setschedparam(&attr, &param);
-  pthread_create (&imprimer, NULL, (void *(*)(void *)) &imprimer_thread, (void *)&argImprimer);
+  pthread_create (&imprimer, &attr, (void *(*)(void *)) &imprimer_thread, (void *)&argImprimer);
 
 
 
@@ -200,7 +200,7 @@ int main()
   param.sched_priority = 40;
   pthread_attr_setschedpolicy(&attr, SCHED_RR);
   pthread_attr_setschedparam(&attr, &param);
-  pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplirPalette_thread, (void *)&argRP);
+  pthread_create (&remplir_palette, &attr, (void *(*)(void *)) &remplirPalette_thread, (void *)&argRP);
 
   
 
@@ -219,7 +219,7 @@ int main()
   param.sched_priority = 50;
   pthread_attr_setschedpolicy(&attr, SCHED_RR);
   pthread_attr_setschedparam(&attr, &param);
-  pthread_create (&stocker_palette, NULL, thread_stock, (void*) &argStock);
+  pthread_create (&stocker_palette, &attr, thread_stock, (void*) &argStock);
 
 
   //Création du thread destocker palette
@@ -252,7 +252,7 @@ int main()
   param.sched_priority = 10;
   pthread_attr_setschedpolicy(&attr, SCHED_RR);
   pthread_attr_setschedparam(&attr, &param);
-  pthread_create (&genere_piece, NULL, thread_piece, (void*) &argPiece);
+  pthread_create (&genere_piece, &attr, thread_piece, (void*) &argPiece);
   
   
   //Création du thread controleur
@@ -303,7 +303,7 @@ int main()
   param.sched_priority = 80;
   pthread_attr_setschedpolicy(&attr, SCHED_RR);
   pthread_attr_setschedparam(&attr, &param);
-  pthread_create (&controleur, NULL, (void *(*)(void *)) controleur_thread, (void *) &argControleur);
+  pthread_create (&controleur, &attr, (void *(*)(void *)) controleur_thread, (void *) &argControleur);
 
 
   // Création du thread de reception(serveur)
