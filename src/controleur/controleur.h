@@ -37,6 +37,7 @@ struct ArgControleur
   Log * gestionnaireLog;
   std::map<Task,InfoThread> threads;
   Mutex * clapet;
+  sem_t * pauseSerieMutex;
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques

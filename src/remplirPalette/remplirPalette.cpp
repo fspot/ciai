@@ -51,12 +51,14 @@ void remplirPalette_thread(void * argsUncasted)
     		palette.lot = &args->shMemLots->content->lots[countLot];
     		args->shMemLots->mutex.unlock();
 
+    		// Message réseau palette finie :
+    		Message msg = {palette.netstr(), false};
+    		args->balMessages->Push(msg, 0);
+
     		// on push la palette
     		args->balStockage->Push(palette,0);
     		
-    		// Message réseau palette finie :
-    		Message msg = {palette.netstr(), false};
-    		args->balMessages->Push(msg, 2);
+
 
     		countCarton = 0;
 	    	countPalette++;

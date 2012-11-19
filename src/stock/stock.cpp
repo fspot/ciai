@@ -63,6 +63,7 @@ void * thread_stock(void *argStock)
 			// test de fin de production :
 			if (lot == shMemLots->content->lots.size())
 			{
+				balEvenements->Push(Event(FIN),1);
         			ecriture_log_stock(infos->gestionnaireLog,"Fin de la tache stock ",EVENT);
 				pthread_exit(0);
 			}

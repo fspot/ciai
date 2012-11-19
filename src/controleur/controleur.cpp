@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <iostream>
+#include <errno.h>
 //------------------------------------------------------ Include personnel
 #include "controleur.h"
 ///////////////////////////////////////////////////////////////////  PRIVE
@@ -115,7 +116,15 @@ int controleur_thread(void * argsUnconverted)
     	  break;
 
     	case PAUSE:
-    	  fermeture_clapet(args->clapet);
+    	  sem_post(args->pauseSerieMutex);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Demande de pause traitée",EVENT);
+    	  break;
+    	case FINSERIE:
+    	  if (sem_trywait(args->pauseSerieMutex) != -1 )
+	  {
+    	    ecriture_log_controleur(args->gestionnaireLog,"En pause",EVENT);
+            fermeture_clapet(args->clapet);
+	  }
     	  ecriture_log_controleur(args->gestionnaireLog,"Pause fin de serie",EVENT);
     	  break;
 
@@ -141,16 +150,16 @@ int controleur_thread(void * argsUnconverted)
     	  reprendre_tache(args->threads[REMPLIRCARTON]);
     	  ecriture_log_controleur(args->gestionnaireLog,"Reprise pause",EVENT);
     	  break;
-
-    	case FIN:
+    	case FINLAST:
           fermeture_clapet(args->clapet);
+          break;
+    	case FIN:
           lca.fin=true;
           args->balCommandes->Push(lca,0);
           aMsg.fin = true;
           args->balMessages->Push(aMsg,0);
           pthread_exit(0);
           break;
-
     	case FINERREUR:
           ecriture_log_controleur(args->gestionnaireLog,"Terminaison de l'application apres erreur - controleur",EVENT);
           Carton c2;
