@@ -32,7 +32,7 @@ void remplirPalette_thread(void * argsUncasted)
 		}
 		// Message réseau carton empaletté :
 		Message msg = {carton.netstr_palette(), false};
-		args->balMessages->Push(msg, 2);
+		args->balMessages->Push(msg, 1);
 
     	// passage au carton suivant :
     	countCarton++;
@@ -53,7 +53,7 @@ void remplirPalette_thread(void * argsUncasted)
 
     		// Message réseau palette finie :
     		Message msg = {palette.netstr(), false};
-    		args->balMessages->Push(msg, 0);
+    		args->balMessages->Push(msg, 1);
 
     		// on push la palette
     		args->balStockage->Push(palette,0);

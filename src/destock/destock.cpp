@@ -57,7 +57,7 @@ void *thread_destock(void * argDestock)
 
 		// Msg réseau acquittement :
 		Message msg = {lc.netstr(ok), false};
-		arg->balMessages->Push(msg, 2);
+		arg->balMessages->Push(msg, 1);
 
 		// UNLOCK :
 		arg->stock->mutex.unlock();

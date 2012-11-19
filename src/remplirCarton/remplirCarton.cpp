@@ -108,7 +108,7 @@ void* remplirCarton(void * index)
 				
 	      // Message réseau carton rempli :
 	      Message msg = {carton.netstr_rempli(), false};
-	      init->pBalMessages->Push(msg, 2);
+	      init->pBalMessages->Push(msg, 1);
 
 	      nbCartonsRestant--;
 	      nbPiecesDsRebut=0;
@@ -132,7 +132,7 @@ void* remplirCarton(void * index)
 		    {
 		      // Message réseau série finie :
 		      Message msg = {lotCourant->netstr(), false};
-		      init->pBalMessages->Push(msg, 2);
+		      init->pBalMessages->Push(msg, 1);
 		      init->lotCourantMutex->lock();
 		      (*(init->lotCourant))+=1;
 		      init->lotCourantMutex->unlock();

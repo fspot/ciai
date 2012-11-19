@@ -77,41 +77,41 @@ int controleur_thread(void * argsUnconverted)
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Abscence carton",ERROR);
     	  aMsg.contenu = nextEvent.netstr();
-    	  args->balMessages->Push(aMsg,0);
+    	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case PANNEIMPRIM:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Panne imprimante",ERROR);
           aMsg.contenu = nextEvent.netstr();
-    	  args->balMessages->Push(aMsg,0);
+    	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case ABSPALETTE:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Abscence palette",ERROR);
           aMsg.contenu = nextEvent.netstr();
-    	  args->balMessages->Push(aMsg,0);
+    	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case TAUXERR:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Taux erreur",ERROR);
           aMsg.contenu = nextEvent.netstr();
-    	  args->balMessages->Push(aMsg,0);
+    	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case FILEATTPLEINE:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"File d'attente pleine",ERROR);
           aMsg.contenu = nextEvent.netstr();
-    	  args->balMessages->Push(aMsg,0);
+    	  args->balMessages->Push(aMsg,1);
     	  break;      
 
     	case ARTURG:
     	  ecriture_log_controleur(args->gestionnaireLog,"Arret d'urgence",ERROR);
           aMsg.contenu = nextEvent.netstr();
-    	  args->balMessages->Push(aMsg,0);
+    	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case REPRISEERREUR:
@@ -140,13 +140,13 @@ int controleur_thread(void * argsUnconverted)
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog, "Erreur embalage",ERROR);
           aMsg.contenu = nextEvent.netstr();
-    	  args->balMessages->Push(aMsg,0);
+    	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case ERRCOMMANDE:
     	  ecriture_log_controleur(args->gestionnaireLog,"Erreur commande",ERROR);
           aMsg.contenu = nextEvent.netstr();
-    	  args->balMessages->Push(aMsg,0);
+    	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case REPRISEPAUSE:
@@ -165,7 +165,7 @@ int controleur_thread(void * argsUnconverted)
           lca.fin=true;
           args->balCommandes->Push(lca,0);
           aMsg.fin = true;
-          args->balMessages->Push(aMsg,0);
+          args->balMessages->Push(aMsg,1);
           aMsg.contenu = nextEvent.netstr();
 	  //Fin d'application à envoyer
     	  //args->balMessages->Push(aMsg,0);
@@ -189,7 +189,7 @@ int controleur_thread(void * argsUnconverted)
           lca.fin=true;
           args->balCommandes->Push(lca,0);
           aMsg.fin = true;
-          args->balMessages->Push(aMsg,0);
+          args->balMessages->Push(aMsg,1);
           ecriture_log_controleur(args->gestionnaireLog,"Fin de la tâche controleur",EVENT);
           pthread_exit(0);
           break;
