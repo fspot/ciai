@@ -323,7 +323,7 @@ int main()
   infoSend.netmb_ptr = &balMessages;
   infoSend.socket_ptr = &socket_ptr;
 
-  // thread tps partagé ou prio 85 ?
+  // thread prio 85 ?
   param.sched_priority = 85;
   pthread_attr_setschedpolicy(&attr, SCHED_RR);
   pthread_attr_setschedparam(&attr, &param);
@@ -334,7 +334,6 @@ int main()
   // ==== FIN THREAD CREATE ====
   // ===========================
   
-
   ecriture_log_mere(&gestionnaireLog,"Phase moteur - tache mere",EVENT);
 
 

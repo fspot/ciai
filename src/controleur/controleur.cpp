@@ -23,17 +23,21 @@ using namespace std;
 
 //------------------------------------------------------ Fonctions privées
 
+
+// Méthode de fermeture de clapet
 void fermeture_clapet(Mutex * clapet)
 {
   clapet->lock();
 }
 
+
+// Méthode d'ouverture de clapet
 void ouverture_clapet(Mutex * clapet)
 {
    clapet->unlock();
 }
 
-
+// Méthode d'écriture en fichier de log
 void ecriture_log_controleur(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
@@ -43,21 +47,26 @@ void ecriture_log_controleur(Log * unGestionnaire, std::string msg,logType unTyp
   #endif 
 }
 
-
+//Méthode de reprise de tache
 void reprendre_tache(InfoThread aThread)
 {
   pthread_cond_signal(aThread.cw);
 }
+
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
 
 int controleur_thread(void * argsUnconverted)
 {
+  // Conversion des paramètre
   ArgControleur  * args= (ArgControleur *)argsUnconverted;
+
   ecriture_log_controleur(args->gestionnaireLog,"Lancement de la tâche controleur",EVENT);
   while(1)
   {
+    // Attente de récupération d'événement
     Event nextEvent = args->balEvenements->Pull();
     ecriture_log_controleur(args->gestionnaireLog,"Nouvel evenement a traiter - controleur",EVENT);
     Message aMsg = {"", false};
@@ -125,7 +134,6 @@ int controleur_thread(void * argsUnconverted)
     	    ecriture_log_controleur(args->gestionnaireLog,"En pause",EVENT);
             fermeture_clapet(args->clapet);
 	  }
-    	  ecriture_log_controleur(args->gestionnaireLog,"Pause fin de serie",EVENT);
     	  break;
 
     	case ERREMBALAGES:
@@ -165,6 +173,7 @@ int controleur_thread(void * argsUnconverted)
           break;
     	case FINERREUR:
           ecriture_log_controleur(args->gestionnaireLog,"Terminaison de l'application apres erreur - controleur",EVENT);
+	  // Arret des taches suivantes
           Carton c2;
           c2.fin=true;
           args->balPalette->Push(c2,0);
