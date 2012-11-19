@@ -1,13 +1,14 @@
 #include <iostream>
-#include "src/mailbox/mailbox.h"
-#include "src/remplirPalette/remplirPalette.h"
-#include "src/log//log.h"
+#include "mailbox/mailbox.h"
+#include "remplirPalette/remplirPalette.h"
+#include "log/log.h"
 
 int main(int argc, char **argv) {
-
-	Mailbox<Carton> SbalImprimante;
-	Log SgestionnaireLog;
-	Mailbox<Palette> SbalPalette;
+	cout<<"toto!"<<endl;
+	Mailbox<Carton> SbalPalette;
+	Mutex mtxStandardOutput;
+	Log SgestionnaireLog(mtxStandardOutput);
+	Mailbox<Palette> SbalStockage;
 	Mailbox<Event> SeventBox;
 	pthread_cond_t Scw = PTHREAD_COND_INITIALIZER;
 	pthread_mutex_t Smxcw;
@@ -26,13 +27,13 @@ int main(int argc, char **argv) {
 	
 	for (int i = 0 ; i<10 ; i++)	{
 		Carton carton;
-		SbalImprimante.Push(carton);
+		SbalPalette.Push(carton);
 	}
 	
-	ArgGestionSerie args;
-	args.balImprimante = &SbalImprimante;
-	args.gestionnaireLog = &SgestionnaireLog;
+	ArgsRemplirPalette args;
 	args.balPalette = &SbalPalette;
+	args.balStockage = &SbalStockage;
+	args.gestionnaireLog = &SgestionnaireLog;
 	args.eventBox = &SeventBox;
 	args.cw = &Scw;
 	args.mxcw = &Smxcw;
@@ -40,7 +41,7 @@ int main(int argc, char **argv) {
 	args.debutSyncro = &SdebutSyncro;
 	
 	pthread_t remplir_palette;
-	pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplirPalette_thread, args);
+	pthread_create (&remplir_palette, NULL, (void *(*)(void *)) &remplirPalette_thread, (void *)&args);
 
 	
 
