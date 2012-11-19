@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <iostream>
+#include <errno.h>
 //------------------------------------------------------ Include personnel
 #include "controleur.h"
 ///////////////////////////////////////////////////////////////////  PRIVE
@@ -115,7 +116,10 @@ int controleur_thread(void * argsUnconverted)
     	  break;
 
     	case PAUSE:
-    	  fermeture_clapet(args->clapet);
+    	  if (sem_trywait(args->pauseSerieMutex) != -1 && errno == EAGAIN )
+	  {
+            fermeture_clapet(args->clapet);
+	  }
     	  ecriture_log_controleur(args->gestionnaireLog,"Pause fin de serie",EVENT);
     	  break;
 
@@ -150,7 +154,6 @@ int controleur_thread(void * argsUnconverted)
           args->balMessages->Push(aMsg,0);
           pthread_exit(0);
           break;
-
     	case FINERREUR:
           ecriture_log_controleur(args->gestionnaireLog,"Terminaison de l'application apres erreur - controleur",EVENT);
           Carton c2;

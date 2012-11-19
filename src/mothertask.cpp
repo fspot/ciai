@@ -82,8 +82,8 @@ int main()
   sem_t  debutSyncro;
   sem_init(&debutSyncro, 0, 0);
 
-  sem_t  finSerieMutex;
-  sem_init(&finSerieMutex, 0, 0);
+//  sem_t  finSerieMutex;
+//  sem_init(&finSerieMutex, 0, 0);
   sem_t  pauseSerieMutex;
   sem_init(&pauseSerieMutex, 0, 0);
   
@@ -148,7 +148,7 @@ int main()
 
   argRC.shMemLots=&lots;
   argRC.debutSyncro=&debutSyncro;
-  argRC.finDeSerieMutex=&finSerieMutex;
+//  argRC.finDeSerieMutex=&finSerieMutex;
   pthread_create (&remplir_carton, NULL, (void *(*)(void *))&remplirCarton, (void *)&argRC);
 
 
@@ -231,6 +231,7 @@ int main()
   argControleur.balCommandes=&balCommandes;
   argControleur.clapet=&clapet;
   argControleur.balMessages=&balMessages;
+  argControleur.pauseSerieMutex=&pauseSerieMutex;
 
   
   InfoThread remplirCarton;

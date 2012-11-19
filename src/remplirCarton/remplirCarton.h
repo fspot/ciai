@@ -24,7 +24,7 @@ struct ArgRemplirCarton{
   Mailbox<Message>* pBalMessages;
   Log * gestionnaireLog;
   Mutex* mutCartonPresent;
-  sem_t* sem_fin_de_serie;
+//  sem_t* sem_fin_de_serie;
   bool* pCartonPresent;
   Mutex * lotCourantMutex;
   SharedMemoryLots *shMemLots;
