@@ -29,7 +29,7 @@ using namespace std;
 
 
 // ----------------------------------------------------- Statics :
-static pthread_t 
+pthread_t 
   genere_piece,
   remplir_carton, 
   imprimer, 
@@ -43,8 +43,6 @@ static pthread_t
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
-
-//Méthode d'ecriture dans le log
 void ecriture_log_mere(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
@@ -54,7 +52,7 @@ void ecriture_log_mere(Log * unGestionnaire, std::string msg,logType unType)
   #endif 
 }
 
-// Hanlder de signal au cas ou nous voudrions interrompre le serveur
+
 void catcher(int noSignal)
 {
   pthread_cancel(genere_piece);
@@ -97,6 +95,9 @@ int main()
 
   // socket
   int socket_ptr;
+
+  // Initialisation du générateur
+  //srand(time(NULL));
 
   // Mutex
   Mutex  sortieStdMutex;
