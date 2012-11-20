@@ -41,24 +41,29 @@ void remplirPalette_thread(void * argsUncasted)
     while (1)
     {
     	Carton carton = args->balPalette->Pull(); // appel bloquant
-		ecriture_log_remplirPalette(args->gestionnaireLog,"Carton recu - remplir palette",EVENT);
+
     	if (carton.fin)
         {
-			ecriture_log_remplirPalette(args->gestionnaireLog,"Fin de la tache - remplir palette",EVENT);
-			Palette p;
-			p.fin=true;
+		ecriture_log_remplirPalette(args->gestionnaireLog,"Fin de la tache remplir palette",EVENT);
+		Palette p;
+		p.fin=true;
     		args->balStockage->Push(p,0);
     		pthread_exit(0);
-		}
-		// Message réseau carton empaletté :
-		Message msg = {carton.netstr_palette(), false};
-		args->balMessages->Push(msg, 1);
+	}
+
+	ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a recu un carton de type "+args->shMemLots->content->lots[countLot].nom,EVENT);
+	// Message réseau carton empaletté :
+	Message msg = {carton.netstr_palette(), false};
+	args->balMessages->Push(msg, 1);
 
     	// passage au carton suivant :
-    	countCarton++;
+    	countCarton++;		
+        ecriture_log_remplirPalette(args->gestionnaireLog,"Le carton a été empilé par la tache remplir palette",EVENT);
     	if (countCarton == args->shMemLots->content->lots[countLot].cartons) { // next palette
 	    	// on emballe la palette qu'on vient de finir :
-    		if ( (*args->capteurEmbalage)() ) { // si erreur emballage :
+    		if ( (*args->capteurEmbalage)() ) 
+		{ // si erreur emballage :
+			ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a eu une erreur en emballant",EVENT);
     			args->eventBox->Push(Event(ABSPALETTE),0);
     			pthread_mutex_lock(args->mxcw);
     			pthread_cond_wait(args->cw,args->mxcw);
@@ -71,13 +76,14 @@ void remplirPalette_thread(void * argsUncasted)
     		palette.lot = &args->shMemLots->content->lots[countLot];
     		args->shMemLots->mutex.unlock();
 
-    		// Message réseau palette finie :
-    		Message msg = {palette.netstr(), false};
-    		args->balMessages->Push(msg, 1);
 
+		ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a empilé le carton",EVENT);
     		// on push la palette
     		args->balStockage->Push(palette,0);
 
+    		// Message réseau palette finie :
+    		Message msg = {palette.netstr(), false};
+    		args->balMessages->Push(msg, 1);
 
 
     		countCarton = 0;
@@ -91,7 +97,9 @@ void remplirPalette_thread(void * argsUncasted)
 	    	}
 
 	    	// la palette est elle bien présente ?
-	    	if (! (*args->capteurPalette)()) { // palette absente !
+	    	if (! (*args->capteurPalette)()) 
+		{ // palette absente !
+			ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a detecté l'abscence d'une palette",EVENT);
 	    		args->eventBox->Push(Event(ERREMBALAGES),0);
 	    		pthread_mutex_lock(args->mxcw);
 	    		pthread_cond_wait(args->cw,args->mxcw);

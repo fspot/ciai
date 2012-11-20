@@ -61,13 +61,15 @@ void* thread_netsend(void* arg)
 			break;
 
 		msg = m.contenu;
-		ecriture_log_netsend(infos->gestionnaireLog,"Message a envoyer - serveur envoi", EVENT);
+		string toSend=msg;
+		toSend.resize(toSend.size()-1);
+		ecriture_log_netsend(infos->gestionnaireLog,"Le serveur d'envoi vas envoyer le message suivant: "+toSend, EVENT);
 		if(send(*client, msg.c_str(), strlen(msg.c_str()), 0) < 0)
 		{
-			ecriture_log_netsend(infos->gestionnaireLog,"Erreur envoi - serveur envoi",ERROR);
+			ecriture_log_netsend(infos->gestionnaireLog,"Erreur d'envoi de la tache serveur envoi",ERROR);
 			break;
 		}
-		ecriture_log_netsend(infos->gestionnaireLog,"Message envoyé - serveur envoi",EVENT);
+		ecriture_log_netsend(infos->gestionnaireLog,"Message envoyé",EVENT);
 	}
 	/**/
 	ecriture_log_netsend(infos->gestionnaireLog,"Fin de la tache serveur envoi",EVENT);

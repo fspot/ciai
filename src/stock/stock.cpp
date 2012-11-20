@@ -59,12 +59,13 @@ void * thread_stock(void *argStock)
 	while(1)
 	{
 		p = balStockage->Pull(); // opération qui peut être bloquante : réception d'une palette à stocker.
-        	ecriture_log_stock(infos->gestionnaireLog,"Une palette arrivee - tache stock",EVENT);
+
 		if (p.fin) // test cas spécial
 		{
         		ecriture_log_stock(infos->gestionnaireLog,"Fin de la tache stock",EVENT);
 			pthread_exit(0);
 		}
+        	ecriture_log_stock(infos->gestionnaireLog,"La tache de stockage a recu une palette",EVENT);
 		// "eventuellement" on peut verifier si la palette correspond..
 
 		// ==== phase de stockage
@@ -72,7 +73,7 @@ void * thread_stock(void *argStock)
 		string nomLot = shMemLots->content->lots[lot].nom;
 		shMemStock->stock[nomLot]++;
 		shMemStock->mutex.unlock();
-
+        	ecriture_log_stock(infos->gestionnaireLog,"La tache de stockage a stocké cette palette",EVENT);
 		// passage à la palette suivante :
 		pal++;
 		if (pal == shMemLots->content->lots[lot].palettes) {

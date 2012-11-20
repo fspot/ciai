@@ -71,7 +71,6 @@ void* remplirCarton(void * index)
   for(;;)
     {
       Piece piece=init->pBalPieces->Pull();
-      //ecriture_log_remplirCarton(init->gestionnaireLog,"Piece recue - remplir carton",EVENT);
       if(piece.fin==true)
 	{
 	  ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tâche remplir carton",EVENT);
@@ -92,7 +91,6 @@ void* remplirCarton(void * index)
 
       while(i<3 && valide)
 	{
-	  cout<<piece.dim[i]<<" "<<lotCourant->dim[i]<<endl;
 	  if(piece.dim[i]!=lotCourant->dim[i])
 	    {
 	      valide=false;
@@ -117,13 +115,7 @@ void* remplirCarton(void * index)
 	  nbPiecesDsCarton++;
 	  if(nbPiecesDsCarton>=lotCourant->pieces)
 	    {
-	      Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
-	      init->pBalCartons->Push(carton,0);
-
-	      // Message réseau carton rempli :
-	      Message msg = {carton.netstr_rempli(), false};
-	      init->pBalMessages->Push(msg, 1);
-	      string toSend="La tâche remplir carton a envoyé un carton(Type: "; 
+		string toSend="La tâche remplir carton a envoyé un carton(Type: "; 
 		toSend+=lotCourant->nom;
 		toSend+=" Nombre de pièces:"; 
 		toSend+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->pieces) )->str();
@@ -133,8 +125,16 @@ void* remplirCarton(void * index)
 		toSend+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->dim[1]) )->str();
 		toSend+=", "; 
 		toSend+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->dim[2]) )->str();;
-		toSend+=+ ")).";
+		toSend+=+ ")).";		
 	      ecriture_log_remplirCarton(init->gestionnaireLog,toSend,EVENT);
+	      Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
+	      init->pBalCartons->Push(carton,0);
+
+	      // Message réseau carton rempli :
+	      Message msg = {carton.netstr_rempli(), false};
+	      init->pBalMessages->Push(msg, 1);
+	      
+
 	      nbCartonsRestant--;
 	      nbPiecesDsRebut=0;
 	      nbPiecesDsCarton=0;
@@ -145,17 +145,7 @@ void* remplirCarton(void * index)
 
 		  if((serieCourante+1)>init->shMemLots->content->lots.size())
 		    {
-		      string message="La tâche remplir carton a envoyé son dernier carton(Type: "; 
-		      message+=lotCourant->nom;
-		      message+=" Nombre de pièces:"; 
-		      message+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->pieces) )->str();
-		      message+=" Taille(mm): (";
-		      message+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->dim[0]) )->str();
-		      message+=", ";
-		      message+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->dim[1]) )->str();
-		      message+=", "; 
-		      message+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->dim[2]) )->str();;
-		      message+=+ ")).";
+		      string message="La tâche remplir carton vient d'envoyer son dernier carton"; 
 		      ecriture_log_remplirCarton(init->gestionnaireLog,message,EVENT);
 		      init->pBalEvenements->Push(Event(FINLAST),1);
 		      Carton c;
