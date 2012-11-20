@@ -50,7 +50,7 @@ int main() {
 
 	// creation du Log
 	Mutex mtxStandardOutput;
-	Log SgestionnaireLog(mtxStandardOutput);
+	Log gestionnaireLog(mtxStandardOutput);
 
 	//Creation du thread imprimer
 	pthread_t imprimer;
@@ -61,6 +61,7 @@ int main() {
 	argImprimer->balPalette = &balPalette;
 	argImprimer->varCond = &varCond;
 	argImprimer->mutex = &mutex;
+	argImprimer->gestionnaireLog = &gestionnaireLog;
 	pthread_create (&imprimer, NULL,(void *(*) (void *)) &imprimer_thread, argImprimer);
 	
 	simuFonctionnementNormal(argImprimer);	
