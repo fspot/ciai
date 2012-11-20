@@ -14,9 +14,11 @@
 #include <modeles/modeles.h>
 #include <log/log.h>
 #include <pthread.h>
-//------------------------------------------------------------- Constantes 
+//------------------------------------------------------------- Constantes
 
-//------------------------------------------------------------------ Types 
+//------------------------------------------------------------------ Types
+typedef bool (*stubFunction)(void);
+
 struct ArgsRemplirPalette{
   Mailbox<Carton>* balPalette;
   Log * gestionnaireLog;
@@ -27,6 +29,8 @@ struct ArgsRemplirPalette{
   pthread_mutex_t* mxcw;
   SharedMemoryLots* shMemLots;
   sem_t * debutSyncro;
+  stubFunction capteurPalette;
+  stubFunction capteurEmbalage;
 };
 
 //////////////////////////////////////////////////////////////////  PUBLIC

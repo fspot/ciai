@@ -20,10 +20,12 @@ using namespace std;
 void Log::Write(string text, logType type, bool stdOutput)
 {
 	string entry;
-	if (type = WARNING)
+	if (type == WARNING)
 		entry.append("[WARNING] ");
-	else if (type = ERROR)
+	else if (type == ERROR)
 		entry.append("[ERROR] ");
+	else if (type == EVENT)
+		entry.append("[EVENT] ");
 
 	entry.append(text);
 
@@ -70,5 +72,3 @@ mutexStd(mtxStandardOutput)
 Log::~Log()
 {
 }
-
-

@@ -204,6 +204,8 @@ int main()
   argRP.mxcw=&condRPM;
   argRP.shMemLots=&lots;
   argRP.debutSyncro=&debutSyncro;
+  argRP.capteurPalette=stubPresencePalette;
+  argRP.capteurEmbalage=stubErrEmbalagePalette;
 
   // thread temps réel : priorité 40
   param.sched_priority = 40;
