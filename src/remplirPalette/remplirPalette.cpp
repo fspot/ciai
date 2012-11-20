@@ -1,6 +1,24 @@
+/*************************************************************************
+                           remplirPalette  -  description
+                             -------------------
+*************************************************************************/
+
+//---------- Réalisation de la tâche remplirPalette
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//------------------------------------------------------ Include personnel
 #include "remplirPalette.h"
+///////////////////////////////////////////////////////////////////  PRIVE
+//------------------------------------------------------------- Constantes
+
+//------------------------------------------------------------------ Types
+using namespace std;
+//---------------------------------------------------- Variables statiques
+
+//------------------------------------------------------ Fonctions privées
 
 
+// Méthode d'écriture dans le log
 void ecriture_log_remplirPalette(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
@@ -9,7 +27,9 @@ void ecriture_log_remplirPalette(Log * unGestionnaire, std::string msg,logType u
     unGestionnaire->Write(msg,unType,false);
   #endif 
 }
-
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
+//Méthode de thread
 void remplirPalette_thread(void * argsUncasted)
 {
     static unsigned int idpalette = 0;
@@ -32,7 +52,7 @@ void remplirPalette_thread(void * argsUncasted)
 		}
 		// Message réseau carton empaletté :
 		Message msg = {carton.netstr_palette(), false};
-		args->balMessages->Push(msg, 2);
+		args->balMessages->Push(msg, 1);
 
     	// passage au carton suivant :
     	countCarton++;
@@ -51,12 +71,14 @@ void remplirPalette_thread(void * argsUncasted)
     		palette.lot = &args->shMemLots->content->lots[countLot];
     		args->shMemLots->mutex.unlock();
 
+    		// Message réseau palette finie :
+    		Message msg = {palette.netstr(), false};
+    		args->balMessages->Push(msg, 1);
+
     		// on push la palette
     		args->balStockage->Push(palette,0);
     		
-    		// Message réseau palette finie :
-    		Message msg = {palette.netstr(), false};
-    		args->balMessages->Push(msg, 2);
+
 
     		countCarton = 0;
 	    	countPalette++;
@@ -79,59 +101,4 @@ void remplirPalette_thread(void * argsUncasted)
     }
     pthread_exit(0);
 }
-
-/* // debut ancienne version
-sem_wait(args->debutSyncro);
-while (1)
-{
-	
-	args->shMemLots->mutex.lock();
-	int cartonsMax = args->shMemLots->content->lots[lotnb].cartons;
-	int palettesMax = args->shMemLots->content->lots[lotnb].palettes;
-	args->shMemLots->mutex.unlock();
-	int countPalettes = 0;
-
-	while (countPalettes < palettesMax)
-	{
-		if (stubPresencePalette())
-		{
-			Palette palette;
-			palette.id = idpalette++;
-			int countCartons = 0;
-			while (countCartons < cartonsMax)
-			{
-				Carton carton = args->balImprimante->Pull();	//cartons perdus (pas nécessaire de les garder d'après le client)
-				if (carton.fin)
-					pthread_exit(0);
-				args->shMemLots->mutex.lock();
-				palette.lot = &args->shMemLots->content->lots[lotnb];
-				args->shMemLots->mutex.unlock();
-				countCartons++;
-			}
-			if (stubErrEmbalagePalette())
-			{
-				//traitement de l'erreur: erreur d'embalage d'une palette
-				args->eventBox->Push(Event(ABSPALETTE),0);
-				pthread_mutex_lock(args->mxcw);
-				pthread_cond_wait(args->cw,args->mxcw);
-			
-				pthread_mutex_unlock(args->mxcw);
-			}
-			args->balPalette->Push(palette,0);
-			
-		}
-		else
-		{
-			//traitement de l'erreur: absence palette
-			args->eventBox->Push(Event(ERREMBALAGES),0);
-			pthread_mutex_lock(args->mxcw);
-			pthread_cond_wait(args->cw,args->mxcw);
-			pthread_mutex_unlock(args->mxcw);
-		}
-	}
-	lotnb++;
-	if (lotnb == args->shMemLots->content->tot)
-		pthread_exit(0);
-}
-// end ancienne version */
 

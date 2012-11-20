@@ -10,7 +10,6 @@ using namespace std;
 
 static bool cartonPresent=true;
 static Mutex* mutCartonPresent;
-static sem_t sem_fin_de_serie;
 static sem_t debutSyncro;
 static pthread_t threadRemplirCarton;
 static pthread_cond_t cvThreadRemplirCarton;
@@ -48,11 +47,14 @@ static bool test1()
 	sleep(2);
 	if(pBalCartons->Size()==9)
 	{
-		if(pBalEvenements->Size()==1)
+		if(pBalEvenements->Size()==2)
 		{
-			if(pBalEvenements->Pull().event==FIN)
+			if(pBalEvenements->Pull().event==FINSERIE)
 			{
-				return true;
+				if(pBalEvenements->Pull().event==FIN)
+				{
+					return true;
+				}
 			}
 		}
 	}
@@ -115,11 +117,14 @@ static bool test3()
 	sleep(2);
 	if(pBalCartons->Size()==4)
 	{
-		if(pBalEvenements->Size()==1)
+		if(pBalEvenements->Size()==2)
 		{
 			if(pBalEvenements->Pull().event==TAUXERR)
 			{
-				return true;
+				if(pBalEvenements->Pull().event==FINSERIE)
+				{
+					return true;
+				}
 			}
 		}
 	}
@@ -149,6 +154,8 @@ static void viderBals()
 //procédure qui réinitialise tout ce que touche le thread remplirCarton entre chaque test
 static void reset()
 {
+	pthread_cond_signal(&cvThreadRemplirCarton);
+	sleep(1);
 	pthread_cancel(threadRemplirCarton);
 	sleep(1);
 
@@ -166,7 +173,6 @@ static void fin(int noSignal)
 		pthread_cond_destroy(&cvThreadRemplirCarton);
 		delete(mutCartonPresent);
 		delete(mutCvRemplirCarton);
-		sem_destroy(&sem_fin_de_serie);
 		sem_destroy(&debutSyncro);
 		delete(pBalPieces);
 		delete(pBalCartons);
@@ -188,7 +194,6 @@ int main()
 	pthread_cond_init(&cvThreadRemplirCarton, NULL);
 	mutCartonPresent=new Mutex();
 	mutCvRemplirCarton=new Mutex();
-	sem_init(&sem_fin_de_serie,0,0);
 	sem_init(&debutSyncro,0,0);
 
 	pBalPieces=new Mailbox<Piece>;
@@ -205,9 +210,9 @@ int main()
 	gestionnaireLog=new Log(mtxStandardOutput);
 
 	pArgRemplirCarton=new ArgRemplirCarton(pBalPieces,pBalCartons,pBalEvenements
-		,pBalMessages,gestionnaireLog,mutCartonPresent,
-		&sem_fin_de_serie,&cartonPresent,&mtxLotCourant,&shMemLots,&lotCourant,NULL,&cvThreadRemplirCarton,
-		mutCvRemplirCarton,&debutSyncro);
+		,pBalMessages,gestionnaireLog,mutCartonPresent
+		,&cartonPresent,&mtxLotCourant,&shMemLots,&lotCourant,NULL,&cvThreadRemplirCarton
+		,mutCvRemplirCarton,&debutSyncro);
 
 	sigaction(SIGINT,&action,NULL);
 

@@ -1,4 +1,3 @@
-
 /*************************************************************************
   piece  -  Tâche qui gère la génération des pièces.
 *************************************************************************/
@@ -11,10 +10,10 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisées
 
-#include "../modeles/modeles.h"
-#include "../mailbox/mailbox.h"
-#include "../multithreadObjects/mutex.h"
-#include "../log/log.h" 
+#include <modeles/modeles.h>
+#include <mailbox/mailbox.h>
+#include <multithreadObjects/mutex.h>
+#include <log/log.h>
 
 //------------------------------------------------------------- Constantes 
 
@@ -29,8 +28,6 @@ struct ArgPiece {
 	int * lotCourant;
 	Mutex * lotCourantMutex;
 	SharedMemoryLots * shMemLots;
-	//pthread_cond_t* cv;
-	//pthread_mutex_t* mutCv;
 };
 
 //////////////////////////////////////////////////////////////////  PUBLIC

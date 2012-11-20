@@ -1,15 +1,33 @@
+/*************************************************************************
+                           controleur  -  description
+                             -------------------
+*************************************************************************/
+
+//---------- Réalisation de la tâche controleur
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//-------------------------------------------------------- Include système
 #include <iostream>
 #include <vector>
 #include <map>
-
 #include "pthread.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+//------------------------------------------------------ Include personnel
 #include "piece.h"
-#include "../mailbox/mailbox.h"
-#include "../modeles/modeles.h"
+#include <mailbox/mailbox.h>
+#include <modeles/modeles.h>
+///////////////////////////////////////////////////////////////////  PRIVE
+//------------------------------------------------------------- Constantes
 
-using namespace std; 
+//------------------------------------------------------------------ Types
+using namespace std;
+//---------------------------------------------------- Variables statiques
 
+//------------------------------------------------------ Fonctions privées
+
+// Méthode d'écriture  de log
 void ecriture_log_piece(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
@@ -19,8 +37,11 @@ void ecriture_log_piece(Log * unGestionnaire, std::string msg,logType unType)
   #endif 
 }
 
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
 void *thread_piece(void * argPiece)
 {
+	srand ( time(NULL) );
 	ArgPiece *arg = (ArgPiece*) argPiece; // cast
         ecriture_log_piece(arg->gestionnaireLog, "Lancement de la tâche pièce", EVENT);
 
@@ -42,11 +63,17 @@ void *thread_piece(void * argPiece)
 		arg->shMemLots->mutex.lock();
 		for(int j=0;j<3;j++)
 		{
-			p.dim[j]=arg->shMemLots->content->lots[i].dim[j];
+			int v1 = rand() % 100;
+			int y=0;
+			if (v1<2)
+			{
+				y=1;
+			}
+			p.dim[j]=arg->shMemLots->content->lots[i].dim[j]+y;
 		}		
 		arg->shMemLots->mutex.unlock();
 		arg->balPiece->Push(p,0);
 		// pause :
-		sleep(0.5);
+		sleep(1);
 	}
 }

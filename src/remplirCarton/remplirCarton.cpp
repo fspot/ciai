@@ -1,12 +1,26 @@
+/*************************************************************************
+                           remplirCarton  -  description
+                             -------------------
+*************************************************************************/
+
+//---------- Réalisation de la tâche remplirCarton
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//-------------------------------------------------------- Include système
 #include <time.h>
 #include <signal.h>
 #include <unistd.h>
-#include "remplirCarton.h"
-#include "../mailbox/mailbox.h"
-#include "../modeles/modeles.h"
 #include <iostream>
-using namespace std;
+//------------------------------------------------------ Include personnel
+#include "remplirCarton.h"
+#include <mailbox/mailbox.h>
+#include <modeles/modeles.h>
+///////////////////////////////////////////////////////////////////  PRIVE
+//------------------------------------------------------------- Constantes
 
+//------------------------------------------------------------------ Types
+using namespace std;
+//---------------------------------------------------- Variables statiques
 static time_t timeBegin;
 static ArgRemplirCarton* init;
 static vector<Lot>* listeLots;
@@ -16,17 +30,17 @@ static unsigned int nbPiecesDsRebut=0;
 static unsigned int nbPiecesDsCarton;
 static unsigned int idCarton;
 static unsigned int serieCourante;
+//------------------------------------------------------ Fonctions privées
 
-//procédure qui permet d'écrire dans le journal interne du système Linux
+// Méthode d'écriture dans le log
 void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
-  #ifdef DEBUG
-    unGestionnaire->Write(msg,unType,true);
-  #else
-    unGestionnaire->Write(msg,unType,false);
-  #endif 
+#ifdef DEBUG
+  unGestionnaire->Write(msg,unType,true);
+#else
+  unGestionnaire->Write(msg,unType,false);
+#endif 
 }
-
 
 //procédure public qui permet de remplir des pièces dans un carton et de gérer tous les cas prévus
 static void wait()
@@ -37,22 +51,25 @@ static void wait()
 	init->mutCv->unlock();
 }
 
+
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
 void* remplirCarton(void * index)
 {
-	init=(ArgRemplirCarton *)index;
-    ecriture_log_remplirCarton(init->gestionnaireLog,"Lancement de la tâche remplir carton",EVENT);
-	serieCourante=0;
-	sem_wait(init->debutSyncro);
-    ecriture_log_remplirCarton(init->gestionnaireLog,"Initialisation finie - remplir carton",EVENT);
-	listeLots = &init->shMemLots->content->lots;
-	lotCourant=&(listeLots->at(serieCourante));	
-	nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
-	nbPiecesDsCarton=0;
-	idCarton=0;
+  init=(ArgRemplirCarton *)index;
+  ecriture_log_remplirCarton(init->gestionnaireLog,"Lancement de la tâche remplir carton",EVENT);
+  serieCourante=0;
+  sem_wait(init->debutSyncro);
+  ecriture_log_remplirCarton(init->gestionnaireLog,"Initialisation finie - remplir carton",EVENT);
+  listeLots = &init->shMemLots->content->lots;
+  lotCourant=&(listeLots->at(serieCourante));	
+  nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
+  nbPiecesDsCarton=0;
+  idCarton=0;
 
 
-	for(;;)
-	{
+  for(;;)
+    {
 		//on reçoit une pièce
 		Piece piece=init->pBalPieces->Pull();
 
@@ -86,17 +103,18 @@ void* remplirCarton(void * index)
 			i++;
 		}
 
-		if(!valide)
-			nbPiecesDsRebut++;
-
-		//on vérifie que le nombre de pièce dans le rebut pour un carton n'est pas
-		//supérieur au seuil fixé
-		if(nbPiecesDsRebut>lotCourant->rebut)
+      	if(!valide)
 		{
-            ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
-			init->pBalEvenements->Push(Event(TAUXERR),0);
-			wait();
-			nbPiecesDsRebut=0;
+	  		nbPiecesDsRebut++;
+	  		//on vérifie que le nombre de pièce dans le rebut pour un carton n'est pas
+			//supérieur au seuil fixé
+	  		if(nbPiecesDsRebut>lotCourant->rebut)
+	    	{
+	      		ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
+	      		init->pBalEvenements->Push(Event(TAUXERR),0);
+	      		wait();
+	      		nbPiecesDsRebut=0;
+	    	}
 		}
 		else
 		{
@@ -134,19 +152,19 @@ void* remplirCarton(void * index)
 					}
 					else
 					{
-            			// Message réseau série finie :
-            			Message msg = {lotCourant->netstr(), false};
-            			init->pBalMessages->Push(msg, 2);
-
-						init->lotCourantMutex->lock();
-						(*(init->lotCourant))+=1;
-						init->lotCourantMutex->unlock();
-                        ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
-						lotCourant=&(init->shMemLots->content->lots[serieCourante]);
-						nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
-					}
-				}
-			}
-		}
+   					    // Message réseau série finie :
+					    Message msg = {lotCourant->netstr(), false};
+					    init->pBalMessages->Push(msg, 1);
+					    init->lotCourantMutex->lock();
+					    (*(init->lotCourant))+=1;
+					    init->lotCourantMutex->unlock();
+					    init->pBalEvenements->Push(Event(FINSERIE),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores
+					    ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
+					    lotCourant=&(init->shMemLots->content->lots[serieCourante]);
+					    nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
+            		}
+            	}
+            }
+	    }
 	}
 }

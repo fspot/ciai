@@ -1,4 +1,4 @@
-# CMakeLists de test pour la tâche mère
+# CMakeLists de test pour la tâche controleur
 cmake_minimum_required(VERSION 2.6)
  
 project(testControleur)
@@ -7,14 +7,13 @@ project(testControleur)
 find_package (Threads)
 message(STATUS ${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../../src/")
-set(SOURCES ${PROJECT_SOURCE_DIR}/../../src/sockets/network.cpp
-	    ${PROJECT_SOURCE_DIR}/../../src/sockets/parser.cpp
- 	    ${PROJECT_SOURCE_DIR}/../../src/sockets/netsend.cpp
-	    ${PROJECT_SOURCE_DIR}/../../src/multithreadObjects/mutex.cpp
-	    ${PROJECT_SOURCE_DIR}/../../src/log/log.cpp
-	    ${PROJECT_SOURCE_DIR}/../../src/remplirCarton/remplirCarton.cpp
-	    ${PROJECT_SOURCE_DIR}/../../src/controleur/controleur.cpp
-	    ${PROJECT_SOURCE_DIR}/../../src/gestionserie/gestionserie.cpp)
+set( SOURCES_DIR ${PROJECT_SOURCE_DIR}/../../src/)
+set(SOURCES ${SOURCES_DIR}/sockets/network.cpp
+	    ${SOURCES_DIR}/sockets/parser.cpp
+	    ${SOURCES_DIR}/multithreadObjects/mutex.cpp
+	    ${SOURCES_DIR}/log/log.cpp
+	    ${SOURCES_DIR}/controleur/controleur.cpp
+	    ${SOURCES_DIR}/piece/piece.cpp)
 
 add_executable(testControleur testControleur.cpp ${SOURCES})
 target_link_libraries (testControleur ${CMAKE_THREAD_LIBS_INIT})

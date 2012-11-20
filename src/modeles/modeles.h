@@ -11,10 +11,8 @@
 #include <pthread.h>
 
 // includes perso
-#include "../mailbox/mailbox.h"
+#include <mailbox/mailbox.h>
 
-
-// http://lite.framapad.org/p/ideemodeleciai
 
 /* Note de Fred :
    la méthode netstr() renvoie une chaîne formatée de façon à ce qu'elle puisse être envoyée sur le réseau.
@@ -25,7 +23,7 @@
 struct Lot {
   std::string nom;
   int pieces, cartons, palettes, rebut, dim[3];
-  std::string netstr() { return "L\r\n"; } // msg envoyé lors du passage au lot suivant (== nouveau lot)
+  std::string netstr() { return "L#\r\n"; } // msg envoyé lors du passage au lot suivant (== nouveau lot)
 }; 
 
 
@@ -54,7 +52,9 @@ enum EventType
   REPRISEPAUSE,
   ABSPIECE,
   FIN,
-  FINERREUR
+  FINERREUR,
+  FINLAST,
+  FINSERIE
 } ;
 
 
