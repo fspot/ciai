@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <iostream>
 #include <string>
+#include <signal.h>
 #include "../../src/modeles/modeles.h"
 #include "../../src/mailbox/mailbox.h"
 #include "../../src/imprimer/imprimer.h"
@@ -14,11 +15,17 @@ using namespace std;
 static Mutex mtxStandardOutput;
 static Log gestionnaireLog(mtxStandardOutput);
 
+// creation varCond et mutex pour attente reprise
+static pthread_cond_t varCond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+//Fontions pour tests
 void ecriture_log_mere(Log * unGestionnaire, std::string msg,logType unType);                                                              
 void depotCartonBalImprimante(ArgImprimer * args, int numCarton);
 void retraitCartonBalPalette(ArgImprimer * args);
 void simuFonctionnementNormal(ArgImprimer * args);
 void simuFilePleine (ArgImprimer * args);
+void viderFilePleine(ArgImprimer * args);
 
 int main() {
 
@@ -27,10 +34,6 @@ int main() {
 	Mailbox<Carton> balImprimante;
 	Mailbox<Carton> balPalette;
 	
-	// creation varCond et mutex pour attente reprise
-	pthread_cond_t varCond = PTHREAD_COND_INITIALIZER;
-	pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
 	//Creation du thread imprimer
 	pthread_t imprimer;
 
@@ -48,6 +51,8 @@ int main() {
 	//simuFonctionnementNormal(argImprimer);	
 
 	simuFilePleine(argImprimer);
+	sleep(1);
+	viderFilePleine(argImprimer);
 
 	pthread_join(imprimer, NULL);
 	
@@ -97,4 +102,9 @@ void simuFilePleine (ArgImprimer * args) {
 		depotCartonBalImprimante( args, i );
 	}
 }
-
+ void viderFilePleine(ArgImprimer * args) {
+	for (int i=1; i<=10; i++) {
+		retraitCartonBalPalette( args );
+	}
+	pthread_cond_signal(&varCond);
+}
