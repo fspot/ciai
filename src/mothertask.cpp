@@ -23,7 +23,7 @@
 #include "remplirCarton/remplirCarton.h"
 #include "remplirPalette/remplirPalette.h"
 #include "stock/stock.h"
-#include "destock/destock.h"                             
+#include "destock/destock.h"                          
 //------------------------------------------------------ Name spaces
 using namespace std;
 
@@ -337,7 +337,7 @@ int main()
   ecriture_log_mere(&gestionnaireLog,"Phase moteur - tache mere",EVENT);
 
 
-  
+
   pthread_join(controleur, NULL);
   pthread_join(destocker_palette, NULL);
   pthread_join(stocker_palette, NULL);
@@ -346,7 +346,7 @@ int main()
   pthread_join(remplir_carton, NULL);
   pthread_join(serveur_envoi, NULL);
   pthread_cancel(serveur_reception);
-
+  cout<<"je me barre"<<endl;
   delete argRC.pCartonPresent;
   
   ecriture_log_mere(&gestionnaireLog,"Fin de la tâche mère",EVENT);
