@@ -13,6 +13,7 @@
 #include <iostream>
 #include <modeles/modeles.h>
 #include <mailbox/mailbox.h>
+#include <stubs/stubs.h>
 #include <log/log.h>
 //------------------------------------------------------------- Constantes 
 
@@ -28,8 +29,6 @@ struct ArgImprimer
   pthread_cond_t * varCond;
   pthread_mutex_t * mutex;
   SharedMemoryLots * Lots; // vérifier si fin du lot pour tuer tache, à faire
-  bool * panneImprim;
-  Mutex * mutexPanne;
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques

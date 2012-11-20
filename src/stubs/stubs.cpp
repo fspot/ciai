@@ -34,3 +34,13 @@ bool stubErrEmbalagePalette()
 	return (rand() % PROBA_ERR_EMBALAGE == 0);
 #endif
 }
+
+bool stubPanneImprimante()
+{
+#ifdef PANNE_IMPRIM
+	return true;
+#else
+	return (rand() % PROBA_PANNE_IMPRIM == 0);
+#endif
+}
+
