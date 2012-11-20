@@ -23,7 +23,7 @@
 struct Lot {
   std::string nom;
   int pieces, cartons, palettes, rebut, dim[3];
-  std::string netstr() { return "L\r\n"; } // msg envoyé lors du passage au lot suivant (== nouveau lot)
+  std::string netstr() { return "L#\r\n"; } // msg envoyé lors du passage au lot suivant (== nouveau lot)
 }; 
 
 
