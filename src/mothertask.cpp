@@ -23,54 +23,28 @@
 #include "remplirCarton/remplirCarton.h"
 #include "remplirPalette/remplirPalette.h"
 #include "stock/stock.h"
-#include "destock/destock.h"                             
+#include "destock/destock.h"
 //------------------------------------------------------ Name spaces
 using namespace std;
 
 
-// ----------------------------------------------------- Statics :
-pthread_t 
-  genere_piece,
-  remplir_carton, 
-  imprimer, 
-  remplir_palette,
-  stocker_palette,
-  destocker_palette,
-  controleur,
-  serveur_reception,
-  serveur_envoi;
-
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
-void ecriture_log_mere(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
+void ecriture_log_mere(Log * unGestionnaire, std::string msg,logType unType)
 {
   #ifdef DEBUG
     unGestionnaire->Write(msg,unType,true);
   #else
     unGestionnaire->Write(msg,unType,false);
-  #endif 
-}
-
-
-void catcher(int noSignal)
-{
-  pthread_cancel(genere_piece);
-  pthread_cancel(remplir_carton);
-  pthread_cancel(imprimer);
-  pthread_cancel(remplir_palette);
-  pthread_cancel(stocker_palette);
-  pthread_cancel(destocker_palette);
-  pthread_cancel(controleur);
-  pthread_cancel(serveur_reception);
-  pthread_cancel(serveur_envoi);
-  cerr << "Fermeture forcée" << endl;
+  #endif
 }
 
 // Tâche mère
+
 int main()
 // Algorithme :
-// Allocation des ressources, initialisation et lancement des autres threads 
+// Allocation des ressources, initialisation et lancement des autres threads
 
 {
 
@@ -111,22 +85,35 @@ int main()
 
   sem_t  pauseSerieMutex;
   sem_init(&pauseSerieMutex, 0, 0);
-  
+
 
   // Creation du gestionnaire de Log
   Log gestionnaireLog(sortieStdMutex);
 
   ecriture_log_mere(&gestionnaireLog,"Lancement de la tâche mère",EVENT);
-  
 
-  pthread_cond_t 
+
+  // Allocation des mutex et variables conditionnelles
+  pthread_t
+    genere_piece,
+    remplir_carton,
+    imprimer,
+    remplir_palette,
+    stocker_palette,
+    destocker_palette,
+    controleur,
+    serveur_reception,
+    serveur_envoi,
+    gestion_series;
+
+  pthread_cond_t
     condRC=PTHREAD_COND_INITIALIZER, // remplir carton
     condIMP=PTHREAD_COND_INITIALIZER, // imprimer
     condRP=PTHREAD_COND_INITIALIZER, // remplir palette
     condSP=PTHREAD_COND_INITIALIZER, // stocker
     condDP=PTHREAD_COND_INITIALIZER; // destocker
- 
-  pthread_mutex_t 
+
+  pthread_mutex_t
     condRCM=PTHREAD_MUTEX_INITIALIZER, // remplir carton
     condIMPM=PTHREAD_MUTEX_INITIALIZER, // imprimer
     condRPM=PTHREAD_MUTEX_INITIALIZER, // remplir palette
@@ -161,7 +148,7 @@ int main()
   argRC.mutCv=&condRCM;
   argRC.cv=&condRC;
 
-  //gestion du lot courant pour simul 
+  //gestion du lot courant pour simul
   argRC.lotCourant=&lotCourant;
   argRC.lotCourantMutex=&memLotCourant;
 
@@ -204,8 +191,6 @@ int main()
   argRP.mxcw=&condRPM;
   argRP.shMemLots=&lots;
   argRP.debutSyncro=&debutSyncro;
-  argRP.capteurPalette=stubPresencePalette;
-  argRP.capteurEmbalage=stubErrEmbalagePalette;
 
   // thread temps réel : priorité 40
   param.sched_priority = 40;
@@ -213,7 +198,7 @@ int main()
   pthread_attr_setschedparam(&attr, &param);
   pthread_create (&remplir_palette, &attr, (void *(*)(void *)) &remplirPalette_thread, (void *)&argRP);
 
-  
+
 
   //Creation du thread stocker palette
   ArgStock argStock;
@@ -255,7 +240,7 @@ int main()
   argPiece.clapet = &clapet;
   argPiece.debutSyncro = &debutSyncro;
   argPiece.shMemLots = &lots;
-  //gestion du lot courant pour simul 
+  //gestion du lot courant pour simul
   argPiece.lotCourant=&lotCourant;
   argPiece.lotCourantMutex=&memLotCourant;
 
@@ -264,10 +249,10 @@ int main()
   pthread_attr_setschedpolicy(&attr, SCHED_RR);
   pthread_attr_setschedparam(&attr, &param);
   pthread_create (&genere_piece, &attr, thread_piece, (void*) &argPiece);
-  
-  
+
+
   //Création du thread controleur
-   
+
   ArgControleur  argControleur;
   argControleur.balEvenements= &balEvenements;
   argControleur.gestionnaireLog=&gestionnaireLog;
@@ -280,7 +265,7 @@ int main()
   argControleur.balMessages=&balMessages;
   argControleur.pauseSerieMutex=&pauseSerieMutex;
 
-  
+
   InfoThread remplirCarton;
   remplirCarton.id =remplir_carton;
   remplirCarton.cw=&condRC;
@@ -348,11 +333,11 @@ int main()
   // ===========================
   // ==== FIN THREAD CREATE ====
   // ===========================
-  
+
   ecriture_log_mere(&gestionnaireLog,"Phase moteur - tache mere",EVENT);
-  
-  signal(SIGINT,catcher);
-  
+
+
+
   pthread_join(controleur, NULL);
   pthread_join(destocker_palette, NULL);
   pthread_join(stocker_palette, NULL);
@@ -363,12 +348,12 @@ int main()
   pthread_cancel(serveur_reception);
 
   delete argRC.pCartonPresent;
-  
+
   ecriture_log_mere(&gestionnaireLog,"Fin de la tâche mère",EVENT);
   sem_destroy(&debutSyncro);
 
 
   sem_destroy(&pauseSerieMutex);
   return 0;
-  
+
 }
