@@ -45,10 +45,10 @@ void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType un
 //procédure public qui permet de remplir des pièces dans un carton et de gérer tous les cas prévus
 static void wait()
 {
-    ecriture_log_remplirCarton(init->gestionnaireLog,"Attente de deblocage - remplir Carton",ERROR);
-	init->mutCv->lock();
-	pthread_cond_wait(init->cv,init->mutCv->getMutex());
-	init->mutCv->unlock();
+        ecriture_log_remplirCarton(init->gestionnaireLog,"Attente de deblocage - remplir Carton",ERROR);
+	pthread_mutex_lock(init->mutCv);
+	pthread_cond_wait(init->cv,init->mutCv);
+	pthread_mutex_unlock(init->mutCv);
 }
 
 
@@ -188,18 +188,18 @@ void* remplirCarton(void * index)
 			i++;
 		}
 
-      	if(!valide)
+      		if(!valide)
 		{
 	  		nbPiecesDsRebut++;
 	  		//on vérifie que le nombre de pièce dans le rebut pour un carton n'est pas
 			//supérieur au seuil fixé
 	  		if(nbPiecesDsRebut>lotCourant->rebut)
-	    	{
+	    		{
 	      		ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
 	      		init->pBalEvenements->Push(Event(TAUXERR),0);
 	      		wait();
 	      		nbPiecesDsRebut=0;
-	    	}
+	    		}
 		}
 		else
 		{
@@ -247,9 +247,10 @@ void* remplirCarton(void * index)
 					    ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
 					    lotCourant=&(init->shMemLots->content->lots[serieCourante]);
 					    nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
+            				}
+            			}
             		}
-            	}
-            }
-	    }
+	    	}
 	}
+}
 }
