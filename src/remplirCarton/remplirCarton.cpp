@@ -89,7 +89,7 @@ void* remplirCarton(void * index)
 
       int i=0;
       bool valide=true;
-
+		
       while(i<3 && valide)
 	{
 	  cout<<piece.dim[i]<<" "<<lotCourant->dim[i]<<endl;
@@ -100,7 +100,7 @@ void* remplirCarton(void * index)
 	    }			
 	  i++;
 	}
-
+		
       if(!valide)
 	{
 	  cout<<"Piece defaillante"<<endl;
@@ -121,7 +121,7 @@ void* remplirCarton(void * index)
 	    {
 	      Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
 	      init->pBalCartons->Push(carton,0);
-
+				
 	      // Message réseau carton rempli :
 	      Message msg = {carton.netstr_rempli(), false};
 	      init->pBalMessages->Push(msg, 1);

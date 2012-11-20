@@ -19,13 +19,13 @@ using namespace std;
 
 
 // Méthode d'écriture dans le log
-void ecriture_log_remplirPalette(Log * unGestionnaire, std::string msg,logType unType)
+void ecriture_log_remplirPalette(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
     unGestionnaire->Write(msg,unType,true);
   #else
     unGestionnaire->Write(msg,unType,false);
-  #endif
+  #endif 
 }
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
@@ -43,7 +43,7 @@ void remplirPalette_thread(void * argsUncasted)
     	Carton carton = args->balPalette->Pull(); // appel bloquant
 		ecriture_log_remplirPalette(args->gestionnaireLog,"Carton recu - remplir palette",EVENT);
     	if (carton.fin)
-        {
+        {	
 			ecriture_log_remplirPalette(args->gestionnaireLog,"Fin de la tache - remplir palette",EVENT);
 			Palette p;
 			p.fin=true;
@@ -58,7 +58,7 @@ void remplirPalette_thread(void * argsUncasted)
     	countCarton++;
     	if (countCarton == args->shMemLots->content->lots[countLot].cartons) { // next palette
 	    	// on emballe la palette qu'on vient de finir :
-    		if ( (*args->capteurEmbalage)() ) { // si erreur emballage :
+    		if (stubErrEmbalagePalette()) { // si erreur emballage :
     			args->eventBox->Push(Event(ABSPALETTE),0);
     			pthread_mutex_lock(args->mxcw);
     			pthread_cond_wait(args->cw,args->mxcw);
@@ -77,7 +77,7 @@ void remplirPalette_thread(void * argsUncasted)
 
     		// on push la palette
     		args->balStockage->Push(palette,0);
-
+    		
 
 
     		countCarton = 0;
@@ -91,7 +91,7 @@ void remplirPalette_thread(void * argsUncasted)
 	    	}
 
 	    	// la palette est elle bien présente ?
-	    	if (! (*args->capteurPalette)()) { // palette absente !
+	    	if (! stubPresencePalette()) { // palette absente !
 	    		args->eventBox->Push(Event(ERREMBALAGES),0);
 	    		pthread_mutex_lock(args->mxcw);
 	    		pthread_cond_wait(args->cw,args->mxcw);

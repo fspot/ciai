@@ -35,8 +35,11 @@ void ecriture_log_imprimer(Log * unGestionnaire, std::string msg,logType unType)
 int imprimer_thread(void * argsUnconverted)
 {
   ArgImprimer * args= (ArgImprimer *)argsUnconverted;
-  ecriture_log_imprimer(args->gestionnaireLog,"Lancement de la tache imprimer",ERROR);	
-
+  ecriture_log_imprimer(args->gestionnaireLog,"Lancement de la tache imprimer",ERROR);
+	
+  bool panneImprimante = false;
+	
+	
   pthread_cond_t varCond;
   pthread_mutex_t mutex;
 
@@ -53,7 +56,12 @@ int imprimer_thread(void * argsUnconverted)
 	pthread_exit(0);
       }
 
-    if (!stubPanneImprimante()) {
+    // Verification panne imprimante, panneImprim a simuler
+    // mutexPanne->lock();
+    // panneImprimante = args->panneImprim;
+    // mutexPanne->unlock();
+
+    if (!panneImprimante) {
 
       if (args->balPalette->Size() < 10) {
 
@@ -64,7 +72,7 @@ int imprimer_thread(void * argsUnconverted)
       else {
 
 	// Depot message erreur dans la bal enventbox
-	ecriture_log_imprimer(args->gestionnaireLog,"File d'attente pleine - tache imprimer",ERROR);
+	ecriture_log_imprimer(args->gestionnaireLog,"Fille d'attente pleine - tache imprimer",ERROR);
 	Event msgErreurFileAttente(FILEATTPLEINE);
 	args->eventBox->Push( msgErreurFileAttente,0 );
 				

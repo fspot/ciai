@@ -27,7 +27,7 @@ using namespace std;
 // Méthode de fermeture de clapet
 void fermeture_clapet(Mutex * clapet)
 {
-  clapet->lock();
+  clapet->trylock();
 }
 
 
@@ -68,48 +68,48 @@ int controleur_thread(void * argsUnconverted)
   {
     // Attente de récupération d'événement
     Event nextEvent = args->balEvenements->Pull();
-    ecriture_log_controleur(args->gestionnaireLog,"Le controleur à recu un nouvel évènement à traiter",EVENT);
+    ecriture_log_controleur(args->gestionnaireLog,"Nouvel evenement a traiter - controleur",EVENT);
     Message aMsg = {"", false};
     ListeCommandes lca;
     switch (nextEvent.event)
     {
     	case ABSCARTON:
     	  fermeture_clapet(args->clapet);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: il y a abscence de carton, l'application est en attente.",ERROR);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Abscence carton",ERROR);
     	  aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case PANNEIMPRIM:
     	  fermeture_clapet(args->clapet);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: il y a panne de l'imprimante, l'application est en attente.",ERROR);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Panne imprimante",ERROR);
           aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case ABSPALETTE:
     	  fermeture_clapet(args->clapet);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: il y a abscence de palette, l'application est en attente.",ERROR);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Abscence palette",ERROR);
           aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case TAUXERR:
     	  fermeture_clapet(args->clapet);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: Le taux d'erreur est trop élevé, l'application est en attente.",ERROR);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Taux erreur",ERROR);
           aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case FILEATTPLEINE:
     	  fermeture_clapet(args->clapet);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: La file d'attente est pleine, l'application est en attente.",ERROR);
+    	  ecriture_log_controleur(args->gestionnaireLog,"File d'attente pleine",ERROR);
           aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;      
 
     	case ARTURG:
-    	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: Un arret d'urgence a été enclenché, l'application est en attente.",ERROR);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Arret d'urgence",ERROR);
           aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;
@@ -121,31 +121,30 @@ int controleur_thread(void * argsUnconverted)
     	  reprendre_tache(args->threads[REMPLIRPALETTE]);
     	  reprendre_tache(args->threads[IMPRIMER]);
     	  reprendre_tache(args->threads[REMPLIRCARTON]);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Un ordre de reprise post érreur a été donné.",EVENT);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Reprise pause",ERROR);
     	  break;
 
     	case PAUSE:
     	  sem_post(args->pauseSerieMutex);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Une demande une pause a été faite, elle sera traitée à la fin du prochain lot",EVENT);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Demande de pause traitée",EVENT);
     	  break;
     	case FINSERIE:
-    	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Une série est finie",EVENT);
     	  if (sem_trywait(args->pauseSerieMutex) != -1 )
 	  {
-    	    ecriture_log_controleur(args->gestionnaireLog,"Evenement: La pause programmée est effective",EVENT);
+    	    ecriture_log_controleur(args->gestionnaireLog,"En pause",EVENT);
             fermeture_clapet(args->clapet);
 	  }
     	  break;
 
     	case ERREMBALAGES:
     	  fermeture_clapet(args->clapet);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: Une erreur est survenue pendant un embalage, l'application est en attente.",ERROR);
+    	  ecriture_log_controleur(args->gestionnaireLog, "Erreur embalage",ERROR);
           aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
     	case ERRCOMMANDE:
-    	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: La commande n'as pa aboutie.",ERROR);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Erreur commande",ERROR);
           aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;
@@ -157,34 +156,33 @@ int controleur_thread(void * argsUnconverted)
     	  reprendre_tache(args->threads[REMPLIRPALETTE]);
     	  reprendre_tache(args->threads[IMPRIMER]);
     	  reprendre_tache(args->threads[REMPLIRCARTON]);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Une reprise a été demandé.",EVENT);
+    	  ecriture_log_controleur(args->gestionnaireLog,"Reprise pause",EVENT);
     	  break;
 
     	case FINLAST:
-    	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: La dernière piece pour la dernière série est passée.",EVENT);
           fermeture_clapet(args->clapet);
           break;
           
     	case FIN:
-    	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: la dernière palette a été stockée, terminaison.",EVENT);
           lca.fin=true;
           args->balCommandes->Push(lca,0);
           aMsg.fin = true;
           args->balMessages->Push(aMsg,1);
           aMsg.contenu = nextEvent.netstr();
-    	  ecriture_log_controleur(args->gestionnaireLog,"Fin de la tâche controleur.",EVENT);
+	  //Fin d'application à envoyer
+    	  //args->balMessages->Push(aMsg,0);
           pthread_exit(0);
           break;
 
     	case FINERREUR:
-    	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Un ordre de terminaison a été demandé suite à une erreur.",EVENT);
+          ecriture_log_controleur(args->gestionnaireLog,"Terminaison de l'application apres erreur - controleur",EVENT);
           // Déblocage des tâches :
           reprendre_tache(args->threads[DESTOCKERPALETTE]);
           reprendre_tache(args->threads[STOCKERPALETTE]);
           reprendre_tache(args->threads[REMPLIRPALETTE]);
           reprendre_tache(args->threads[IMPRIMER]);
           reprendre_tache(args->threads[REMPLIRCARTON]);
-	  // Arret des taches 
+	        // Arret des taches suivantes
           Carton c2;
           c2.fin=true;
           args->balPalette->Push(c2,0);
@@ -201,12 +199,12 @@ int controleur_thread(void * argsUnconverted)
           args->balCommandes->Push(lca,0);
           aMsg.fin = true;
           args->balMessages->Push(aMsg,1);
-    	  ecriture_log_controleur(args->gestionnaireLog,"Fin de la tâche controleur.",EVENT);
+          ecriture_log_controleur(args->gestionnaireLog,"Fin de la tâche controleur",EVENT);
           pthread_exit(0);
           break;
 
     	default:
-        ecriture_log_controleur(args->gestionnaireLog,"Un événement non gérré a été envoyé au controleur",ERROR);
+        ecriture_log_controleur(args->gestionnaireLog,"Erreur non gérée",ERROR);
         break;
     }
   }

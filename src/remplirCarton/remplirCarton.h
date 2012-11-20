@@ -10,9 +10,9 @@
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisées
-#include <modeles/modeles.h>
-#include <mailbox/mailbox.h>
-#include <log/log.h> 
+#include "../modeles/modeles.h"
+#include "../mailbox/mailbox.h"
+#include "../log/log.h" 
 
 //------------------------------------------------------------- Constantes 
 
@@ -24,20 +24,15 @@ struct ArgRemplirCarton{
   Mailbox<Message>* pBalMessages;
   Log * gestionnaireLog;
   Mutex* mutCartonPresent;
+//  sem_t* sem_fin_de_serie;
   bool* pCartonPresent;
   Mutex * lotCourantMutex;
   SharedMemoryLots *shMemLots;
   int * lotCourant;
+  sem_t * finDeSerieMutex;
   pthread_cond_t* cv;
   pthread_mutex_t* mutCv;
   sem_t * debutSyncro;
-
-  ArgRemplirCarton() {}
-  ArgRemplirCarton(Mailbox<Piece>* p,Mailbox<Carton>* c,Mailbox<Event>* e,Mailbox<Message>* m,Log * l, Mutex* mcp
-   , bool* cp,Mutex * lcm,SharedMemoryLots * sml,int* lc,sem_t * fsm, pthread_cond_t* cv2
-    ,pthread_mutex_t* mutCv2,sem_t * ds):pBalPieces(p),pBalCartons(c),pBalEvenements(e),pBalMessages(m),gestionnaireLog(l)
-    ,mutCartonPresent(mcp),pCartonPresent(cp),lotCourantMutex(lcm),shMemLots(sml)
-    ,lotCourant(lc),cv(cv2),mutCv(mutCv2),debutSyncro(ds){}
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
