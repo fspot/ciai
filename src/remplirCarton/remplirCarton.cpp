@@ -79,10 +79,7 @@ void* remplirCarton(void * index)
 	  ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tâche remplir carton",EVENT);
 	  pthread_exit(NULL);
 	}
-      init->mutCartonPresent->lock();
-      bool retour=(*(init->pCartonPresent));
-      init->mutCartonPresent->unlock();
-      if(!retour)
+      if((*init->capteurCarton)())
 	{
 	  ecriture_log_remplirCarton(init->gestionnaireLog,"La tâche remplir carton a detecter un carton abscent",ERROR);
 	  init->pBalEvenements->Push(Event(ABSCARTON),1);

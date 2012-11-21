@@ -21,10 +21,11 @@
 //------------------------------------------------------ Name spaces
 using namespace std;
 
+extern bool alwaysFalse();
+extern bool alwaysTrue();
+
 ///////////////////////////////////////////////////////////////////  PRIVE
 //---------------------------------------------------- Variables statiques
-static bool cartonPresent=true;
-static Mutex mutCartonPresent;
 static sem_t debutSyncro;
 static pthread_t threadRemplirCarton;
 static pthread_cond_t cvThreadRemplirCarton;
@@ -87,9 +88,7 @@ static bool test2()
 		Piece piece={{100,100,100},false};
 		pBalPieces->Push(piece);
 	}
-	mutCartonPresent.lock();
-	cartonPresent=false;
-	mutCartonPresent.unlock();
+	pArgRemplirCarton->capteurCarton=alwaysTrue;
 	for(int i=0; i<5;i++)
 	{
 		sleep(1);
@@ -97,9 +96,7 @@ static bool test2()
 		pBalPieces->Push(piece);
 	}
 	sleep(2);
-	mutCartonPresent.lock();
-	cartonPresent=true;
-	mutCartonPresent.unlock();
+	pArgRemplirCarton->capteurCarton=alwaysFalse;
 	if(pBalCartons->Size()==1)
 	{
 		if(pBalEvenements->Size()==1)
@@ -200,6 +197,18 @@ static void fin(int noSignal)
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
+//fonction qui retourne toujours vrai
+bool alwaysTrue()
+{
+	return true;
+}
+
+//fonction qui retourne toujours faux
+bool alwaysFalse()
+{
+	return false;
+}
+
 //fonction qui principal qui lance les tests
 int main()
 {
@@ -241,8 +250,7 @@ int main()
 	pArgRemplirCarton->pBalEvenements=pBalEvenements;
 	pArgRemplirCarton->pBalMessages=pBalMessages;
 	pArgRemplirCarton->gestionnaireLog=gestionnaireLog;
-	pArgRemplirCarton->mutCartonPresent=&mutCartonPresent;
-	pArgRemplirCarton->pCartonPresent=&cartonPresent;
+	pArgRemplirCarton->capteurCarton=alwaysFalse;
 	pArgRemplirCarton->lotCourantMutex=&mtxLotCourant;
 	pArgRemplirCarton->shMemLots=&shMemLots;
 	pArgRemplirCarton->lotCourant=&lotCourant;

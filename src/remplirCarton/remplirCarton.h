@@ -17,14 +17,15 @@
 //------------------------------------------------------------- Constantes 
 
 //------------------------------------------------------------------ Types 
+typedef bool (*stubFunction)(void);
+
 struct ArgRemplirCarton{
   Mailbox<Piece>* pBalPieces;
   Mailbox<Carton>* pBalCartons;
   Mailbox<Event>* pBalEvenements;
   Mailbox<Message>* pBalMessages;
   Log * gestionnaireLog;
-  Mutex* mutCartonPresent;
-  bool* pCartonPresent;
+  stubFunction capteurCarton;
   Mutex * lotCourantMutex;
   SharedMemoryLots *shMemLots;
   int * lotCourant;
