@@ -1,7 +1,7 @@
-﻿# CMakeLists de test pour la tâche mère
+﻿# CMakeLists de test pour la tache stock
 cmake_minimum_required(VERSION 2.6)
  
-project(testRemplirPalette)
+project(testStock.cpp)
 #set (CMAKE_CXX_FLAGS "-fpermissive") 
  
 find_package (Threads)
