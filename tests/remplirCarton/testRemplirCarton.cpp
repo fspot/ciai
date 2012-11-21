@@ -9,11 +9,11 @@ using namespace std;
 #include <time.h>
 
 static bool cartonPresent=true;
-static Mutex* mutCartonPresent;
+static Mutex mutCartonPresent;
 static sem_t debutSyncro;
 static pthread_t threadRemplirCarton;
 static pthread_cond_t cvThreadRemplirCarton;
-static Mutex* mutCvRemplirCarton;
+static Mutex mutCvRemplirCarton;
 static Mailbox<Piece>* pBalPieces;
 static Mailbox<Carton>* pBalCartons;
 static Mailbox<Event>* pBalEvenements;
@@ -51,7 +51,7 @@ static bool test1()
 		{
 			if(pBalEvenements->Pull().event==FINSERIE)
 			{
-				if(pBalEvenements->Pull().event==FIN)
+				if(pBalEvenements->Pull().event==FINLAST)
 				{
 					return true;
 				}
@@ -71,9 +71,9 @@ static bool test2()
 		Piece piece={{100,100,100},false};
 		pBalPieces->Push(piece);
 	}
-	mutCartonPresent->lock();
+	mutCartonPresent.lock();
 	cartonPresent=false;
-	mutCartonPresent->unlock();
+	mutCartonPresent.unlock();
 	for(int i=0; i<5;i++)
 	{
 		sleep(1);
@@ -81,7 +81,9 @@ static bool test2()
 		pBalPieces->Push(piece);
 	}
 	sleep(2);
+	mutCartonPresent.lock();
 	cartonPresent=true;
+	mutCartonPresent.unlock();
 	if(pBalCartons->Size()==1)
 	{
 		if(pBalEvenements->Size()==1)
@@ -171,8 +173,6 @@ static void fin(int noSignal)
 		pthread_cancel(threadRemplirCarton);
 		sleep(1);
 		pthread_cond_destroy(&cvThreadRemplirCarton);
-		delete(mutCartonPresent);
-		delete(mutCvRemplirCarton);
 		sem_destroy(&debutSyncro);
 		delete(pBalPieces);
 		delete(pBalCartons);
@@ -192,8 +192,6 @@ int main()
 	action.sa_flags=0;
 
 	pthread_cond_init(&cvThreadRemplirCarton, NULL);
-	mutCartonPresent=new Mutex();
-	mutCvRemplirCarton=new Mutex();
 	sem_init(&debutSyncro,0,0);
 
 	pBalPieces=new Mailbox<Piece>;
@@ -215,11 +213,13 @@ int main()
 	pArgRemplirCarton->pBalEvenements=pBalEvenements;
 	pArgRemplirCarton->pBalMessages=pBalMessages;
 	pArgRemplirCarton->gestionnaireLog=gestionnaireLog;
-	pArgRemplirCarton->mutCartonPresent=mutCartonPresent;
+	pArgRemplirCarton->mutCartonPresent=&mutCartonPresent;
 	pArgRemplirCarton->pCartonPresent=&cartonPresent;
+	pArgRemplirCarton->lotCourantMutex=&mtxLotCourant;
 	pArgRemplirCarton->shMemLots=&shMemLots;
+	pArgRemplirCarton->lotCourant=&lotCourant;
 	pArgRemplirCarton->cv=&cvThreadRemplirCarton;
-	pArgRemplirCarton->mutCv=mutCvRemplirCarton->getMutex();
+	pArgRemplirCarton->mutCv=mutCvRemplirCarton.getMutex();
 	pArgRemplirCarton->debutSyncro=&debutSyncro;
 
 	sigaction(SIGINT,&action,NULL);
