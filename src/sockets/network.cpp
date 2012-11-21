@@ -57,35 +57,35 @@ using namespace std;
 void ecriture_log_network(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
-    unGestionnaire->Write(msg,unType,true);
+	unGestionnaire->Write(msg,unType,true);
   #else
-    unGestionnaire->Write(msg,unType,false);
+	unGestionnaire->Write(msg,unType,false);
   #endif 
 }
 
-
+// renvoie le main socket (qui reçoit les clients)
 int initListener(NetworkInitInfo *infos)
 {
-	// initialisation du main socket (qui reçoit les clients)
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if(sock == -1)
-    {
-        ecriture_log_network(infos->gestionnaireLog,"Erreur socket - serveur reception",ERROR);
-        exit(errno);
-    }
+	// initialisation du main socket
+	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	if(sock == -1)
+	{
+		ecriture_log_network(infos->gestionnaireLog,"Erreur socket - serveur reception",ERROR);
+		exit(errno);
+	}
 
-    Sockaddr_in sin = { 0 };
-    sin.sin_addr.s_addr = htonl(INADDR_ANY); /* nous sommes un serveur, nous acceptons n'importe quelle adresse */
-    sin.sin_family = AF_INET;
-    sin.sin_port = htons(PORT);
+	Sockaddr_in sin = { 0 };
+	sin.sin_addr.s_addr = htonl(INADDR_ANY); /* on accepte n'importe quelle adresse */
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(PORT);
 
-    if(bind (sock, (Sockaddr *) &sin, sizeof sin) == -1)
-    {
+	if(bind (sock, (Sockaddr *) &sin, sizeof sin) == -1)
+	{
 		ecriture_log_network(infos->gestionnaireLog,"Erreur bind - serveur reception",ERROR);
 		exit(errno);
-    }
-    
-    if(listen(sock, 5) == -1)
+	}
+	
+	if(listen(sock, 5) == -1)
 	{
 		ecriture_log_network(infos->gestionnaireLog,"Erreur ecoute - serveur reception",ERROR);
 		exit(errno);
@@ -93,6 +93,8 @@ int initListener(NetworkInitInfo *infos)
 	return sock;
 }
 
+
+// attent une connexion et renvoie le socket client
 int waitClient(int listener, NetworkInitInfo *infos)
 {
 	Sockaddr_in csin = { 0 };
@@ -100,12 +102,13 @@ int waitClient(int listener, NetworkInitInfo *infos)
 	int csock = accept(listener, (Sockaddr *)&csin, &sinsize);
 	if(csock == -1)
 	{
-                ecriture_log_network(infos->gestionnaireLog,"Erreur connexion - serveur reception",ERROR);
+		ecriture_log_network(infos->gestionnaireLog,"Erreur connexion - serveur reception",ERROR);
 		exit(errno);
 	}
 	return csock;
 }
 
+// traite les données reçues
 int handle(char* data, char *buf)
 {
 	if (MAX_SIZE_MSG-strlen(data) < strlen(buf))
@@ -142,33 +145,26 @@ int handle(char* data, char *buf)
 		}
 
 	}
-	strcpy(data, str); // it works !
+	strcpy(data, str);
 	return ret;
 }
 
+// traite un message reçu dans l'état BEGIN
 int handle_BEGIN(char *str)
 {
 	int err = parse_I(str, stat_lots->content);
 	if (err == -1) {
 		return BAD_MSG;
 	}
-	for (int i=0 ; i < stat_lots->content->lots.size() ; i++) {
-		/*printf("(%d/%d) => Prod %d palettes de %s\n",
-			i+1, 
-			stat_lots->content->tot, 
-			stat_lots->content->lots[i].palettes, 
-			stat_lots->content->lots[i].nom.c_str()
-		);*/
-	}
-	//printf("(BEGIN RCV : %s)\n", str);
 	sockstate = MIDDLE;
-	for(int i=0;i<2;i++)
+	for(int i=0;i<2;i++) // 2 tâches à débloquer
 	{
 		sem_post(stat_sync);
 	}		
 	return GOOD_MSG;
 }
 
+// traite un message reçu dans l'état MIDDLE
 int handle_MIDDLE(char *str)
 {
 	char c = str[0];
@@ -181,21 +177,23 @@ int handle_MIDDLE(char *str)
 			{
 				case 0:
 					infos->balEvenements->Push(Event(FINERREUR),0);
-					cout<<"Remonte"<<endl;
 				break;
+
 				case 1:
 					infos->balEvenements->Push(Event(REPRISEERREUR),0);
 				break;
+
 				case 2:
 					infos->balEvenements->Push(Event(PAUSE),0);
 				break;
+
 				case 3:
 					infos->balEvenements->Push(Event(REPRISEPAUSE),0);
 				break;
+
 				default:
 				break;
 			};
-			printf("(MIDDLE RCV : %s, VAL IS %d)\n", str, val);
 			return GOOD_MSG;
 		}
 		return BAD_MSG;
@@ -217,8 +215,7 @@ int handle_MIDDLE(char *str)
 void* thread_network(void* arg)
 {
 	infos = (NetworkInitInfo*) arg;
-        ecriture_log_network(infos->gestionnaireLog,"Lancement de la tâche serveur reception",EVENT);
-	// Mailbox<string> *netmb = infos->netmb_ptr;
+	ecriture_log_network(infos->gestionnaireLog,"Lancement de la tâche serveur reception",EVENT);
 	int *client = infos->socket_ptr;
 	stat_lots = (SharedMemoryLots*) infos->shMemLots;
 	stat_sync = infos->debutSyncro;
@@ -227,9 +224,9 @@ void* thread_network(void* arg)
 	{
 		// On va attendre un client...
 		sockstate = BEGIN;
-                ecriture_log_network(infos->gestionnaireLog,"Attente connexion - serveur reception",EVENT);
+		ecriture_log_network(infos->gestionnaireLog,"Attente connexion - serveur reception",EVENT);
 		*client = waitClient(listener,infos);
-                ecriture_log_network(infos->gestionnaireLog,"Client connecté - serveur reception",EVENT);
+		ecriture_log_network(infos->gestionnaireLog,"Client connecté - serveur reception",EVENT);
 	
 		// reception string
 		char data[MAX_SIZE_MSG];  // contiendra les msg a traiter (1024 char max!)
@@ -241,14 +238,14 @@ void* thread_network(void* arg)
 			if((n = recv(*client, buffer, sizeof(buffer)-1, 0)) <= 0)
 			{
 				close(listener);
-                		ecriture_log_network(infos->gestionnaireLog,"Client deconnécté && Fin de la tache serveur reception",EVENT);
+				ecriture_log_network(infos->gestionnaireLog,"Client deconnécté && Fin de la tache serveur reception",EVENT);
 				pthread_exit(0);
 			}
 			buffer[n] = '\0';
 			continuer = handle(data, buffer);
 
 			if (continuer <= 0)
-                		ecriture_log_network(infos->gestionnaireLog,"Client deconnécté - serveur reception",EVENT);
+				ecriture_log_network(infos->gestionnaireLog,"Client deconnécté - serveur reception",EVENT);
 		}
 		close(*client);
 	}

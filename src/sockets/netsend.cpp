@@ -35,43 +35,24 @@ void* thread_netsend(void* arg)
 	int *client = infos->socket_ptr;
 	string msg;
 
-	/*
-	int i=0;
-	// dummy example :
-	 for(;;)
-	 {
-		sleep(1);
-		cout<<"<thread 2 says socket "<<i<<endl;
-		i++;
-	 }
-	 /**/
-
-	/*
-	en vérité le thread n'a pas pour seul argument le socket :
-		il a une structure contenant entre autres le socket et la BaL.
-	Et en vérité on ne boucle pas à l'infini, on boucle sur les messages de la BaL,
-	Puis on envoie ce message (primitive send() TCP)
-	*/
-
-	//*
 	while (1)
 	{
-		Message m = netmb->Pull();
+		Message m = netmb->Pull(); // on reçoit un message
 		if (m.fin)
 			break;
 
 		msg = m.contenu;
-		string toSend=msg;
-		toSend.resize(toSend.size()-1);
-		ecriture_log_netsend(infos->gestionnaireLog,"Le serveur d'envoi vas envoyer le message suivant: "+toSend, EVENT);
-		if(send(*client, msg.c_str(), strlen(msg.c_str()), 0) < 0)
+		string toLog=msg;
+		toLog.resize(toLog.size()-1);
+		ecriture_log_netsend(infos->gestionnaireLog,"Le serveur d'envoi vas envoyer le message suivant: "+toLog, EVENT);
+		if(send(*client, msg.c_str(), strlen(msg.c_str()), 0) < 0) // envoie TCP
 		{
 			ecriture_log_netsend(infos->gestionnaireLog,"Erreur d'envoi de la tache serveur envoi",ERROR);
 			break;
 		}
 		ecriture_log_netsend(infos->gestionnaireLog,"Message envoyé",EVENT);
 	}
-	/**/
+	
 	ecriture_log_netsend(infos->gestionnaireLog,"Fin de la tache serveur envoi",EVENT);
 	pthread_exit(0);
 }

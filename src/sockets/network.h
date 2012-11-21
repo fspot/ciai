@@ -15,6 +15,7 @@ struct NetworkInitInfo {
   	Log * gestionnaireLog;
 };
 
+// thread tâche réception
 void* thread_network(void* arg);
 
 #endif
