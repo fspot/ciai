@@ -1,13 +1,28 @@
+/*************************************************************************
+                           testControleur.cpp  -  Tâche mère
+                             -------------------
+*************************************************************************/
+
+//---------- Réalisation de  test Controleur ---
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//-------------------------------------------------------- Include système
 #include <iostream>
-using namespace std;
 #include <signal.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <remplirCarton/remplirCarton.h>
 #include <string>
 #include <signal.h>
 #include <time.h>
 
+//------------------------------------------------------ Include personnel
+#include "remplirCarton/remplirCarton.h"
+
+//------------------------------------------------------ Name spaces
+using namespace std;
+
+///////////////////////////////////////////////////////////////////  PRIVE
+//---------------------------------------------------- Variables statiques
 static bool cartonPresent=true;
 static Mutex mutCartonPresent;
 static sem_t debutSyncro;
@@ -27,6 +42,7 @@ static Mutex mtxLotCourant;
 static Log *gestionnaireLog;
 static int lotCourant=0;
 
+//------------------------------------------------------ Fonctions privées
 
 //on teste un cas normal sans erreur
 static bool test1()
@@ -133,6 +149,7 @@ static bool test3()
 	return false;
 }
 
+//procédure qui vide toutes les boite aux lettres
 static void viderBals()
 {
 	while(pBalEvenements->Size()>0)
@@ -156,20 +173,21 @@ static void viderBals()
 //procédure qui réinitialise tout ce que touche le thread remplirCarton entre chaque test
 static void reset()
 {
+	//destruction du thread remplirCarton
 	pthread_cond_signal(&cvThreadRemplirCarton);
 	sleep(1);
 	pthread_cancel(threadRemplirCarton);
 	sleep(1);
 
+	//création du thread remplirCarton
 	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)
 		pArgRemplirCarton)!=0)
 		cerr<<"ERROR create threadRemplirCarton"<<endl;
 }
 
+//procédure qui détruit tous les thread et objets liés aux threads
 static void fin(int noSignal)
 {
-	if(noSignal==SIGINT)
-	{
 		pthread_cancel(threadRemplirCarton);
 		sleep(1);
 		pthread_cond_destroy(&cvThreadRemplirCarton);
@@ -178,11 +196,14 @@ static void fin(int noSignal)
 		delete(pBalCartons);
 		delete(pBalEvenements);
 		pthread_exit(NULL);
-	}
 }
 
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
+//fonction qui principal qui lance les tests
 int main()
 {
+	//initialisation
 	nbTests=0;
 	nbMauvaisTests=0;
 
@@ -200,6 +221,13 @@ int main()
 	pBalMessages=new Mailbox<Message>;
 
 	ListeLots lots;
+
+	//tous les tests ont ces deux deux lots à gérer
+	//2 pièces par cartons
+	//2 cartons par palettes
+	//2 palettes par lots
+	//1 pièces défectueuses dans le rebut autorisée pour un carton
+	//les dimensions des pièces sont soit 100,100,100 soit 200,200,200 (x,y,z)
 	lots.lots.push_back({"A",2,2,2,1,{100,100,100}});
 	lots.lots.push_back({"B",2,2,2,1,{200,200,200}});
 
@@ -224,6 +252,7 @@ int main()
 
 	sigaction(SIGINT,&action,NULL);
 
+	//création du thread remplirCarton
 	if(pthread_create(&threadRemplirCarton,NULL,remplirCarton,(void*)pArgRemplirCarton)!=0)
 		cerr<<"ERROR create threadRemplirCarton"<<endl;
 
@@ -260,7 +289,5 @@ int main()
 	viderBals();
 
 	cout<<"Le nombre de tests réussis est de "<<nbTests-nbMauvaisTests<<"/"<<nbTests<<endl;
-	pthread_cancel(threadRemplirCarton);
-	sleep(1);
-	pthread_exit(NULL);
+	fin(0);
 }
