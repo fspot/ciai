@@ -1,0 +1,8 @@
+==== Tests effectués : ====
+===========================
+
+== Mailbox ==
+ - fonctionnement sans erreurs..................................OK
+ - gestion erreur emballage (pause + remontée)..................OK
+ - gestion absence carton (pause + remontée)....................OK
+ - handle du carton de fin......................................OK

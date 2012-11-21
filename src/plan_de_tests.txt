@@ -1,0 +1,10 @@
+Plan de test général :
+    - tester l'application dans des conditions réelles, tout d'abord en désactivant les erreurs :
+	    - en produisant un seul lot très simple
+	    - puis un seul lot de plusieurs palettes
+	    - puis plusieurs lots de plusieurs palettes
+    - vérifier la bonne terminaison de l'application dans un cas normal
+    - vérifier la bonne terminaison de l'application à la réception d'un SIGINT
+    - tester les pauses en fin de série et la sortie de pause.
+    - tester le passage de commandes, avec des commandes valides et invalides (stocks insuffisants).
+    - activer les erreurs avec des taux élevés, et tester la reprise ou l'arrêt de l'application dans chaque cas.
