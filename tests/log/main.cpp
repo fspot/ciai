@@ -3,7 +3,8 @@
 #include "src/log/log.h"
 using namespace std;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) 
+{
 	cout << "TEST LOG"<<endl;
 	log.Write("test1warning",WARNING);
 	log.Write("test2error",ERROR);

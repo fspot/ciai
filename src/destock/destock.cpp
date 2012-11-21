@@ -45,7 +45,7 @@ void *thread_destock(void * argDestock)
     {
       // Attente passive sur lecture
       lc = arg->balCommandes->Pull(); 
-      ecriture_log_destock(arg->gestionnaireLog,"Commande recue - destock",EVENT);
+
       if (lc.fin)
 	{
 	  // Message de Fin
@@ -53,6 +53,7 @@ void *thread_destock(void * argDestock)
 	  pthread_exit(0);
 	  break;
 	}
+      ecriture_log_destock(arg->gestionnaireLog,"La tache destock a recu une commande",EVENT);
       // Verouillage du stock par la tache de stock
       arg->stock->mutex.lock();
 
@@ -61,19 +62,26 @@ void *thread_destock(void * argDestock)
       for (int i=0 ; i<lc.commandes.size() ; i++) {
 	string nom = lc.commandes[i].nom;
 	int qte = lc.commandes[i].palettes;
-	if (arg->stock->stock[nom] < qte) { // oups, pas assez !
+	if (arg->stock->stock[nom] < qte) { 
+
 	  ok = false;
 	}
       }
 
       // si OK : on destocke
       if (ok) { 
+      	  ecriture_log_destock(arg->gestionnaireLog,"Le stock  contient suffisament de palletes pour valider la commande",EVENT);
 	for (int i=0 ; i<lc.commandes.size() ; i++) {
 	  string nom = lc.commandes[i].nom;
 	  int qte = lc.commandes[i].palettes;
 	  arg->stock->stock[nom] -= qte;
 	}
       }
+      else
+      {
+        ecriture_log_destock(arg->gestionnaireLog,"Le stock ne contient pas suffisament de palletes pour valider la commande",EVENT);
+      }	
+      	ecriture_log_destock(arg->gestionnaireLog,"La commande a été traitée par la tache destock",EVENT);
 	// Msg réseau acquittement :
 	Message msg = {lc.netstr(ok), false};
 	arg->balMessages->Push(msg, 1);

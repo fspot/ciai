@@ -27,7 +27,7 @@ using namespace std;
 // Méthode de fermeture de clapet
 void fermeture_clapet(Mutex * clapet)
 {
-  clapet->lock();
+  clapet->trylock();
 }
 
 
@@ -73,6 +73,7 @@ int controleur_thread(void * argsUnconverted)
     ListeCommandes lca;
     switch (nextEvent.event)
     {
+	// Abscence d'un carton recue
     	case ABSCARTON:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: il y a abscence de carton, l'application est en attente.",ERROR);
@@ -80,6 +81,7 @@ int controleur_thread(void * argsUnconverted)
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
+	// Panne de l'iprimante détéctée
     	case PANNEIMPRIM:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: il y a panne de l'imprimante, l'application est en attente.",ERROR);
@@ -87,6 +89,7 @@ int controleur_thread(void * argsUnconverted)
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
+	// Abscence palette detectée
     	case ABSPALETTE:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: il y a abscence de palette, l'application est en attente.",ERROR);
@@ -94,6 +97,7 @@ int controleur_thread(void * argsUnconverted)
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
+	// Taux d'erreur trop élevé
     	case TAUXERR:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: Le taux d'erreur est trop élevé, l'application est en attente.",ERROR);
@@ -101,6 +105,7 @@ int controleur_thread(void * argsUnconverted)
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
+	// File d'attente pleine
     	case FILEATTPLEINE:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: La file d'attente est pleine, l'application est en attente.",ERROR);
@@ -108,12 +113,14 @@ int controleur_thread(void * argsUnconverted)
     	  args->balMessages->Push(aMsg,1);
     	  break;      
 
+	// Arret d'urgence detecté
     	case ARTURG:
     	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: Un arret d'urgence a été enclenché, l'application est en attente.",ERROR);
           aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
+	// Reprise suite à une erreur demandée
     	case REPRISEERREUR:
     	  ouverture_clapet(args->clapet);
     	  reprendre_tache(args->threads[DESTOCKERPALETTE]);
@@ -124,10 +131,13 @@ int controleur_thread(void * argsUnconverted)
     	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Un ordre de reprise post érreur a été donné.",EVENT);
     	  break;
 
+	// Une pause a été demandée
     	case PAUSE:
     	  sem_post(args->pauseSerieMutex);
     	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Une demande une pause a été faite, elle sera traitée à la fin du prochain lot",EVENT);
     	  break;
+
+	// Un lot/une serie est finie
     	case FINSERIE:
     	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Une série est finie",EVENT);
     	  if (sem_trywait(args->pauseSerieMutex) != -1 )
@@ -137,6 +147,7 @@ int controleur_thread(void * argsUnconverted)
 	  }
     	  break;
 
+	// Une erreur d'embalage est survenue
     	case ERREMBALAGES:
     	  fermeture_clapet(args->clapet);
     	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: Une erreur est survenue pendant un embalage, l'application est en attente.",ERROR);
@@ -144,12 +155,14 @@ int controleur_thread(void * argsUnconverted)
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
+	// Une erreur de commande est survenue
     	case ERRCOMMANDE:
     	  ecriture_log_controleur(args->gestionnaireLog,"Erreur: La commande n'as pa aboutie.",ERROR);
           aMsg.contenu = nextEvent.netstr();
     	  args->balMessages->Push(aMsg,1);
     	  break;
 
+	// Une reprise après une pause
     	case REPRISEPAUSE:
     	  ouverture_clapet(args->clapet);
     	  reprendre_tache(args->threads[DESTOCKERPALETTE]);
@@ -160,11 +173,13 @@ int controleur_thread(void * argsUnconverted)
     	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Une reprise a été demandé.",EVENT);
     	  break;
 
+	// La dernière piece a érté envoyée
     	case FINLAST:
     	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: La dernière piece pour la dernière série est passée.",EVENT);
           fermeture_clapet(args->clapet);
           break;
           
+	// La dernière palette a été stockée
     	case FIN:
     	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: la dernière palette a été stockée, terminaison.",EVENT);
           lca.fin=true;
@@ -176,6 +191,7 @@ int controleur_thread(void * argsUnconverted)
           pthread_exit(0);
           break;
 
+	// Fin de l'application suite à une erreur
     	case FINERREUR:
     	  ecriture_log_controleur(args->gestionnaireLog,"Evenement: Un ordre de terminaison a été demandé suite à une erreur.",EVENT);
           // Déblocage des tâches :

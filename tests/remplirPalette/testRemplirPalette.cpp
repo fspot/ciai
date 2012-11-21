@@ -2,7 +2,7 @@
 #include "mailbox/mailbox.h"
 #include "remplirPalette/remplirPalette.h"
 #include "log/log.h"
-#include "multithreadObjects/mutex.h"
+#include "mutex/mutex.h"
  #include <iomanip>
 using namespace std;
 

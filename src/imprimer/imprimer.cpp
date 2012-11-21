@@ -55,7 +55,7 @@ int imprimer_thread(void * argsUnconverted)
 		}
     	ecriture_log_imprimer(args->gestionnaireLog,"La tache imprimer a recu un carton",EVENT);
 
-		if (stubPanneImprimante()) {
+		if (args->capteurPanne()) {
 		  	ecriture_log_imprimer(args->gestionnaireLog,"Une panne imprimante est survenue",ERROR);
 			// Depot message erreur dans la bal eventbox
 			Event msgErreurImp(PANNEIMPRIM);

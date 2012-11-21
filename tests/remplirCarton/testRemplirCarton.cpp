@@ -3,7 +3,7 @@ using namespace std;
 #include <signal.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include "../../src/remplirCarton/remplirCarton.h"
+#include <remplirCarton/remplirCarton.h>
 #include <string>
 #include <signal.h>
 #include <time.h>

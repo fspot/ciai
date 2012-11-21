@@ -11,7 +11,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <utility>
-#include "../multithreadObjects/mutex.h"
+#include <mutex/mutex.h>
 
 //------------------------------------------------------------- Constantes 
   #define PRIO_MAX 10
