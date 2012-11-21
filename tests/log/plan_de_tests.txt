@@ -1,0 +1,10 @@
+==== Tests effectués : ====
+===========================
+
+== Log ==
+ - append sur log.txt..................................OK
+ - log d'ouverture de session..........................OK
+ - timestamp correct...................................OK
+ - gestion des 3 types d'entrées.......................OK
+ - sortie standard sur demande.........................OK
+ - écriture immédiate..................................OK

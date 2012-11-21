@@ -16,14 +16,20 @@
 class Mutex
 {
 	public:
+		// Constructeur
 		Mutex();
+		//Destructeur
 		~Mutex();
 
-		pthread_mutex_t* getMutex();//retourne le mutex
+		//Méthode qui retourne le mutex pthread
+		pthread_mutex_t* getMutex();
 
-		void lock(); 		// prendre le mutex (peut être bloquant)
-		bool trylock();		// essaye de prendre le mutex, renvoie true si ok. (jamais bloquant)
-		void unlock(); 		// rend le mutex.
+		//Méthode de verouillage(bloquante en cas de mutex deja verouillé)
+		void lock(); 		
+		//Méthode de verouillage non bloquante
+		bool trylock();		
+		//Méthode de deblocage du mutex
+		void unlock(); 		
 
 	private:
 		pthread_mutex_t mut;

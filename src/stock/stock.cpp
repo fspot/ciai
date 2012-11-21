@@ -42,7 +42,7 @@ void ecriture_log_stock(Log * unGestionnaire, std::string msg,logType unType)
 void * thread_stock(void *argStock)
 {
 
-	// ==== unpack arguments
+	// Récupération des arguments et conversion
 	ArgStock *infos = (ArgStock*) argStock;
         ecriture_log_stock(infos->gestionnaireLog,"Lancement de la tache de stock",EVENT);
 	Mailbox<Palette>* balStockage = infos->balStockage;
@@ -52,9 +52,8 @@ void * thread_stock(void *argStock)
 	pthread_mutex_t* mutCv = infos->mutCv;
 	SharedMemoryLots *shMemLots = infos->shMemLots;
 	SharedMemoryStock *shMemStock = infos->stock;
-	// stock ?
 	Palette p;
-	int lot = 0, pal = 0; // num lot actuel, num palette actuelle (au sein du lot)
+	int lot = 0, pal = 0; // numéro de lot actuel, num palette actuelle (au sein du lot)
 
 	while(1)
 	{
@@ -90,6 +89,4 @@ void * thread_stock(void *argStock)
 			}
 		}
 	}
-
-	pthread_exit(0);
 }

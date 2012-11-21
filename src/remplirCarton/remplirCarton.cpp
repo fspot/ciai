@@ -15,11 +15,14 @@
 #include "remplirCarton.h"
 #include <mailbox/mailbox.h>
 #include <modeles/modeles.h>
+
+//------------------------------------------------------ Name spaces
+using namespace std;
+                             
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
 
-//------------------------------------------------------------------ Types
-using namespace std;
+
 //---------------------------------------------------- Variables statiques
 static time_t timeBegin;
 static ArgRemplirCarton* init;
