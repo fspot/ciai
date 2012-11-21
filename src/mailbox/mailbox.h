@@ -14,7 +14,7 @@
 #include "../multithreadObjects/mutex.h"
 
 //------------------------------------------------------------- Constantes 
-  #define PRIO_MAX 10
+  #define PRIO_MAX 10	//nombre de niveaux de priorités, compris entre 0 et PRIO_MAX-1
 //------------------------------------------------------------------ Types 
 
 //------------------------------------------------------------------------ 
@@ -52,9 +52,10 @@ public:
 
 protected:
 //----------------------------------------------------- Attributs protégés
-	std::queue<T> queues[PRIO_MAX];
-	sem_t countSemaphore;
-	Mutex writeMutex[PRIO_MAX];
+
+	std::queue<T> queues[PRIO_MAX];	// queues fifo de stockage des messages, une queue par priorite
+	sem_t countSemaphore;		// compte le nombre de messages actuellement dans la mailbox. Permet la lecture bloquante
+	Mutex writeMutex[PRIO_MAX];	// mutexs de protection en lecture/écriture des queues.
 };
 
 

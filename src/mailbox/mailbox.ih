@@ -22,12 +22,15 @@ using namespace std;
 template <typename T>
 void Mailbox<T>::Push(const T& element, unsigned int priority)
 {
-	if (priority >= PRIO_MAX)
+	if (priority >= PRIO_MAX) //gestion prio hors bornes: ramener à prio min
 	{
+		#ifdef DEBUG
 		std::cout << "[WARNING] Mailbox::Push() - priority higher than PRIO_MAX (set back to " << PRIO_MAX-1<< ")" << std::endl;
+		#endif
 		priority = PRIO_MAX-1;
 	}
 
+	//insertion dans la queue correspondante
 	writeMutex[priority].lock();
 	queues[priority].push(element);
 	writeMutex[priority].unlock();
@@ -37,10 +40,10 @@ void Mailbox<T>::Push(const T& element, unsigned int priority)
 template <typename T>
 T Mailbox<T>::Pull()
 {
-	sem_wait(&countSemaphore);
-	for (unsigned int i=0 ; true ; i++ )
+	sem_wait(&countSemaphore);	//attendre message disponible
+	for (unsigned int i=0 ; true ; i++ )	//parcours des priorités
 	{
-		if (queues[i].size()>0)
+		if (queues[i].size()>0)				//quand trouvé, renvoi
 		{
 			writeMutex[i].lock();
 			T returnedElt = queues[i].front();
