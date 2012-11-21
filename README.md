@@ -1,17 +1,25 @@
-Projet de CIAI
+Projet de CIAI Hexanome H4404
 ==============
 
 Arborescence :
 --------------
 
- * **src** : le code source
+ * **src** : le code source - commenté et indenté
  * **tests** : les tests
- * **doc** : la documentation
- * **build** : (c)makefiles ?
- * **ihm** : les trucs louches à benoît
- * **bordel** : le reste (peut servir de fourre-tout, mais à éviter quand même)
 
 [--> Lien vers le dossier GDOC](https://drive.google.com/#folders/0B5UBwj2NuT59ZnNoQ3FaMFZka0E)
 
-[--> Lien vers la gestion dou twavail](https://docs.google.com/document/d/1VQy_jvSknC9jm0BChr9SIjLNj2L-lceUmVy_KGz9_WA/edit)
+
+Pour utiliser, se placer dans le dossier racide du serveurLinux
+entrer les commandes suivantes dans un terminal:
+ 
+mkdir build 
+cd build
+cmake ..
+make
+
+Ce code compile les tests et le serveur.
+
+Pour lancer le serveur aller dans build/src et le lancer comme ceci:
+sudo ./mothertask
 

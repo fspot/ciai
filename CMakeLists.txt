@@ -1,4 +1,4 @@
-# CMakeLists de test pour la tâche mère
+# CMakeLists général
 cmake_minimum_required(VERSION 2.6)
 
 

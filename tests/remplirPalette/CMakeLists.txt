@@ -1,4 +1,4 @@
-# CMakeLists de test pour la tâche mère
+# CMakeLists de test pour la tâche remplir palette
 cmake_minimum_required(VERSION 2.6)
  
 project(testRemplirPalette)
