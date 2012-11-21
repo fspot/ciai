@@ -16,7 +16,7 @@
 #include <stubs/stubs.h>
 #include <log/log.h>
 //------------------------------------------------------------- Constantes 
-
+typedef bool(*stub)(void);
 //------------------------------------------------------------------ Types 
 using namespace std;
 
@@ -31,6 +31,8 @@ struct ArgImprimer
   SharedMemoryLots * Lots; // vérifier si fin du lot pour tuer tache, à faire
   bool * panneImprim;
   Mutex * mutexPanne;
+  stub capteurPanne;
+  
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques

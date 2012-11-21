@@ -43,6 +43,7 @@ pthread_t
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
+//Méthode d'écriture dans le log
 void ecriture_log_mere(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
   #ifdef DEBUG
@@ -52,7 +53,7 @@ void ecriture_log_mere(Log * unGestionnaire, std::string msg,logType unType)
   #endif 
 }
 
-
+//Handler appelé en cas de signal envoyé a la tache mère
 void catcher(int noSignal)
 {
   pthread_cancel(genere_piece);
@@ -97,7 +98,6 @@ int main()
   int socket_ptr;
 
   // Initialisation du générateur
-  //srand(time(NULL));
 
   // Mutex
   Mutex  sortieStdMutex;
@@ -118,7 +118,7 @@ int main()
 
   ecriture_log_mere(&gestionnaireLog,"Lancement de la tâche mère",EVENT);
   
-
+// Variables conditionelles et leur mutex de protection associé
   pthread_cond_t 
     condRC=PTHREAD_COND_INITIALIZER, // remplir carton
     condIMP=PTHREAD_COND_INITIALIZER, // imprimer
@@ -142,8 +142,6 @@ int main()
 
 
   // Variables necessaires à la simulation
-
-
   int lotCourant=0;
   // ===================================
   // ====== Creation des threads =======
@@ -161,7 +159,7 @@ int main()
   argRC.mutCv=&condRCM;
   argRC.cv=&condRC;
 
-  //gestion du lot courant pour simul 
+  //gestion du lot courant pour la simulation
   argRC.lotCourant=&lotCourant;
   argRC.lotCourantMutex=&memLotCourant;
 
@@ -184,6 +182,7 @@ int main()
   argImprimer.balPalette=&balPalette;
   argImprimer.varCond=&condIMP;
   argImprimer.mutex=&condIMPM;
+  argImprimer.capteurPanne=&stubPanneImprimante;
 
   // thread temps réel : priorité 30
   param.sched_priority = 30;
@@ -204,6 +203,8 @@ int main()
   argRP.mxcw=&condRPM;
   argRP.shMemLots=&lots;
   argRP.debutSyncro=&debutSyncro;
+
+  // Méthodes utiles pour la simulation
   argRP.capteurPalette=stubPresencePalette;
   argRP.capteurEmbalage=stubErrEmbalagePalette;
 
@@ -214,13 +215,11 @@ int main()
   pthread_create (&remplir_palette, &attr, (void *(*)(void *)) &remplirPalette_thread, (void *)&argRP);
 
   
-
   //Creation du thread stocker palette
   ArgStock argStock;
   argStock.gestionnaireLog=&gestionnaireLog;
   argStock.balStockage = &balStockage;
   argStock.balEvenements = &balEvenements;
-  // argStock.reprise = ?; // reprise après erreur
   argStock.shMemLots = &lots;
   argStock.cv = &condSP;
   argStock.mutCv = &condSPM;
@@ -247,7 +246,7 @@ int main()
   pthread_create (&destocker_palette, NULL, thread_destock, (void*) &argDestock);
 
 
-  // Création du thread genere_piece
+  // Création du thread genere_piece (Thread de simulation)
   ArgPiece  argPiece;
   argPiece.balPiece =&balPiece;
   argPiece.balEvenements = &balEvenements;
@@ -338,7 +337,7 @@ int main()
   infoSend.netmb_ptr = &balMessages;
   infoSend.socket_ptr = &socket_ptr;
 
-  // thread prio 85 ?
+  // thread prio 85 
   param.sched_priority = 85;
   pthread_attr_setschedpolicy(&attr, SCHED_RR);
   pthread_attr_setschedparam(&attr, &param);
@@ -348,10 +347,14 @@ int main()
   // ===========================
   // ==== FIN THREAD CREATE ====
   // ===========================
+
   
+
+  // Mise en place du handler pour l'arret forcé
+  signal(SIGINT,catcher);
+
   ecriture_log_mere(&gestionnaireLog,"Phase moteur - tache mere",EVENT);
   
-  signal(SIGINT,catcher);
   
   pthread_join(controleur, NULL);
   pthread_join(destocker_palette, NULL);

@@ -10,7 +10,7 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../../src/")
 set( SOURCES_DIR ${PROJECT_SOURCE_DIR}/../../src/)
 set(SOURCES ${SOURCES_DIR}/sockets/network.cpp
 	    ${SOURCES_DIR}/sockets/parser.cpp
-	    ${SOURCES_DIR}/multithreadObjects/mutex.cpp
+	    ${SOURCES_DIR}/mutex/mutex.cpp
 	    ${SOURCES_DIR}/log/log.cpp
 	    ${SOURCES_DIR}/controleur/controleur.cpp
 	    ${SOURCES_DIR}/piece/piece.cpp)

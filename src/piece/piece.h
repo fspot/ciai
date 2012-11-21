@@ -12,7 +12,7 @@
 
 #include <modeles/modeles.h>
 #include <mailbox/mailbox.h>
-#include <multithreadObjects/mutex.h>
+#include <mutex/mutex.h>
 #include <log/log.h>
 
 //------------------------------------------------------------- Constantes 
