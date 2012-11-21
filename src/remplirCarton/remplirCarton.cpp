@@ -42,13 +42,13 @@ void ecriture_log_remplirCarton(Log * unGestionnaire, std::string msg,logType un
 #endif 
 }
 
-//procédure public qui permet de remplir des pièces dans un carton et de gérer tous les cas prévus
+// Méthode d'attente
 static void wait()
 {
-    ecriture_log_remplirCarton(init->gestionnaireLog,"Attente de deblocage - remplir Carton",ERROR);
-	init->mutCv->lock();
-	pthread_cond_wait(init->cv,init->mutCv->getMutex());
-	init->mutCv->unlock();
+  ecriture_log_remplirCarton(init->gestionnaireLog,"Attente de deblocage - remplir Carton",ERROR);
+  pthread_mutex_lock(init->mutCv);
+  pthread_cond_wait(init->cv,init->mutCv);
+  pthread_mutex_unlock(init->mutCv);
 }
 
 
@@ -60,7 +60,7 @@ void* remplirCarton(void * index)
   ecriture_log_remplirCarton(init->gestionnaireLog,"Lancement de la tâche remplir carton",EVENT);
   serieCourante=0;
   sem_wait(init->debutSyncro);
-  ecriture_log_remplirCarton(init->gestionnaireLog,"Initialisation finie - remplir carton",EVENT);
+  ecriture_log_remplirCarton(init->gestionnaireLog,"Initialisation de la tâche remplir carton finie",EVENT);
   listeLots = &init->shMemLots->content->lots;
   lotCourant=&(listeLots->at(serieCourante));	
   nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
@@ -70,101 +70,105 @@ void* remplirCarton(void * index)
 
   for(;;)
     {
-		//on reçoit une pièce
-		Piece piece=init->pBalPieces->Pull();
+      Piece piece=init->pBalPieces->Pull();
+      if(piece.fin==true)
+	{
+	  ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tâche remplir carton",EVENT);
+	  pthread_exit(NULL);
+	}
+      init->mutCartonPresent->lock();
+      bool retour=(*(init->pCartonPresent));
+      init->mutCartonPresent->unlock();
+      if(!retour)
+	{
+	  ecriture_log_remplirCarton(init->gestionnaireLog,"La tâche remplir carton a detecter un carton abscent",ERROR);
+	  init->pBalEvenements->Push(Event(ABSCARTON),1);
+	  wait();
+	}
 
-        ecriture_log_remplirCarton(init->gestionnaireLog,"Piece recue - remplir carton",EVENT);
-        //on vérifie si la pièce lue dans la boite aux lettres n'est pas un message de pause en réalité
-		if(piece.fin==true)
-		{
-            ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tâche remplir carton",EVENT);
-			pthread_exit(NULL);
-		}
+      int i=0;
+      bool valide=true;
 
-		//on vérifie qu'un carton est présent
-		init->mutCartonPresent->lock();
-		bool retour=(*(init->pCartonPresent));
-		init->mutCartonPresent->unlock();
-		if(!retour)
-		{
-            ecriture_log_remplirCarton(init->gestionnaireLog,"Carton abscent - remplir carton",EVENT);
-			init->pBalEvenements->Push(Event(ABSCARTON),1);
-			wait();
-		}
+      while(i<3 && valide)
+	{
+	  if(piece.dim[i]!=lotCourant->dim[i])
+	    {
+	      valide=false;
 
-		//on vérifie que la dimension de la pièce est bien celle voulue
-		int i=0;
-		bool valide=true;
+	    }			
+	  i++;
+	}
 
-		while(i<3 && valide)
-		{
-			if(piece.dim[i]!=lotCourant->dim[i])
-				valide=false;
-			i++;
-		}
-
-      	if(!valide)
-		{
-	  		nbPiecesDsRebut++;
-	  		//on vérifie que le nombre de pièce dans le rebut pour un carton n'est pas
-			//supérieur au seuil fixé
-	  		if(nbPiecesDsRebut>lotCourant->rebut)
-	    	{
-	      		ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
-	      		init->pBalEvenements->Push(Event(TAUXERR),0);
-	      		wait();
-	      		nbPiecesDsRebut=0;
-	    	}
-		}
-		else
-		{
-			nbPiecesDsCarton++;
-
-			//on vérifie si le carton est plein
-			if(nbPiecesDsCarton>=lotCourant->pieces)
-			{
-				Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
-				init->pBalCartons->Push(carton,0);
-				
-				// Message réseau carton rempli :
-				Message msg = {carton.netstr_rempli(), false};
-				init->pBalMessages->Push(msg, 2);
-
-				nbCartonsRestant--;
-				nbPiecesDsRebut=0;
-				nbPiecesDsCarton=0;
-
-				//on vérifie si on a terminé une série
-				if(nbCartonsRestant<=0)
-				{
-					serieCourante++;
-
-					//on vérifie si on a fini toutes les séries
-					if((serieCourante+1)>init->shMemLots->content->lots.size())
-					{
-            			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la dernière série - remplir carton",EVENT);
-						init->pBalEvenements->Push(Event(FIN),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores mais une bal
-						Carton c;
-						c.fin=true;
-						init->pBalCartons->Push(c,0);
-            			ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tache remplir carton",EVENT);
-						pthread_exit(NULL);
-					}
-					else
-					{
-   					    // Message réseau série finie :
-					    Message msg = {lotCourant->netstr(), false};
-					    init->pBalMessages->Push(msg, 1);
-					    init->lotCourantMutex->lock();
-					    (*(init->lotCourant))+=1;
-					    init->lotCourantMutex->unlock();
-					    init->pBalEvenements->Push(Event(FINSERIE),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores
-					    ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
-					    lotCourant=&(init->shMemLots->content->lots[serieCourante]);
-					    nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
-            		}
-            	}
-            }
+      if(!valide)
+	{
+	  nbPiecesDsRebut++;
+	  if(nbPiecesDsRebut>lotCourant->rebut)
+	    {
+	      ecriture_log_remplirCarton(init->gestionnaireLog,"Taux d'erreur trop elevé - remplir carton",EVENT);
+	      init->pBalEvenements->Push(Event(TAUXERR),0);
+	      wait();
+	      nbPiecesDsRebut=0;
 	    }
 	}
+      else
+	{	
+	  nbPiecesDsCarton++;
+	  if(nbPiecesDsCarton>=lotCourant->pieces)
+	    {
+		string toSend="La tâche remplir carton a envoyé un carton(Type: "; 
+		toSend+=lotCourant->nom;
+		toSend+=" Nombre de pièces:"; 
+		toSend+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->pieces) )->str();
+		toSend+=" Taille(mm): (";
+		toSend+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->dim[0]) )->str();
+		toSend+=", ";
+		toSend+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->dim[1]) )->str();
+		toSend+=", "; 
+		toSend+=static_cast<ostringstream*>( &(ostringstream() << lotCourant->dim[2]) )->str();;
+		toSend+=+ ")).";		
+	      ecriture_log_remplirCarton(init->gestionnaireLog,toSend,EVENT);
+	      Carton carton={idCarton,lotCourant,nbPiecesDsRebut};
+	      init->pBalCartons->Push(carton,0);
+
+	      // Message réseau carton rempli :
+	      Message msg = {carton.netstr_rempli(), false};
+	      init->pBalMessages->Push(msg, 1);
+	      
+
+	      nbCartonsRestant--;
+	      nbPiecesDsRebut=0;
+	      nbPiecesDsCarton=0;
+	      if(nbCartonsRestant<=0)
+		{
+
+		  serieCourante++;
+
+		  if((serieCourante+1)>init->shMemLots->content->lots.size())
+		    {
+		      string message="La tâche remplir carton vient d'envoyer son dernier carton"; 
+		      ecriture_log_remplirCarton(init->gestionnaireLog,message,EVENT);
+		      init->pBalEvenements->Push(Event(FINLAST),1);
+		      Carton c;
+		      c.fin=true;
+		      init->pBalCartons->Push(c,0);
+		      ecriture_log_remplirCarton(init->gestionnaireLog,"Fin de la tache remplir carton",EVENT);
+		      pthread_exit(NULL);
+		    }
+		  else
+		    {
+		      // Message réseau série finie :
+		      Message msg = {lotCourant->netstr(), false};
+		      init->pBalMessages->Push(msg, 1);
+		      init->lotCourantMutex->lock();
+		      (*(init->lotCourant))+=1;
+		      init->lotCourantMutex->unlock();
+		      init->pBalEvenements->Push(Event(FINSERIE),1);// a changer. Il faut travailler avec gestion de série mais pas avec des sémaphores
+		      ecriture_log_remplirCarton(init->gestionnaireLog,"Fin d'une serie - remplir carton",EVENT);
+		      lotCourant=&(init->shMemLots->content->lots[serieCourante]);
+		      nbCartonsRestant=lotCourant->palettes*lotCourant->cartons;
+		    }
+		}
+	    }
+	}
+    }
 }

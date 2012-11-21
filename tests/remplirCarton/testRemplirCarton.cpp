@@ -209,10 +209,18 @@ int main()
 
 	gestionnaireLog=new Log(mtxStandardOutput);
 
-	pArgRemplirCarton=new ArgRemplirCarton(pBalPieces,pBalCartons,pBalEvenements
-		,pBalMessages,gestionnaireLog,mutCartonPresent
-		,&cartonPresent,&mtxLotCourant,&shMemLots,&lotCourant,NULL,&cvThreadRemplirCarton
-		,mutCvRemplirCarton,&debutSyncro);
+	pArgRemplirCarton=new ArgRemplirCarton();
+	pArgRemplirCarton->pBalPieces=pBalPieces;
+	pArgRemplirCarton->pBalCartons=pBalCartons;
+	pArgRemplirCarton->pBalEvenements=pBalEvenements;
+	pArgRemplirCarton->pBalMessages=pBalMessages;
+	pArgRemplirCarton->gestionnaireLog=gestionnaireLog;
+	pArgRemplirCarton->mutCartonPresent=mutCartonPresent;
+	pArgRemplirCarton->pCartonPresent=&cartonPresent;
+	pArgRemplirCarton->shMemLots=&shMemLots;
+	pArgRemplirCarton->cv=&cvThreadRemplirCarton;
+	pArgRemplirCarton->mutCv=mutCvRemplirCarton->getMutex();
+	pArgRemplirCarton->debutSyncro=&debutSyncro;
 
 	sigaction(SIGINT,&action,NULL);
 

@@ -17,7 +17,7 @@
 //------------------------------------------------------------- Constantes
 
 //------------------------------------------------------------------ Types
-
+typedef bool (*stubFunction)(void);
 
 struct ArgsRemplirPalette{
   Mailbox<Carton>* balPalette;
@@ -29,8 +29,8 @@ struct ArgsRemplirPalette{
   pthread_mutex_t* mxcw;
   SharedMemoryLots* shMemLots;
   sem_t * debutSyncro;
-  bool (*capteurPalette)(void);
-  bool (*capteurEmbalage)(void);
+  stubFunction capteurPalette;
+  stubFunction capteurEmbalage;
 };
 
 //////////////////////////////////////////////////////////////////  PUBLIC

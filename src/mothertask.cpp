@@ -28,6 +28,18 @@
 using namespace std;
 
 
+// ----------------------------------------------------- Statics :
+pthread_t 
+  genere_piece,
+  remplir_carton, 
+  imprimer, 
+  remplir_palette,
+  stocker_palette,
+  destocker_palette,
+  controleur,
+  serveur_reception,
+  serveur_envoi;
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
@@ -40,8 +52,22 @@ void ecriture_log_mere(Log * unGestionnaire, std::string msg,logType unType)
   #endif 
 }
 
-// Tâche mère
 
+void catcher(int noSignal)
+{
+  pthread_cancel(genere_piece);
+  pthread_cancel(remplir_carton);
+  pthread_cancel(imprimer);
+  pthread_cancel(remplir_palette);
+  pthread_cancel(stocker_palette);
+  pthread_cancel(destocker_palette);
+  pthread_cancel(controleur);
+  pthread_cancel(serveur_reception);
+  pthread_cancel(serveur_envoi);
+  cerr << "Fermeture forcée" << endl;
+}
+
+// Tâche mère
 int main()
 // Algorithme :
 // Allocation des ressources, initialisation et lancement des autres threads 
@@ -91,20 +117,7 @@ int main()
   Log gestionnaireLog(sortieStdMutex);
 
   ecriture_log_mere(&gestionnaireLog,"Lancement de la tâche mère",EVENT);
-
-
-  // Allocation des mutex et variables conditionnelles
-  pthread_t 
-    genere_piece,
-    remplir_carton, 
-    imprimer, 
-    remplir_palette,
-    stocker_palette,
-    destocker_palette,
-    controleur,
-    serveur_reception,
-    serveur_envoi,
-    gestion_series;
+  
 
   pthread_cond_t 
     condRC=PTHREAD_COND_INITIALIZER, // remplir carton
@@ -191,6 +204,8 @@ int main()
   argRP.mxcw=&condRPM;
   argRP.shMemLots=&lots;
   argRP.debutSyncro=&debutSyncro;
+  argRP.capteurPalette=stubPresencePalette;
+  argRP.capteurEmbalage=stubErrEmbalagePalette;
 
   // thread temps réel : priorité 40
   param.sched_priority = 40;
@@ -335,8 +350,8 @@ int main()
   // ===========================
   
   ecriture_log_mere(&gestionnaireLog,"Phase moteur - tache mere",EVENT);
-
-
+  
+  signal(SIGINT,catcher);
   
   pthread_join(controleur, NULL);
   pthread_join(destocker_palette, NULL);
