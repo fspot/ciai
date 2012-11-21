@@ -9,6 +9,8 @@
 
 using namespace std;
 
+// ================== PRIVATE FUNCTIONS ==================
+
 // Lit une string **alphanumérique** dans str et l'écrit dans s.
 // Retour : renvoie la longueur de la string lue. Si 0 => erreur, on renvoie -1.
 int parse_nextString(const char* str, string *s)
@@ -50,6 +52,7 @@ int parse_nextInt(const char* str, int *val)
 	return i;
 }
 
+// retourne la valeur absolue lue par parse_nextInt
 int parse_nextUint(const char* str, int *val)
 {
 	int err = parse_nextInt(str, val);
@@ -70,7 +73,7 @@ int skip(const char* str, char c)
 
 // Lit dans str un I_field, c a d : 
 // "nom,palettes,cartons,pieces,rebut,dim[0],dim[1],dim[2]"
-// ex I_Field : "#A,10,50,1000,20,33,44,55#"
+// ex I_Field : "#A,10,50,1000,20,33,44,55"
 // nom est une string et les autres champs des ints.
 // Tout ça est ecrit dans *lot qui ne doit pas être NULL !
 // Retour : -1 si erreur ; le nombre de char lus sinon.
@@ -100,6 +103,28 @@ int parse_I_nextField(const char* str, Lot *lot)
 	return ofs;
 }
 
+// Lit dans str un C_field, c a d : 
+// "nom,palettes"
+// ex I_Field : "#A,10"
+// nom est une string palettes est un int.
+// Tout ça est ecrit dans *mc qui ne doit pas être NULL !
+// Retour : -1 si erreur ; le nombre de char lus sinon.
+int parse_C_nextField(const char *str, Commande *mc)
+{
+	int err, ofs = 0;
+	if (mc == NULL || !isalnum(str[0])) {
+		return -1;
+	}
+
+	err = parse_nextString(str+ofs, &mc->nom); if (err == -1) return -1; else ofs += err;
+	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
+	err = parse_nextUint(str+ofs, &mc->palettes); if (err == -1) return -1; else ofs += err;
+
+	return ofs;
+}
+
+// ================== PUBLIC FUNCTIONS ==================
+
 int parse_I(const char* str, ListeLots *val)
 {
 	if (val == NULL || str[0] != INITIALISATION)
@@ -115,20 +140,6 @@ int parse_I(const char* str, ListeLots *val)
 	}
 	val->tot = i;
 	val->cur = 0;
-	return ofs;
-}
-
-int parse_C_nextField(const char *str, Commande *mc)
-{
-	int err, ofs = 0;
-	if (mc == NULL || !isalnum(str[0])) {
-		return -1;
-	}
-
-	err = parse_nextString(str+ofs, &mc->nom); if (err == -1) return -1; else ofs += err;
-	err = skip(str+ofs, SEP2); if (err == -1) return -1; else ofs += err;
-	err = parse_nextUint(str+ofs, &mc->palettes); if (err == -1) return -1; else ofs += err;
-
 	return ofs;
 }
 
@@ -148,11 +159,15 @@ int parse_C(const char *str, ListeCommandes *val)
 	return ofs;
 }
 
-// Parse totalement un message de type R.
-// renvoie SHUTDOWN ou REPRENDRE ou PREVOIRPAUSE ou FINPAUSE
 int parse_R(const char *str, int *val)
 {
-	if (val == NULL || strlen(str) != 3 || str[0] != REPRISE || str[1] != SEP || !isdigit(str[2]))
+	if (val == NULL || 
+		strlen(str) != 3 || 
+		str[0] != REPRISE || 
+		str[1] != SEP || 
+		!isdigit(str[2]) ||
+		str[2]<'0' ||
+		str[2]>'3')
 		return -1;
 	
 	*val = str[2]-'0';
