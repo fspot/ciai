@@ -2,4 +2,5 @@ Trois tests sont prévus pour la tâche remplirCarton.
 
 Test 1: test du fonctionnement normal,c'est-à-dire que la tâche remplirCarton n'a pas d'erreur...........OK
 Test 2: test de la tâche ayant à un moment donnée une absence de carton..................................OK
-Test 3: test de la tâche ayant pour un carton donné trop de pièces dans le rebut.........................OK
+Test 3: test de la tâche ayant pour le premier carton trop de pièces dans le rebut.......................OK
+Test 4: test de la tâche ayant pour pour le premier carton des pièces dans le rebut mais ne dépassant pas le nombre limite, puis un deuxième carton qui dépasse la limite..........................................OK
