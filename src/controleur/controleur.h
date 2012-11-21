@@ -43,6 +43,6 @@ struct ArgControleur
 //---------------------------------------------------- Fonctions publiques
 int controleur_thread(void * argsUnconverted);
 
-#endif // XXX_H
+#endif // controleur_H
 
 

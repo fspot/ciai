@@ -20,20 +20,30 @@ using namespace std;
 void Log::Write(string text, logType type, bool stdOutput)
 {
 	string entry;
+  
+	//balises en fonction du type de message
 	if (type == WARNING)
+	{
 		entry.append("[WARNING] ");
+	}
 	else if (type == ERROR)
+	{
 		entry.append("[ERROR] ");
+	}
 	else if (type == EVENT)
+	{
 		entry.append("[EVENT] ");
+	}
 
+	//ajout du texte
 	entry.append(text);
 
+	//timestamp
 	mutexFile.lock();
 	file << dateStr() << entry << endl;
 	mutexFile.unlock();
 
-	if (stdOutput)
+	if (stdOutput)	//sortie standard demandée
 	{
 		mutexStd.lock();
 		cout << dateStr() << entry << endl;

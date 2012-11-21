@@ -10,8 +10,7 @@ set(SOURCES ${PROJECT_SOURCE_DIR}/../../src/remplirCarton/remplirCarton.cpp
 			${PROJECT_SOURCE_DIR}/../../src/remplirCarton/remplirCarton.h
 			${PROJECT_SOURCE_DIR}/../../src/modeles/modeles.h
 			${PROJECT_SOURCE_DIR}/../../src/mailbox/mailbox.h
-			${PROJECT_SOURCE_DIR}/../../src/multithreadObjects/mutex.h
-			${PROJECT_SOURCE_DIR}/../../src/multithreadObjects/mutex.cpp
+			${PROJECT_SOURCE_DIR}/../../src/mutex/mutex.cpp
 			${PROJECT_SOURCE_DIR}/../../src/log/log.h
 			${PROJECT_SOURCE_DIR}/../../src/log/log.cpp)
 

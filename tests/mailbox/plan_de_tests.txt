@@ -1,0 +1,10 @@
+==== Tests effectués : ====
+===========================
+
+== Mailbox ==
+ - insertion puis récupération d'un message.....................OK
+ - bonne prise en compte des priorités..........................OK   
+ - gestion priorité hors bornes.................................OK
+ - parallelisme: protection des données en écriture.............OK
+ - parallelisme: lecture bloquante si mailbox vide..............OK
+ - Size fonctionnel.............................................OK
