@@ -154,10 +154,9 @@ int main()
   argRC.pBalEvenements = &balEvenements;
   argRC.pBalMessages = &balMessages;
   argRC.gestionnaireLog=&gestionnaireLog;
-  argRC.mutCartonPresent=&cartonPresent;
-  argRC.pCartonPresent = new bool(true);
   argRC.mutCv=&condRCM;
   argRC.cv=&condRC;
+  argRC.capteurCarton=&stubAbscenceCarton;
 
   //gestion du lot courant pour la simulation
   argRC.lotCourant=&lotCourant;
@@ -364,8 +363,6 @@ int main()
   pthread_join(remplir_carton, NULL);
   pthread_join(serveur_envoi, NULL);
   pthread_cancel(serveur_reception);
-
-  delete argRC.pCartonPresent;
   
   ecriture_log_mere(&gestionnaireLog,"Fin de la tâche mère",EVENT);
   sem_destroy(&debutSyncro);

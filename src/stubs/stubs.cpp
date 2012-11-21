@@ -43,3 +43,13 @@ bool stubPanneImprimante()
 	return (rand() % PROBA_ERR_PANNE_IMPRIM == 0);
 #endif
 }
+
+
+bool stubAbscenceCarton()
+{
+#ifdef ERR_CARTON
+	return true;
+#else 
+	return (rand() % PROBA_ERR_CARTON == 0);
+#endif
+}
