@@ -1,6 +1,14 @@
-#ifndef MODELES_H
-#define MODELES_H
+/*************************************************************************
+                           modeles.h  -  description
+                             -------------------
+*************************************************************************/
 
+//---------- Interface du fichier modeles
+#if ! defined ( modeles_H )
+#define modeles_H
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//--------------------------------------------------- Interfaces utilisées
 // includes C++
 #include <map>
 #include <vector>
@@ -10,23 +18,18 @@
 // includes C
 #include <pthread.h>
 
-// includes perso
+// includes personnels
 #include <mailbox/mailbox.h>
+//------------------------------------------------------------- Types
 
-
-/* Note de Fred :
-   la méthode netstr() renvoie une chaîne formatée de façon à ce qu'elle puisse être envoyée sur le réseau.
-   Du coup si vous voulez modifier les structures suivantes, pensez simplement à faire en sorte que ces
-   méthodes fonctionnent toujours (en y ajoutant des paramètres si besoin).
-*/
-
+// Structure qui definit un lot
 struct Lot {
   std::string nom;
   int pieces, cartons, palettes, rebut, dim[3];
   std::string netstr() { return "L#\r\n"; } // msg envoyé lors du passage au lot suivant (== nouveau lot)
 }; 
 
-
+// La liste des tache de production
 enum Task
 {
   REMPLIRCARTON,
@@ -36,8 +39,9 @@ enum Task
   DESTOCKERPALETTE
 };
 
-enum EventType            
 
+// La liste des évènements gérrés par la tache controleur
+enum EventType            
 {
   ABSCARTON,      
   PANNEIMPRIM ,     
@@ -57,7 +61,7 @@ enum EventType
   FINSERIE
 } ;
 
-
+// Une structure evenement
 struct Event {
   EventType event	;
   Event(EventType e):event(e){}
@@ -68,24 +72,29 @@ struct Event {
   }
 }; 
 
-
-
+// Un message gérré par la tache d'envoi réseau
 struct Message {
   std::string contenu;
   bool fin; // vaut true si fin de la tâche, false sinon.
 }; 
 
+
+// L'ensemble des lots à produire
 struct ListeLots {
   std::vector<Lot> lots;
   int tot;
   int cur;
 };
 
+
+// Une commande à effectuer par la tache destock
 struct Commande {
   std::string nom; // nom du produit
   int palettes; // nombre de palettes commandées
 };
 
+
+// L'ensemble des commandes a effectuer
 struct ListeCommandes {
 	std::vector<Commande> commandes;
 	std::string netstr(bool ok) {
@@ -97,6 +106,8 @@ struct ListeCommandes {
   bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
+
+// La structure d'une palette
 struct Palette {
 	int id;
 	Lot *lot;
@@ -108,6 +119,7 @@ struct Palette {
   bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
+//La structure d'un carton
 struct Carton {
 	int id;
 	Lot *lot;
@@ -125,8 +137,9 @@ struct Carton {
   bool fin; // vaut true si fin de la tâche, false sinon.
 };
 
+
+// La structure d'une piece
 struct Piece {
-	// Carton *carton; // ?
 	int dim[3]; // en mm
   bool fin; // vaut true si fin de la tâche, false sinon.
 };
@@ -134,12 +147,15 @@ struct Piece {
 
 // SHARED MEMORY :
 
+// Mémoire partagée qui regrouppe l'enmeble des lots
 struct SharedMemoryLots
 {
 	Mutex mutex;
 	ListeLots * content;	
 };
 
+
+// Mémoire partagée qui gère l'ensemble des stock
 struct SharedMemoryStock // utilisé par stock et destock :
 {
   Mutex mutex;

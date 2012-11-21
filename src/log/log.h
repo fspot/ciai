@@ -12,7 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include <ctime>
-#include "../multithreadObjects/mutex.h"
+#include <mutex/mutex.h>
 //------------------------------------------------------------- Constantes 
 #define FILENAME "log.txt"
 using namespace std;

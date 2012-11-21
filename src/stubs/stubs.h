@@ -11,9 +11,9 @@
 //--------------------------------------------------- Interfaces utilisées
 #include "cstdlib"
 //------------------------------------------------------------- Constantes 
-#define PROBA_ABS_PALETTE 100	//l'absence de palette arrive 1 fois sur STUB_PROBA
-#define PROBA_ERR_EMBALAGE 100
-#define PROBA_ERR_PANNE_IMPRIM 100
+#define PROBA_ABS_PALETTE 500	//l'absence de palette arrive 1 fois sur STUB_PROBA
+#define PROBA_ERR_EMBALAGE 500
+#define PROBA_ERR_PANNE_IMPRIM 500
 
 
 //////////////////////////////////////////////////////////////////  PUBLIC

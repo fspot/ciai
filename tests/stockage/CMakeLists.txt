@@ -1,4 +1,3 @@
-﻿# CMakeLists de test pour la tache stock
 cmake_minimum_required(VERSION 2.6)
  
 project(testStock.cpp)

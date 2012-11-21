@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 set(SOURCES sockets/network.cpp
 	    sockets/parser.cpp
  	    sockets/netsend.cpp
-	    multithreadObjects/mutex.cpp
+	    mutex/mutex.cpp
 	    log/log.cpp
 	    remplirCarton/remplirCarton.cpp
 	    controleur/controleur.cpp

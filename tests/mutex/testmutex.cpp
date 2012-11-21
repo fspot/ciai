@@ -2,7 +2,7 @@
 #include <string>
 #include <pthread.h>
 
-#include "mutex.h"
+#include <mutex.h>
 
 #define MAX 100000
 

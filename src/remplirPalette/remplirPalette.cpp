@@ -53,7 +53,6 @@ void remplirPalette_thread(void * argsUncasted)
 	ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a recu un carton de type "+args->shMemLots->content->lots[countLot].nom,EVENT);
 	// Message réseau carton empaletté :
 	Message msg = {carton.netstr_palette(), false};
-			cout << "5c" << endl;
 	args->balMessages->Push(msg, 1);
 	
     	// passage au carton suivant :
