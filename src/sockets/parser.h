@@ -1,8 +1,19 @@
-#ifndef PARSER_H
-#define PARSER_H
 
-#include "../modeles/modeles.h"
+/*************************************************************************
+                           			Parser  
+*************************************************************************/
 
+//---------- Interface du fichier Parser -------
+#if ! defined ( Parser_H )
+#define Parser_H
+
+
+/////////////////////////////////////////////////////////////////  INCLUDE
+//--------------------------------------------------- Interfaces utilisées
+#include <modeles/modeles.h>
+
+
+//------------------------------------------------------------- Constantes 
 #define MAX_INT 9 // taille maximale d'un int (en nombre de caracteres)
 
 // séparateurs entre champs des messages :
@@ -18,6 +29,7 @@
 #define FINPAUSE '3'
 
 #define COMMANDE 'C'
+//------------------------------------------------------------------ Fonctions publiques  
 
 // parse un message de type I (initialisation)
 int parse_I(const char* msg, ListeLots *val);

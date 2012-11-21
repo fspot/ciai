@@ -19,18 +19,19 @@
 //------------------------------------------------------------------ Types
 typedef bool (*stubFunction)(void);
 
-struct ArgsRemplirPalette{
-  Mailbox<Carton>* balPalette;
-  Log * gestionnaireLog;
-  Mailbox<Palette>* balStockage;
-  Mailbox<Event>* eventBox;
-  Mailbox<Message>* balMessages;
-  pthread_cond_t *cw;
-  pthread_mutex_t* mxcw;
-  SharedMemoryLots* shMemLots;
-  sem_t * debutSyncro;
-  stubFunction capteurPalette;
-  stubFunction capteurEmbalage;
+struct ArgsRemplirPalette
+{
+    Mailbox<Carton>* balPalette;
+    Log * gestionnaireLog;
+    Mailbox<Palette>* balStockage;
+    Mailbox<Event>* eventBox;
+    Mailbox<Message>* balMessages;
+    pthread_cond_t *cw;
+    pthread_mutex_t* mxcw;
+    SharedMemoryLots* shMemLots;
+    sem_t * debutSyncro;
+    stubFunction capteurPalette;
+    stubFunction capteurEmbalage;
 };
 
 //////////////////////////////////////////////////////////////////  PUBLIC

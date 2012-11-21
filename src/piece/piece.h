@@ -19,15 +19,16 @@
 
 //------------------------------------------------------------------ Types 
 
-struct ArgPiece {
-	Mailbox<Piece>* balPiece;
-	Mailbox<Event>* balEvenements;
-  	Log * gestionnaireLog;
-  	sem_t * debutSyncro;
-  	Mutex *clapet;
-	int * lotCourant;
-	Mutex * lotCourantMutex;
-	SharedMemoryLots * shMemLots;
+struct ArgPiece
+{
+    Mailbox<Piece>* balPiece;
+    Mailbox<Event>* balEvenements;
+    Log * gestionnaireLog;
+    sem_t * debutSyncro;
+    Mutex *clapet;
+    int * lotCourant;
+    Mutex * lotCourantMutex;
+    SharedMemoryLots * shMemLots;
 };
 
 //////////////////////////////////////////////////////////////////  PUBLIC

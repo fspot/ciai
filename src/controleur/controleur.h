@@ -20,24 +20,24 @@
 
 struct InfoThread
 {
-  pthread_t id;
-  pthread_cond_t * cw;
-  pthread_mutex_t * mx;
+    pthread_t id;
+    pthread_cond_t * cw;
+    pthread_mutex_t * mx;
 };
 
 struct ArgControleur
 {
-  Mailbox<Carton> * balImprimante;
-  Mailbox<Carton>  * balPalette;
-  Mailbox<Palette> *balStockage;
-  Mailbox<Piece> * balPiece;
-  Mailbox<Event> * balEvenements;
-  Mailbox<Message> * balMessages;
-  Mailbox<ListeCommandes> * balCommandes;
-  Log * gestionnaireLog;
-  std::map<Task,InfoThread> threads;
-  Mutex * clapet;
-  sem_t * pauseSerieMutex;
+    Mailbox<Carton> * balImprimante;
+    Mailbox<Carton>  * balPalette;
+    Mailbox<Palette> *balStockage;
+    Mailbox<Piece> * balPiece;
+    Mailbox<Event> * balEvenements;
+    Mailbox<Message> * balMessages;
+    Mailbox<ListeCommandes> * balCommandes;
+    Log * gestionnaireLog;
+    std::map<Task,InfoThread> threads;
+    Mutex * clapet;
+    sem_t * pauseSerieMutex;
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques

@@ -31,24 +31,24 @@ class Log
 public:
 //----------------------------------------------------- Méthodes publiques
 public:
-	Log(Mutex &mtxStandardOutput);
-	~Log();
+    Log(Mutex &mtxStandardOutput);
+    ~Log();
 
-	void Write(string text, logType type, bool stdOutput=false);
-	//permet d'ajouter une entree au log, et eventuellement sur la sortie standard.
-	//	type:		definit si l'entree est un evenement, un avertisement ou une erreur.
-	//	text:		description.
-	//	stdOutput:	si true, le message est envoyé sur la sortie standard EN PLUS du log.
+    void Write(string text, logType type, bool stdOutput=false);
+    //permet d'ajouter une entree au log, et eventuellement sur la sortie standard.
+    //	type:		definit si l'entree est un evenement, un avertisement ou une erreur.
+    //	text:		description.
+    //	stdOutput:	si true, le message est envoyé sur la sortie standard EN PLUS du log.
 
 
 
 //------------------------------------------------------------------ PRIVE 
 
 protected:
-	ofstream file;
-	time_t now;
-	string dateStr();
-	Mutex mutexFile, &mutexStd;
+    ofstream file;
+    time_t now;
+    string dateStr();
+    Mutex mutexFile, &mutexStd;
 
 };
 

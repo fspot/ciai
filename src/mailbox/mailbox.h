@@ -14,7 +14,7 @@
 #include <mutex/mutex.h>
 
 //------------------------------------------------------------- Constantes 
-  #define PRIO_MAX 10	//nombre de niveaux de priorités, compris entre 0 et PRIO_MAX-1
+#define PRIO_MAX 10	//nombre de niveaux de priorités, compris entre 0 et PRIO_MAX-1
 //------------------------------------------------------------------ Types 
 
 //------------------------------------------------------------------------ 
@@ -31,21 +31,21 @@ class Mailbox
 //----------------------------------------------------------------- PUBLIC
 
 public:
-	Mailbox();
-	~Mailbox();
+    Mailbox();
+    ~Mailbox();
 
-	void Push(const T& element, unsigned int priority = PRIO_MAX-1);
-	//	permet d'insérer un element de type T dans la mailbox, avec la priorité priority.
-	//	un message est d'autant plus prioritaire que sa priorité est petite.
+    void Push(const T& element, unsigned int priority = PRIO_MAX-1);
+    //	permet d'insérer un element de type T dans la mailbox, avec la priorité priority.
+    //	un message est d'autant plus prioritaire que sa priorité est petite.
 
-	T Pull();
-	//	renvoie un élément (par priorité d'abord, puis FIFO si memes priorités)
-	//	bloquant si la boite aux lettres est vide.
+    T Pull();
+    //	renvoie un élément (par priorité d'abord, puis FIFO si memes priorités)
+    //	bloquant si la boite aux lettres est vide.
 
-	int Size();
-	//	renvoie le nombre d'éléments dans la boite aux lettres
-	//	attention quant à l'utilisation de cette valeur, du fait de la concurence elle peut ne plus être valide au moment où vous la recevez.
-	//	à utiliser précautionneusement.
+    int Size();
+    //	renvoie le nombre d'éléments dans la boite aux lettres
+    //	attention quant à l'utilisation de cette valeur, du fait de la concurence elle peut ne plus être valide au moment où vous la recevez.
+    //	à utiliser précautionneusement.
 
 
 //------------------------------------------------------------------ PRIVE 
@@ -53,9 +53,9 @@ public:
 protected:
 //----------------------------------------------------- Attributs protégés
 
-	std::queue<T> queues[PRIO_MAX];	// queues fifo de stockage des messages, une queue par priorite
-	sem_t countSemaphore;		// compte le nombre de messages actuellement dans la mailbox. Permet la lecture bloquante
-	Mutex writeMutex[PRIO_MAX];	// mutexs de protection en lecture/écriture des queues.
+    std::queue<T> queues[PRIO_MAX];	// queues fifo de stockage des messages, une queue par priorite
+    sem_t countSemaphore;		// compte le nombre de messages actuellement dans la mailbox. Permet la lecture bloquante
+    Mutex writeMutex[PRIO_MAX];	// mutexs de protection en lecture/écriture des queues.
 };
 
 

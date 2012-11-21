@@ -21,11 +21,11 @@ using namespace std;
 // Méthode d'écriture dans le log
 void ecriture_log_remplirPalette(Log * unGestionnaire, std::string msg,logType unType)
 {
-  #ifdef DEBUG
+#ifdef DEBUG
     unGestionnaire->Write(msg,unType,true);
-  #else
+#else
     unGestionnaire->Write(msg,unType,false);
-  #endif
+#endif
 }
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
@@ -43,11 +43,11 @@ void remplirPalette_thread(void * argsUncasted)
 
     	if (carton.fin)
         {
-		ecriture_log_remplirPalette(args->gestionnaireLog,"Fin de la tache remplir palette",EVENT);
-		Palette p;
-		p.fin=true;
-    		args->balStockage->Push(p,0);
-    		pthread_exit(0);
+	    ecriture_log_remplirPalette(args->gestionnaireLog,"Fin de la tache remplir palette",EVENT);
+	    Palette p;
+	    p.fin=true;
+	    args->balStockage->Push(p,0);
+	    pthread_exit(0);
 	}
 	
 	ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a recu un carton de type "+args->shMemLots->content->lots[countLot].nom,EVENT);
@@ -61,51 +61,51 @@ void remplirPalette_thread(void * argsUncasted)
 
     	if (countCarton == args->shMemLots->content->lots[countLot].cartons) 
 	{ // next palette
-	    	// on emballe la palette qu'on vient de finir :
-    		if ( (*args->capteurEmbalage)() ) 
-		{ // si erreur emballage :
-				ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a eu une erreur en emballant",EVENT);
-    			args->eventBox->Push(Event(ABSPALETTE),0);
-    			pthread_mutex_lock(args->mxcw);
-    			pthread_cond_wait(args->cw,args->mxcw);
-    			pthread_mutex_unlock(args->mxcw);
-    		}
-    		// On donne un id et un id_lot à la palette finie :
-    		palette.id = idpalette++;
-    		args->shMemLots->mutex.lock();
-    		palette.lot = &args->shMemLots->content->lots[countLot];
-    		args->shMemLots->mutex.unlock();
-
-		ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a empilé le carton",EVENT);
-    		// on push la palette
-    		args->balStockage->Push(palette,0);
-	
-    		// Message réseau palette finie :
-    		Message msg = {palette.netstr(), false};
-    		args->balMessages->Push(msg, 1);
-
-
-    		countCarton = 0;
-	    	countPalette++;
-	    	if (countPalette == args->shMemLots->content->lots[countLot].palettes) 
-		{ // next lot
-	    		countPalette = 0;
-	    		countLot++;
-	    		// test de fin de production :
-	    		if (countLot == args->shMemLots->content->lots.size())
-	    			break;
-	    	}
-	    	// la palette est elle bien présente ?
-	    	if ( (*args->capteurPalette)() ) 
-		{ // palette absente !
-
-			ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a detecté l'abscence d'une palette",EVENT);
-	    		args->eventBox->Push(Event(ERREMBALAGES),0);
-	    		pthread_mutex_lock(args->mxcw);
-	    		pthread_cond_wait(args->cw,args->mxcw);
-	    		pthread_mutex_unlock(args->mxcw);
-	    	}
+	    // on emballe la palette qu'on vient de finir :
+	    if ( (*args->capteurEmbalage)() ) 
+	    { // si erreur emballage :
+		ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a eu une erreur en emballant",EVENT);
+		args->eventBox->Push(Event(ABSPALETTE),0);
+		pthread_mutex_lock(args->mxcw);
+		pthread_cond_wait(args->cw,args->mxcw);
+		pthread_mutex_unlock(args->mxcw);
 	    }
+	    // On donne un id et un id_lot à la palette finie :
+	    palette.id = idpalette++;
+	    args->shMemLots->mutex.lock();
+	    palette.lot = &args->shMemLots->content->lots[countLot];
+	    args->shMemLots->mutex.unlock();
+
+	    ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a empilé le carton",EVENT);
+	    // on push la palette
+	    args->balStockage->Push(palette,0);
+	
+	    // Message réseau palette finie :
+	    Message msg = {palette.netstr(), false};
+	    args->balMessages->Push(msg, 1);
+
+
+	    countCarton = 0;
+	    countPalette++;
+	    if (countPalette == args->shMemLots->content->lots[countLot].palettes) 
+	    { // next lot
+		countPalette = 0;
+		countLot++;
+		// test de fin de production :
+		if (countLot == args->shMemLots->content->lots.size())
+		    break;
+	    }
+	    // la palette est elle bien présente ?
+	    if ( (*args->capteurPalette)() ) 
+	    { // palette absente !
+
+		ecriture_log_remplirPalette(args->gestionnaireLog,"La tache remplir palette a detecté l'abscence d'une palette",EVENT);
+		args->eventBox->Push(Event(ERREMBALAGES),0);
+		pthread_mutex_lock(args->mxcw);
+		pthread_cond_wait(args->cw,args->mxcw);
+		pthread_mutex_unlock(args->mxcw);
+	    }
+	}
     }
 }
 

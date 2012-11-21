@@ -18,14 +18,15 @@
 
 //------------------------------------------------------------------ Types 
 
-struct ArgDestock {
-	SharedMemoryStock *stock;
-	Mailbox<Event>* balEvenements;
-	Mailbox<ListeCommandes>* balCommandes;
-	Mailbox<Message>* balMessages;
-  	Log * gestionnaireLog;
-	pthread_cond_t* cv;
-	pthread_mutex_t* mutCv;
+struct ArgDestock 
+{
+    SharedMemoryStock *stock;
+    Mailbox<Event>* balEvenements;
+    Mailbox<ListeCommandes>* balCommandes;
+    Mailbox<Message>* balMessages;
+    Log * gestionnaireLog;
+    pthread_cond_t* cv;
+    pthread_mutex_t* mutCv;
 };
 
 //////////////////////////////////////////////////////////////////  PUBLIC

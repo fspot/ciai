@@ -19,20 +19,21 @@
 
 //------------------------------------------------------------------ Types 
 
-struct ArgStock {
-	Mailbox<Palette>* balStockage;
-	Mailbox<Event>* balEvenements;
-  	Log * gestionnaireLog;
-	sem_t* reprise; // reprise après erreur
-	SharedMemoryLots *shMemLots;
-	SharedMemoryStock *stock;
-	// sem_t* sem_fin_de_serie;
-	// bool* pCartonPresent;
-	// Lot* lots;
-	// unsigned int nbLots;
-	// sem_t * finDeSerieMutex;
-	pthread_cond_t* cv;
-	pthread_mutex_t* mutCv;
+struct ArgStock 
+{
+    Mailbox<Palette>* balStockage;
+    Mailbox<Event>* balEvenements;
+    Log * gestionnaireLog;
+    sem_t* reprise; // reprise après erreur
+    SharedMemoryLots *shMemLots;
+    SharedMemoryStock *stock;
+    // sem_t* sem_fin_de_serie;
+    // bool* pCartonPresent;
+    // Lot* lots;
+    // unsigned int nbLots;
+    // sem_t * finDeSerieMutex;
+    pthread_cond_t* cv;
+    pthread_mutex_t* mutCv;
 };
 
 //////////////////////////////////////////////////////////////////  PUBLIC

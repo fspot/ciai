@@ -19,19 +19,20 @@
 //------------------------------------------------------------------ Types 
 typedef bool (*stubFunction)(void);
 
-struct ArgRemplirCarton{
-  Mailbox<Piece>* pBalPieces;
-  Mailbox<Carton>* pBalCartons;
-  Mailbox<Event>* pBalEvenements;
-  Mailbox<Message>* pBalMessages;
-  Log * gestionnaireLog;
-  stubFunction capteurCarton;
-  Mutex * lotCourantMutex;
-  SharedMemoryLots *shMemLots;
-  int * lotCourant;
-  pthread_cond_t* cv;
-  pthread_mutex_t* mutCv;
-  sem_t * debutSyncro;
+struct ArgRemplirCarton
+{
+    Mailbox<Piece>* pBalPieces;
+    Mailbox<Carton>* pBalCartons;
+    Mailbox<Event>* pBalEvenements;
+    Mailbox<Message>* pBalMessages;
+    Log * gestionnaireLog;
+    stubFunction capteurCarton;
+    Mutex * lotCourantMutex;
+    SharedMemoryLots *shMemLots;
+    int * lotCourant;
+    pthread_cond_t* cv;
+    pthread_mutex_t* mutCv;
+    sem_t * debutSyncro;
 };
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques

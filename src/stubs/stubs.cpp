@@ -18,9 +18,9 @@ using namespace std;
 bool stubPresencePalette()
 {
 #ifdef ABS_PALETTE
-	return false;
+    return false;
 #else
-	return (rand() % PROBA_ABS_PALETTE == 0);
+    return (rand() % PROBA_ABS_PALETTE == 0);
 #endif
 }
 
@@ -29,18 +29,18 @@ bool stubPresencePalette()
 bool stubErrEmbalagePalette()
 {
 #ifdef ERR_EMBALAGE
-	return true;
+    return true;
 #else 
-	return (rand() % PROBA_ERR_EMBALAGE == 0);
+    return (rand() % PROBA_ERR_EMBALAGE == 0);
 #endif
 }
 
 bool stubPanneImprimante()
 {
 #ifdef ERR_IMPRIM
-	return true;
+    return true;
 #else 
-	return (rand() % PROBA_ERR_PANNE_IMPRIM == 0);
+    return (rand() % PROBA_ERR_PANNE_IMPRIM == 0);
 #endif
 }
 
@@ -48,8 +48,8 @@ bool stubPanneImprimante()
 bool stubAbscenceCarton()
 {
 #ifdef ERR_CARTON
-	return true;
+    return true;
 #else 
-	return (rand() % PROBA_ERR_CARTON == 0);
+    return (rand() % PROBA_ERR_CARTON == 0);
 #endif
 }

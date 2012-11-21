@@ -30,50 +30,50 @@ using namespace std;
 // Méthode d'écriture  de log
 void ecriture_log_piece(Log * unGestionnaire, std::string msg,logType unType)                                                                                     
 {
-  #ifdef DEBUG
+#ifdef DEBUG
     unGestionnaire->Write(msg,unType,true);
-  #else
+#else
     unGestionnaire->Write(msg,unType,false);
-  #endif 
+#endif 
 }
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 void *thread_piece(void * argPiece)
 {
-	srand ( time(NULL) );
-	ArgPiece *arg = (ArgPiece*) argPiece; // cast
-        ecriture_log_piece(arg->gestionnaireLog, "Lancement de la tâche de simulation pièce", EVENT);
+    srand ( time(NULL) );
+    ArgPiece *arg = (ArgPiece*) argPiece; // cast
+    ecriture_log_piece(arg->gestionnaireLog, "Lancement de la tâche de simulation pièce", EVENT);
 
-	sem_wait(arg->debutSyncro);
+    sem_wait(arg->debutSyncro);
 
-	// boucle infinie, on sera killé par la tâche mère.
-	while(1)
-	{
-		if (arg->clapet->trylock() == false) { // si le clapet est fermé...
-			arg->clapet->lock(); // ... j'attend qu'il s'ouvre.
-			arg->clapet->unlock();
-		}
-		arg->clapet->unlock();
-		// le clapet est ouvert => je génère une pièce :
-		Piece p;
-		arg->lotCourantMutex->lock();
-		int i= *(arg->lotCourant);
-		arg->lotCourantMutex->unlock();
-		arg->shMemLots->mutex.lock();
-		for(int j=0;j<3;j++)
-		{
-			int v1 = rand() % TAUX_PIECE;
-			int y=0;
-			if (v1==1)
-			{
-				y=1;
-			}
-			p.dim[j]=arg->shMemLots->content->lots[i].dim[j]+y;
-		}		
-		arg->shMemLots->mutex.unlock();
-		arg->balPiece->Push(p,0);
-		// pause :
-		sleep(1);
+    // boucle infinie, on sera killé par la tâche mère.
+    while(1)
+    {
+	if (arg->clapet->trylock() == false) { // si le clapet est fermé...
+	    arg->clapet->lock(); // ... j'attend qu'il s'ouvre.
+	    arg->clapet->unlock();
 	}
+	arg->clapet->unlock();
+	// le clapet est ouvert => je génère une pièce :
+	Piece p;
+	arg->lotCourantMutex->lock();
+	int i= *(arg->lotCourant);
+	arg->lotCourantMutex->unlock();
+	arg->shMemLots->mutex.lock();
+	for(int j=0;j<3;j++)
+	{
+	    int v1 = rand() % TAUX_PIECE;
+	    int y=0;
+	    if (v1==1)
+	    {
+		y=1;
+	    }
+	    p.dim[j]=arg->shMemLots->content->lots[i].dim[j]+y;
+	}		
+	arg->shMemLots->mutex.unlock();
+	arg->balPiece->Push(p,0);
+	// pause :
+	sleep(1);
+    }
 }
