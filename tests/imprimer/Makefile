@@ -19,4 +19,4 @@ testImp.o : testTacheImprimer.cpp ../../src/imprimer/imprimer.h ../../src/modele
 	g++ -c testTacheImprimer.cpp -o testImp.o -I../../src
 
 clean :
-	rm -f testImp *.o *~
+	rm -f testImp *.o *~ log.txt
