@@ -20,7 +20,7 @@
 #include <modeles/modeles.h>
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
-
+#define TAUX_PIECE 200
 //------------------------------------------------------------------ Types
 using namespace std;
 //---------------------------------------------------- Variables statiques
@@ -43,7 +43,7 @@ void *thread_piece(void * argPiece)
 {
 	srand ( time(NULL) );
 	ArgPiece *arg = (ArgPiece*) argPiece; // cast
-        ecriture_log_piece(arg->gestionnaireLog, "Lancement de la tâche pièce", EVENT);
+        ecriture_log_piece(arg->gestionnaireLog, "Lancement de la tâche de simulation pièce", EVENT);
 
 	sem_wait(arg->debutSyncro);
 
@@ -63,9 +63,9 @@ void *thread_piece(void * argPiece)
 		arg->shMemLots->mutex.lock();
 		for(int j=0;j<3;j++)
 		{
-			int v1 = rand() % 100;
+			int v1 = rand() % TAUX_PIECE;
 			int y=0;
-			if (v1<2)
+			if (v1==1)
 			{
 				y=1;
 			}
