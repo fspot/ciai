@@ -20,7 +20,7 @@ bool stubPresencePalette()
 #ifdef ABS_PALETTE
 	return false;
 #else
-	return (rand() % PROBA_ABS_PALETTE != 0);
+	return (rand() % PROBA_ABS_PALETTE == 0);
 #endif
 }
 

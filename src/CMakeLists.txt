@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.6)
  
 project(mothertask)
-#set (CMAKE_CXX_FLAGS "-g -fpermissive") 
+set (CMAKE_CXX_FLAGS "-g -fpermissive") 
  
 find_package (Threads)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
