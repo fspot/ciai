@@ -1,0 +1,20 @@
+==== Tests effectués : ====
+===========================
+
+== Tâche de réception ==
+ - lancement du thread de réception sans erreur.....................OK
+ - vérifier qu'on se met bien en attente d'un client................OK
+ - vérifier que la connexion du client est détectée.................OK
+ - vérifier que les messages envoyés par le client sont bien reçus
+   (avec un programme client de test)...............................OK
+ - détecter la déconnexion du client................................OK
+
+== Tâche d'envoi ==
+ - Précondition :
+ 	- le thread de réception est lancé et un client est connecté
+ - lancement du thread d'envoi sans erreur..........................OK
+ - vérifier qu'on est bien en attente de messages
+   dans la boite aux lettres........................................OK
+ - vérifier qu'un message envoyé dans la boîte aux lettres est
+   bien réceptionné, lu, et envoyé sur le socket....................OK
+ - vérifier qu'en cas de message spécial FIN, la tâche finit........OK

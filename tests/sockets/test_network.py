@@ -24,7 +24,7 @@ class Client(TCPClient):
 if __name__ == '__main__':
     for test in JEUX_DE_TESTS:
         print '==== LANCEMENT DU TEST "{}" ===='.format(test['titre'])
-        client = Client(ip='192.168.1.2', port=8761)
+        client = Client(ip='127.0.0.1', port=8761)
         client.start()
         time.sleep(0.1)
         for cmd in test['commandes']:
